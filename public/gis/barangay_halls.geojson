@@ -1,0 +1,532 @@
+{
+    "type": "FeatureCollection",
+    "name": "Santa Cruz Barangay Halls",
+    "crs": {
+        "type": "name",
+        "properties": {
+            "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+        }
+    },
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.4084,
+                    14.22103
+                ]
+            },
+            "properties": {
+                "barangay": "Alipit",
+                "office_name": "Barangay Hall - Alipit",
+                "address": "Alipit, Santa Cruz, Laguna",
+                "source": "Google Maps",
+                "validation_status": "Verified",
+                "verification_note": "Researcher verified",
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.3907,
+                    14.27331
+                ]
+            },
+            "properties": {
+                "barangay": "Bagumbayan",
+                "office_name": "Barangay Hall - Bagumbayan",
+                "address": "Bagumbayan, Santa Cruz, Laguna",
+                "source": "Google Maps",
+                "validation_status": "Verified",
+                "verification_note": "Researcher verified",
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.3982,
+                    14.2591
+                ]
+            },
+            "properties": {
+                "barangay": "Bubukal",
+                "office_name": "Barangay Hall - Bubukal",
+                "address": "Bubukal, Santa Cruz, Laguna",
+                "source": "Google Maps",
+                "validation_status": "Verified",
+                "verification_note": "Researcher verified",
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.4051,
+                    14.27505
+                ]
+            },
+            "properties": {
+                "barangay": "Calios",
+                "office_name": "Barangay Hall - Calios",
+                "address": "Calios, Santa Cruz, Laguna",
+                "source": "Google Maps",
+                "validation_status": "Verified",
+                "verification_note": "Researcher verified",
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.3827,
+                    14.25349
+                ]
+            },
+            "properties": {
+                "barangay": "Duhat",
+                "office_name": "Barangay Hall - Duhat",
+                "address": "Duhat, Santa Cruz, Laguna",
+                "source": "Google Maps",
+                "validation_status": "Verified",
+                "verification_note": "Researcher verified",
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.4,
+                    14.255
+                ]
+            },
+            "properties": {
+                "barangay": "Gatid",
+                "office_name": "Barangay Hall - Gatid",
+                "address": "Gatid, Santa Cruz, Laguna",
+                "source": "config centroid fallback",
+                "validation_status": "Needs manual validation",
+                "verification_note": null,
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.3945,
+                    14.22416
+                ]
+            },
+            "properties": {
+                "barangay": "Jasaan",
+                "office_name": "Barangay Hall - Jasaan",
+                "address": "Jasaan, Santa Cruz, Laguna",
+                "source": "Google Maps",
+                "validation_status": "Verified",
+                "verification_note": "Researcher verified",
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.398,
+                    14.25909
+                ]
+            },
+            "properties": {
+                "barangay": "Labuin",
+                "office_name": "Barangay Hall - Labuin",
+                "address": "Labuin, Santa Cruz, Laguna",
+                "source": "Google Maps",
+                "validation_status": "Verified",
+                "verification_note": "Researcher verified",
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.431,
+                    14.32
+                ]
+            },
+            "properties": {
+                "barangay": "Malinao",
+                "office_name": "Barangay Hall - Malinao",
+                "address": "Malinao, Santa Cruz, Laguna",
+                "source": "config centroid fallback",
+                "validation_status": "Needs manual validation",
+                "verification_note": null,
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.4004,
+                    14.2266
+                ]
+            },
+            "properties": {
+                "barangay": "Oogong",
+                "office_name": "Barangay Hall - Oogong",
+                "address": "Oogong, Santa Cruz, Laguna",
+                "source": "Google Maps",
+                "validation_status": "Verified",
+                "verification_note": "Researcher verified",
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.4266,
+                    14.26586
+                ]
+            },
+            "properties": {
+                "barangay": "Pagsawitan",
+                "office_name": "Barangay Hall - Pagsawitan",
+                "address": "Pagsawitan, Santa Cruz, Laguna",
+                "source": "Google Maps",
+                "validation_status": "Verified",
+                "verification_note": "Researcher verified",
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.419,
+                    14.25755
+                ]
+            },
+            "properties": {
+                "barangay": "Palasan",
+                "office_name": "Barangay Hall - Palasan",
+                "address": "Palasan, Santa Cruz, Laguna",
+                "source": "Google Maps",
+                "validation_status": "Verified",
+                "verification_note": "Researcher verified",
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.4196,
+                    14.26679
+                ]
+            },
+            "properties": {
+                "barangay": "Patimbao",
+                "office_name": "Barangay Hall - Patimbao",
+                "address": "Patimbao, Santa Cruz, Laguna",
+                "source": "Google Maps",
+                "validation_status": "Verified",
+                "verification_note": "Researcher verified",
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.415,
+                    14.28
+                ]
+            },
+            "properties": {
+                "barangay": "Poblacion I",
+                "office_name": "Barangay Hall - Poblacion I",
+                "address": "Poblacion I, Santa Cruz, Laguna",
+                "source": "config centroid fallback",
+                "validation_status": "Needs manual validation",
+                "verification_note": null,
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.4171,
+                    14.27987
+                ]
+            },
+            "properties": {
+                "barangay": "Poblacion II",
+                "office_name": "Barangay Hall - Poblacion II",
+                "address": "Poblacion II, Santa Cruz, Laguna",
+                "source": "Google Maps",
+                "validation_status": "Verified",
+                "verification_note": "Researcher verified",
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.4162,
+                    14.28254
+                ]
+            },
+            "properties": {
+                "barangay": "Poblacion III",
+                "office_name": "Barangay Hall - Poblacion III",
+                "address": "Poblacion III, Santa Cruz, Laguna",
+                "source": "Google Maps",
+                "validation_status": "Verified",
+                "verification_note": "Researcher verified",
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.4156,
+                    14.28479
+                ]
+            },
+            "properties": {
+                "barangay": "Poblacion IV",
+                "office_name": "Barangay Hall - Poblacion IV",
+                "address": "Poblacion IV, Santa Cruz, Laguna",
+                "source": "Google Maps",
+                "validation_status": "Verified",
+                "verification_note": "Researcher verified",
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.412266,
+                    14.285657
+                ]
+            },
+            "properties": {
+                "barangay": "Poblacion V",
+                "office_name": "Barangay Hall - Poblacion V",
+                "address": "Poblacion V, Santa Cruz, Laguna",
+                "source": "Google Maps",
+                "validation_status": "Verified",
+                "verification_note": "Researcher verified",
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.4039,
+                    14.23744
+                ]
+            },
+            "properties": {
+                "barangay": "San Jose",
+                "office_name": "Barangay Hall - San Jose",
+                "address": "San Jose, Santa Cruz, Laguna",
+                "source": "Google Maps",
+                "validation_status": "Verified",
+                "verification_note": "Researcher verified",
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.4071,
+                    14.2442
+                ]
+            },
+            "properties": {
+                "barangay": "San Juan",
+                "office_name": "Barangay Hall - San Juan",
+                "address": "San Juan, Santa Cruz, Laguna",
+                "source": "Google Maps",
+                "validation_status": "Verified",
+                "verification_note": "Researcher verified",
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.4132,
+                    14.29135
+                ]
+            },
+            "properties": {
+                "barangay": "San Pablo Norte",
+                "office_name": "Barangay Hall - San Pablo Norte",
+                "address": "San Pablo Norte, Santa Cruz, Laguna",
+                "source": "Google Maps",
+                "validation_status": "Verified",
+                "verification_note": "Researcher verified",
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.385,
+                    14.225
+                ]
+            },
+            "properties": {
+                "barangay": "San Pablo Sur",
+                "office_name": "Barangay Hall - San Pablo Sur",
+                "address": "San Pablo Sur, Santa Cruz, Laguna",
+                "source": "config centroid fallback",
+                "validation_status": "Needs manual validation",
+                "verification_note": null,
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.4112,
+                    14.28799
+                ]
+            },
+            "properties": {
+                "barangay": "Santisima Cruz",
+                "office_name": "Barangay Hall - Santisima Cruz",
+                "address": "Santisima Cruz, Santa Cruz, Laguna",
+                "source": "Google Maps",
+                "validation_status": "Verified",
+                "verification_note": "Researcher verified",
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.408,
+                    14.2857
+                ]
+            },
+            "properties": {
+                "barangay": "Santo Angel Central",
+                "office_name": "Barangay Hall - Santo Angel Central",
+                "address": "Santo Angel Central, Santa Cruz, Laguna",
+                "source": "Google Maps",
+                "validation_status": "Verified",
+                "verification_note": "Researcher verified",
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.383,
+                    14.22
+                ]
+            },
+            "properties": {
+                "barangay": "Santo Angel Norte",
+                "office_name": "Barangay Hall - Santo Angel Norte",
+                "address": "Santo Angel Norte, Santa Cruz, Laguna",
+                "source": "config centroid fallback",
+                "validation_status": "Needs manual validation",
+                "verification_note": null,
+                "osm_type": null,
+                "osm_id": null
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    121.377,
+                    14.21
+                ]
+            },
+            "properties": {
+                "barangay": "Santo Angel Sur",
+                "office_name": "Barangay Hall - Santo Angel Sur",
+                "address": "Santo Angel Sur, Santa Cruz, Laguna",
+                "source": "config centroid fallback",
+                "validation_status": "Needs manual validation",
+                "verification_note": null,
+                "osm_type": null,
+                "osm_id": null
+            }
+        }
+    ]
+}

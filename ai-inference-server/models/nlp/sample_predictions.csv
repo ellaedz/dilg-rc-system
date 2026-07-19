@@ -1,0 +1,6 @@
+text,prediction,confidence
+May nakaparadang sasakyan sa kalsada,illegal_parking,37.82
+May basura na nakaharang sa sidewalk,sidewalk_obstruction,51.53
+May hollow blocks at buhangin sa daan,construction_materials,40.59
+May vendor na nakaharang sa bangketa,sidewalk_obstruction,44.16
+Malinis ang daan at walang obstruction,no_violation,63.38

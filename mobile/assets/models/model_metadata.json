@@ -1,0 +1,104 @@
+{
+  "phase": "5C.0",
+  "task": "detect",
+  "architecture": "YOLOv8s",
+  "model": {
+    "name": "DILG-RC Road Clearing Detector",
+    "version": "YOLOv8s-TFLite-float16",
+    "preferred_filename": "best_float16.tflite"
+  },
+  "source_model": {
+    "filename": "best.pt",
+    "size_bytes": 22506858,
+    "sha256": "2bc8df1b21c96219de5228e6afa0027ed05f43a78bb04af72a228435452969bc",
+    "checkpoint_ultralytics_version": "8.4.82"
+  },
+  "export": {
+    "command": "model.export(format='tflite', imgsz=640, batch=1, quantize=16, device='cpu', nms=False)",
+    "ultralytics_version": "8.4.82",
+    "torch_version": "2.13.0+cpu",
+    "tensorflow_version": "2.19.0",
+    "ai_edge_litert_version": "2.1.6",
+    "onnx_version": "1.22.0",
+    "onnx2tf_version": "1.28.8",
+    "batch_size": 1,
+    "image_size": [640, 640],
+    "nms_embedded": false
+  },
+  "classes": {
+    "count": 5,
+    "names": [
+      "construction_materials",
+      "garbage_debris",
+      "illegal_parking",
+      "road_obstruction",
+      "sidewalk_obstruction"
+    ]
+  },
+  "tensor_contract": {
+    "input": {
+      "name": "images",
+      "shape": [1, 640, 640, 3],
+      "layout": "NHWC",
+      "dtype": "float32"
+    },
+    "output": {
+      "name": "Identity",
+      "shape": [1, 9, 8400],
+      "dtype": "float32",
+      "description": "Raw YOLO detection tensor with 4 box channels and 5 class-score channels across 8400 candidates. Confidence filtering, box decoding, and NMS are not embedded."
+    }
+  },
+  "preprocessing": {
+    "color_order": "RGB",
+    "normalization": "pixel_value / 255.0",
+    "value_range": [0.0, 1.0],
+    "resize": "aspect-ratio-preserving letterbox",
+    "letterbox_color_rgb": [114, 114, 114]
+  },
+  "models": [
+    {
+      "filename": "best_float16.tflite",
+      "precision": "Float16 weights with Float32 input/output",
+      "size_bytes": 22426678,
+      "size_mib": 21.39,
+      "sha256": "deb4e346701a063cfa39494fd9ab86882269ca827795304db27e60f8e42a7c0f",
+      "interpreter_load_success": true,
+      "tensor_allocation_success": true,
+      "float16_tensor_count": 131
+    },
+    {
+      "filename": "best_float32.tflite",
+      "precision": "Float32",
+      "size_bytes": 44767514,
+      "size_mib": 42.69,
+      "sha256": "6a796a9b6e14abe1c13a36ae5fa74f13504bc0c335adccacaea0e58aa3fbd808",
+      "interpreter_load_success": true,
+      "tensor_allocation_success": true,
+      "float16_tensor_count": 0
+    }
+  ],
+  "verification": {
+    "interpreter": "tensorflow.lite.Interpreter",
+    "tensorflow_lite_version": "2.19.0",
+    "load_confirmation": "Both models loaded and allocated successfully.",
+    "dummy_inference_run": false
+  },
+  "react_native_readiness": {
+    "model_artifacts_ready": true,
+    "preferred_model": "best_float16.tflite",
+    "runtime": "react-native-fast-tflite 3.0.1",
+    "inference_implemented": true,
+    "physical_android_validation_complete": false,
+    "notes": [
+      "The mobile source implements Float32 NHWC preprocessing, letterboxing, raw YOLO output decoding, confidence filtering, and per-class NMS.",
+      "TensorFlow Lite requires the DILG-RC custom Expo development build; standard Expo Go cannot load the native runtime.",
+      "Validate accuracy and latency on representative Android hardware before release."
+    ]
+  },
+  "license": {
+    "name": "AGPL-3.0",
+    "source": "Ultralytics checkpoint metadata",
+    "url": "https://ultralytics.com/license"
+  }
+}

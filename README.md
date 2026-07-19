@@ -121,3 +121,324 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+
+# DILG-RC System
+
+## Collaborating on the Repository
+
+Welcome to the DILG-RC System project. This guide explains how collaborators can clone, pull, and push changes to the repository using Git and GitHub.
+
+---
+
+## Prerequisites
+
+Before starting, make sure you have:
+
+* A GitHub account
+* Git installed on your computer
+* Visual Studio Code (recommended)
+* Accepted the GitHub collaborator invitation from the repository owner
+
+To verify Git is installed, open a terminal and run:
+
+```bash
+git --version
+```
+
+---
+
+# Step 1: Clone the Repository
+
+Open **PowerShell**, **Command Prompt**, or the **VS Code Terminal**.
+
+Navigate to the folder where you want to save the project.
+
+Example:
+
+```bash
+cd C:\Users\YourName\Desktop
+```
+
+Clone the repository:
+
+```bash
+git clone https://github.com/OWNER_USERNAME/REPOSITORY_NAME.git
+```
+
+Example:
+
+```bash
+git clone https://github.com/username/dilg-rc-system.git
+```
+
+Move into the project folder:
+
+```bash
+cd dilg-rc-system
+```
+
+Open the project in VS Code:
+
+```bash
+code .
+```
+
+---
+
+# Step 2: Configure Git (First Time Only)
+
+Run these commands once on your computer.
+
+```bash
+git config --global user.name "Your Name"
+```
+
+```bash
+git config --global user.email "your-email@example.com"
+```
+
+Verify your configuration:
+
+```bash
+git config --global --list
+```
+
+---
+
+# Step 3: Get the Latest Changes
+
+Before starting any work, always update your local copy.
+
+```bash
+git checkout main
+```
+
+```bash
+git pull origin main
+```
+
+---
+
+# Step 4: Create Your Own Branch
+
+Create a new branch for the feature or task you are working on.
+
+Example:
+
+```bash
+git checkout -b feature-report-module
+```
+
+Other examples:
+
+```bash
+git checkout -b feature-dashboard
+```
+
+```bash
+git checkout -b fix-login
+```
+
+```bash
+git checkout -b feature-mobile-api
+```
+
+---
+
+# Step 5: Make Your Changes
+
+Edit the project files using Visual Studio Code.
+
+When finished, check the modified files:
+
+```bash
+git status
+```
+
+---
+
+# Step 6: Stage Your Changes
+
+Add all modified files:
+
+```bash
+git add .
+```
+
+Verify that the files are staged:
+
+```bash
+git status
+```
+
+---
+
+# Step 7: Commit Your Changes
+
+Write a clear and meaningful commit message.
+
+Example:
+
+```bash
+git commit -m "Added report validation"
+```
+
+Other examples:
+
+```bash
+git commit -m "Updated dashboard design"
+```
+
+```bash
+git commit -m "Fixed login bug"
+```
+
+---
+
+# Step 8: Push Your Branch
+
+The first time you push your branch:
+
+```bash
+git push -u origin feature-report-module
+```
+
+After the first push, you only need:
+
+```bash
+git push
+```
+
+---
+
+# Step 9: Create a Pull Request
+
+1. Open the repository on GitHub.
+2. Click **Compare & pull request**.
+3. Verify that the base branch is **main**.
+4. Enter a descriptive title.
+5. Click **Create pull request**.
+
+The repository owner will review your changes before merging them into the main branch.
+
+---
+
+# Daily Workflow
+
+Every time you begin working:
+
+```bash
+git checkout main
+```
+
+```bash
+git pull origin main
+```
+
+Switch back to your branch:
+
+```bash
+git checkout feature-report-module
+```
+
+Merge the latest updates from the main branch:
+
+```bash
+git merge main
+```
+
+After making changes:
+
+```bash
+git add .
+git commit -m "Describe your changes"
+git push
+```
+
+---
+
+# Useful Git Commands
+
+Check current branch:
+
+```bash
+git branch
+```
+
+View project status:
+
+```bash
+git status
+```
+
+View commit history:
+
+```bash
+git log --oneline
+```
+
+List remote repositories:
+
+```bash
+git remote -v
+```
+
+Fetch updates without merging:
+
+```bash
+git fetch
+```
+
+---
+
+# Best Practices
+
+* Always pull the latest changes before starting work.
+* Create a separate branch for each feature or bug fix.
+* Write clear and meaningful commit messages.
+* Push your work regularly.
+* Create a Pull Request instead of pushing directly to the `main` branch.
+* Resolve merge conflicts carefully before submitting a Pull Request.
+
+---
+
+# Repository Workflow
+
+```
+Clone Repository
+        │
+        ▼
+Pull Latest Changes
+        │
+        ▼
+Create Feature Branch
+        │
+        ▼
+Develop Feature
+        │
+        ▼
+git add .
+        │
+        ▼
+git commit
+        │
+        ▼
+git push
+        │
+        ▼
+Create Pull Request
+        │
+        ▼
+Repository Owner Reviews
+        │
+        ▼
+Merge into Main
+```
+
+---
+
+## Repository Owner
+
+The repository owner is responsible for reviewing Pull Requests, resolving merge conflicts when necessary, and merging approved changes into the `main` branch.
+

@@ -401,3 +401,11 @@ Git. Because PostgreSQL has accepted a test write and may now accept normal writ
 SQLite must not be restored blindly; any rollback requires a new write freeze and
 explicit PostgreSQL-delta reconciliation. Phase 9B storage, Supabase Auth/Data API
 use, mobile SDK changes, and FastAPI database access remain outside Phase 9A.
+
+An isolated Phase 9A recovery drill subsequently restored the immutable SQLite backup
+to a new external copy, applied the current migration set, and passed integrity,
+foreign-key, relationship, credential-hash, opaque-tracking, authenticated-view, and
+HTTP checks. Supabase and the live `.env` were unchanged. The reconciliation check
+identified only controlled test report `RCV-2026-0028` and its timeline as newer than
+the frozen snapshot. The roadmap recovery exit gate is therefore tested, while a real
+rollback remains separately approval-gated and must reconcile all PostgreSQL deltas.

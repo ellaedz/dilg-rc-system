@@ -758,11 +758,13 @@ must be resolved and physically retested before the production release gate.
 - [x] Record counts and relationships match the approved migration manifest.
 - [x] Existing credentials and roles still work.
 - [x] PostgreSQL Laravel regression tests pass.
-- [ ] Rollback/recovery procedure is documented and tested.
+- [x] Rollback/recovery procedure is documented and tested.
 
-Phase 9A database activation is complete. The final rollback artifacts and procedure
-are documented and integrity-verified, but a full post-write reversal has deliberately
-not been exercised; therefore the rollback/recovery checkbox remains open.
+Phase 9A database activation is complete. The rollback procedure was tested against a
+new isolated copy of the immutable SQLite backup without changing Supabase or the live
+`.env`. The drill verified current migrations, integrity, relationships, credentials,
+tracking, staff views, and HTTP startup. A real post-write rollback still requires a
+new write freeze and reconciliation of every PostgreSQL-only row.
 
 ---
 

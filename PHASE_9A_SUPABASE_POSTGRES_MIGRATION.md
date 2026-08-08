@@ -327,3 +327,38 @@ relationships, and obtain a separate rollback approval. Phase 9A does not implem
 dual writes.
 
 No SQLite database or backup may be deleted during Phase 9A.
+
+## Isolated rollback and recovery drill
+
+The Phase 9A recovery procedure was tested on 2026-08-08 without changing the active
+Supabase database or the live `.env`. A new writable copy of the immutable backup was
+created outside the repository at:
+
+`C:\Users\63923\CIVICLEAR_BACKUPS\phase9a-recovery-drill-20260808-210551\recovered-database.sqlite`
+
+Recovery evidence:
+
+- immutable source SHA-256 before and after the drill:
+  `e6d16cc2f97cf40c0b0ff4b96dc366af84311048afca08f1f32bd68451fae5bc`;
+- immutable source remained read-only;
+- initial recovery-copy SHA-256 matched the immutable source;
+- the current SQLite-compatible migration advanced the copy from 18 to 19 migrations;
+- post-migration recovery-copy SHA-256:
+  `32c4825ffb1e98c3d43a98591037351fec8cac80dd467d6d7860f32fbf1959fb`;
+- SQLite integrity check: `ok`;
+- foreign-key violations and orphan timelines: 0;
+- preserved rows: 27 users, 27 reports, and 31 timelines;
+- Report Numbers and tracking-token hashes remained unique;
+- 27 staff password hashes and 2 role groups remained present;
+- valid opaque tracking passed without printing the raw Tracking Token;
+- authenticated DILG dashboard, report list, Analytics, and GIS views rendered;
+- isolated HTTP checks passed on port 8002: `/up` 200, `/` 302 to login,
+  `/login` 200, and invalid opaque tracking 404;
+- the temporary server was stopped and no CIVICLEAR listener remained.
+
+The read-only reconciliation comparison found exactly one PostgreSQL-only report and
+one PostgreSQL-only timeline relative to the frozen snapshot: controlled test report
+`RCV-2026-0028`, marked `is_test_data = true`. This proves the recovery baseline is
+usable while also proving that a live rollback must not blindly select SQLite. Freeze
+PostgreSQL writes, export and reconcile this row plus every later delta, verify parity,
+and obtain separate approval before any real database reversal.

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ViolationReport;
 use App\Services\BarangayAssignmentService;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Facades\DB;
 
 class BarangayAnalyticsReportController extends Controller
@@ -79,9 +80,10 @@ class BarangayAnalyticsReportController extends Controller
             ->get();
 
         // 3. Monthly Barangay Trend (last 6 months)
+        [$yearExpression, $monthExpression] = $this->monthlyDateExpressions();
         $monthlyTrend = ViolationReport::select(
-            DB::raw("strftime('%Y', created_at) as year"),
-            DB::raw("strftime('%m', created_at) as month"),
+            $yearExpression,
+            $monthExpression,
             DB::raw('COUNT(*) as count')
         )
             ->forEffectiveBarangay($barangay)
@@ -220,5 +222,23 @@ class BarangayAnalyticsReportController extends Controller
             'statusSummary',
             'recentActions'
         ));
+    }
+
+    /**
+     * @return array{Expression, Expression}
+     */
+    private function monthlyDateExpressions(): array
+    {
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            return [
+                DB::raw('EXTRACT(YEAR FROM created_at)::integer as year'),
+                DB::raw('EXTRACT(MONTH FROM created_at)::integer as month'),
+            ];
+        }
+
+        return [
+            DB::raw("CAST(strftime('%Y', created_at) AS INTEGER) as year"),
+            DB::raw("CAST(strftime('%m', created_at) AS INTEGER) as month"),
+        ];
     }
 }

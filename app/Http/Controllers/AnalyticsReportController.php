@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ViolationReport;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -53,27 +54,39 @@ class AnalyticsReportController extends Controller
         $avgResponseTime = $avgResponseTime ? round($avgResponseTime, 1) : 0;
 
         // 9. Top Performing Barangay
-        $topPerformingBarangay = ViolationReport::select('detected_barangay',
-            DB::raw('COUNT(*) as total'),
-            DB::raw('SUM(CASE WHEN status = "Resolved" THEN 1 ELSE 0 END) as resolved'))
+        $topPerformingBarangay = ViolationReport::select('detected_barangay')
+            ->selectRaw(
+                'COUNT(*) as total,
+                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as resolved',
+                ['Resolved'],
+            )
             ->whereNotNull('detected_barangay')
             ->where('detected_barangay', '!=', 'Location Not Available')
             ->where('detected_barangay', '!=', 'Outside Santa Cruz Coverage')
             ->groupBy('detected_barangay')
-            ->havingRaw('total > 0')
-            ->orderByRaw('(resolved / total) DESC')
+            ->havingRaw('COUNT(*) > 0')
+            ->orderByRaw(
+                '(SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) * 1.0 / COUNT(*)) DESC',
+                ['Resolved'],
+            )
             ->orderBy('resolved', 'DESC')
             ->first();
 
         // 10. Barangay Needing Attention
-        $barangayNeedingAttention = ViolationReport::select('detected_barangay',
-            DB::raw('COUNT(*) as total'),
-            DB::raw('SUM(CASE WHEN status IN ("Submitted", "For Verification") THEN 1 ELSE 0 END) as pending'))
+        $barangayNeedingAttention = ViolationReport::select('detected_barangay')
+            ->selectRaw(
+                'COUNT(*) as total,
+                 SUM(CASE WHEN status IN (?, ?) THEN 1 ELSE 0 END) as pending',
+                ['Submitted', 'For Verification'],
+            )
             ->whereNotNull('detected_barangay')
             ->where('detected_barangay', '!=', 'Location Not Available')
             ->where('detected_barangay', '!=', 'Outside Santa Cruz Coverage')
             ->groupBy('detected_barangay')
-            ->havingRaw('pending > 0')
+            ->havingRaw(
+                'SUM(CASE WHEN status IN (?, ?) THEN 1 ELSE 0 END) > 0',
+                ['Submitted', 'For Verification'],
+            )
             ->orderBy('pending', 'DESC')
             ->first();
 
@@ -109,9 +122,10 @@ class AnalyticsReportController extends Controller
             ->values();
 
         // 4. Monthly Report Trend (last 6 months)
+        [$yearExpression, $monthExpression] = $this->monthlyDateExpressions();
         $monthlyTrend = ViolationReport::select(
-            DB::raw("strftime('%Y', created_at) as year"),
-            DB::raw("strftime('%m', created_at) as month"),
+            $yearExpression,
+            $monthExpression,
             DB::raw('COUNT(*) as count')
         )
             ->where('created_at', '>=', now()->subMonths(6))
@@ -224,13 +238,23 @@ class AnalyticsReportController extends Controller
             ->get();
 
         // Barangay Summary Table
-        $barangaySummary = ViolationReport::select('detected_barangay',
-            DB::raw('COUNT(*) as total'),
-            DB::raw('SUM(CASE WHEN verification_status = "Valid Violation" THEN 1 ELSE 0 END) as verified'),
-            DB::raw('SUM(CASE WHEN status IN ("Assigned", "In Progress") THEN 1 ELSE 0 END) as in_progress'),
-            DB::raw('SUM(CASE WHEN status = "Resolved" THEN 1 ELSE 0 END) as resolved'),
-            DB::raw('SUM(CASE WHEN status IN ("Submitted", "For Verification") THEN 1 ELSE 0 END) as pending'),
-            DB::raw('AVG(CASE WHEN response_time_hours IS NOT NULL THEN response_time_hours ELSE NULL END) as avg_response_time'))
+        $barangaySummary = ViolationReport::select('detected_barangay')
+            ->selectRaw(
+                'COUNT(*) as total,
+                 SUM(CASE WHEN verification_status = ? THEN 1 ELSE 0 END) as verified,
+                 SUM(CASE WHEN status IN (?, ?) THEN 1 ELSE 0 END) as in_progress,
+                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as resolved,
+                 SUM(CASE WHEN status IN (?, ?) THEN 1 ELSE 0 END) as pending,
+                 AVG(CASE WHEN response_time_hours IS NOT NULL THEN response_time_hours ELSE NULL END) as avg_response_time',
+                [
+                    'Valid Violation',
+                    'Assigned',
+                    'In Progress',
+                    'Resolved',
+                    'Submitted',
+                    'For Verification',
+                ],
+            )
             ->whereNotNull('detected_barangay')
             ->where('detected_barangay', '!=', 'Location Not Available')
             ->where('detected_barangay', '!=', 'Outside Santa Cruz Coverage')
@@ -282,5 +306,23 @@ class AnalyticsReportController extends Controller
             'topPerformingBarangay',
             'barangayNeedingAttention'
         ));
+    }
+
+    /**
+     * @return array{Expression, Expression}
+     */
+    private function monthlyDateExpressions(): array
+    {
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            return [
+                DB::raw('EXTRACT(YEAR FROM created_at)::integer as year'),
+                DB::raw('EXTRACT(MONTH FROM created_at)::integer as month'),
+            ];
+        }
+
+        return [
+            DB::raw("CAST(strftime('%Y', created_at) AS INTEGER) as year"),
+            DB::raw("CAST(strftime('%m', created_at) AS INTEGER) as month"),
+        ];
     }
 }

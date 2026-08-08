@@ -10,6 +10,7 @@ use App\Services\ReportNumberService;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -169,10 +170,10 @@ class Phase8BReportSecurityTest extends TestCase
         ]);
 
         $this->expectException(QueryException::class);
-        $this->createDirectReport([
+        DB::transaction(fn () => $this->createDirectReport([
             'report_id' => 'RCV-2031-9999',
             'report_number' => $report->report_number,
-        ]);
+        ]));
     }
 
     public function test_token_and_idempotency_hash_constraints_reject_duplicates(): void
@@ -180,18 +181,18 @@ class Phase8BReportSecurityTest extends TestCase
         $first = $this->createDirectReport();
 
         try {
-            $this->createDirectReport([
+            DB::transaction(fn () => $this->createDirectReport([
                 'tracking_token_hash' => $first->tracking_token_hash,
-            ]);
+            ]));
             $this->fail('The tracking token hash uniqueness constraint was not enforced.');
         } catch (QueryException) {
             $this->assertTrue(true);
         }
 
         try {
-            $this->createDirectReport([
+            DB::transaction(fn () => $this->createDirectReport([
                 'idempotency_key_hash' => $first->idempotency_key_hash,
-            ]);
+            ]));
             $this->fail('The idempotency key hash uniqueness constraint was not enforced.');
         } catch (QueryException) {
             $this->assertTrue(true);

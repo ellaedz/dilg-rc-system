@@ -380,3 +380,24 @@ preserve the report, Tracking Token credentials, timeline, and private photograp
 Phase 8E uses synchronous local dispatch only. Cloud Tasks replacement remains Phase
 10A, while mobile server-AI submission, opaque-token handling, idempotency, and polling
 remain Phase 8F.
+
+## Phase 9A PostgreSQL migration — activated
+
+Phase 9A completed its guarded Supabase PostgreSQL migration on 2026-08-08. All 19
+migrations passed in a protected disposable schema before the immutable final SQLite
+backup was imported into the private `civiclear` schema. The final import preserved 91
+rows across 13 tables; all 13 canonical digests matched, with 50 indexes and 3 foreign
+keys verified.
+
+Laravel now uses the Supabase Session Pooler with TLS `verify-full`, schema
+`civiclear`, and PostgreSQL writes enabled. Gate 3A created one controlled,
+idempotent, `is_test_data = true` report (`RCV-2026-0028`). Gate 3B then restored
+database-backed sessions, cache, and queues, verified a writable TLS session, and
+lifted maintenance mode. Final HTTP health, login, redirect, and safe invalid-tracking
+checks passed, and the temporary server was stopped.
+
+The immutable SQLite backup and both configuration rollback copies remain outside
+Git. Because PostgreSQL has accepted a test write and may now accept normal writes,
+SQLite must not be restored blindly; any rollback requires a new write freeze and
+explicit PostgreSQL-delta reconciliation. Phase 9B storage, Supabase Auth/Data API
+use, mobile SDK changes, and FastAPI database access remain outside Phase 9A.

@@ -86,7 +86,7 @@ return [
 
         'pgsql' => [
             'driver' => 'pgsql',
-            'url' => env('DB_URL'),
+            'url' => env('DB_URL') ?: null,
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '5432'),
             'database' => env('DB_DATABASE', 'laravel'),
@@ -95,8 +95,34 @@ return [
             'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
-            'search_path' => 'public',
-            'sslmode' => env('DB_SSLMODE', 'prefer'),
+            'search_path' => env('DB_SCHEMA', 'civiclear'),
+            'sslmode' => env('DB_SSLMODE', 'verify-full'),
+            'sslrootcert' => env('DB_SSLROOTCERT')
+                ? str_replace('\\', '/', env('DB_SSLROOTCERT'))
+                : null,
+            'application_name' => env('DB_APPLICATION_NAME', 'civiclear-laravel'),
+        ],
+
+        // Phase 9A destructive validation is isolated from the ordinary runtime
+        // connection. DB_URL is deliberately unsupported here so it cannot
+        // override the approved database, TLS mode, or disposable schema.
+        'phase9a_pgsql' => [
+            'driver' => 'pgsql',
+            'url' => null,
+            'host' => env('PHASE9A_DB_HOST'),
+            'port' => env('PHASE9A_DB_PORT', '5432'),
+            'database' => env('PHASE9A_DB_DATABASE'),
+            'username' => env('PHASE9A_DB_USERNAME'),
+            'password' => env('PHASE9A_DB_PASSWORD'),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'search_path' => env('PHASE9A_DB_SCHEMA'),
+            'sslmode' => env('PHASE9A_DB_SSLMODE', 'verify-full'),
+            'sslrootcert' => env('PHASE9A_DB_SSLROOTCERT')
+                ? str_replace('\\', '/', env('PHASE9A_DB_SSLROOTCERT'))
+                : null,
+            'application_name' => 'civiclear-phase9a-validation',
         ],
 
         'sqlsrv' => [

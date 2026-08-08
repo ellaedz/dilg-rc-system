@@ -26,6 +26,7 @@
         <env name="DB_CONNECTION" value="sqlite"/>
         <env name="DB_DATABASE" value=":memory:"/>
         <env name="DB_URL" value=""/>
+        <env name="PHASE9A_RUNTIME_READ_ONLY" value="false" force="true"/>
         <env name="REPORT_TRACKING_TOKEN_DERIVATION_KEY" value="phase-8b-test-derivation-key-000000000000000000000000"/>
         <env name="REPORT_TRACKING_TOKEN_LOOKUP_KEY" value="phase-8b-test-lookup-key-000000000000000000000000000"/>
         <env name="REPORT_IDEMPOTENCY_HMAC_KEY" value="phase-8b-test-idempotency-key-00000000000000000000000"/>

@@ -740,25 +740,29 @@ must be resolved and physically retested before the production release gate.
 
 ### Implementation tasks
 
-- [ ] Create and verify a final SQLite backup.
-- [ ] Enable and verify PHP PostgreSQL support.
-- [ ] Configure the Supabase Session Pooler with secrets outside Git.
-- [ ] Prefer a dedicated Laravel application schema.
-- [ ] Validate every migration against PostgreSQL.
-- [ ] Build a controlled, repeatable import command.
-- [ ] Preserve users, password hashes, roles, reports, timelines, identifiers,
+- [x] Create and verify a final SQLite backup.
+- [x] Enable and verify PHP PostgreSQL support.
+- [x] Configure the Supabase Session Pooler with secrets outside Git.
+- [x] Prefer a dedicated Laravel application schema.
+- [x] Validate every migration against PostgreSQL.
+- [x] Build a controlled, repeatable import command.
+- [x] Preserve users, password hashes, roles, reports, timelines, identifiers,
       verification evidence, and relationships.
-- [ ] Explicitly mark known seeded records as `is_test_data = true`.
-- [ ] Validate boolean, JSON, decimal, date, timestamp, index, and foreign-key behavior.
-- [ ] Verify hash uniqueness after import.
-- [ ] Do not run migrations automatically on every container startup.
+- [x] Explicitly mark known seeded records as `is_test_data = true`.
+- [x] Validate boolean, JSON, decimal, date, timestamp, index, and foreign-key behavior.
+- [x] Verify hash uniqueness after import.
+- [x] Do not run migrations automatically on every container startup.
 
 ### Exit gate
 
-- [ ] Record counts and relationships match the approved migration manifest.
-- [ ] Existing credentials and roles still work.
-- [ ] PostgreSQL Laravel regression tests pass.
+- [x] Record counts and relationships match the approved migration manifest.
+- [x] Existing credentials and roles still work.
+- [x] PostgreSQL Laravel regression tests pass.
 - [ ] Rollback/recovery procedure is documented and tested.
+
+Phase 9A database activation is complete. The final rollback artifacts and procedure
+are documented and integrity-verified, but a full post-write reversal has deliberately
+not been exercised; therefore the rollback/recovery checkbox remains open.
 
 ---
 

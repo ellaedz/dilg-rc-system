@@ -15,13 +15,24 @@ class BarangayPerformanceController extends Controller
         $barangayPerformance = ViolationReport::selectRaw('
                 COALESCE(detected_barangay, manually_assigned_barangay) as detected_barangay,
                 COUNT(*) as total_reports,
-                SUM(CASE WHEN status = "Resolved" THEN 1 ELSE 0 END) as resolved_count,
-                SUM(CASE WHEN status IN ("Submitted", "For Verification", "Verified", "Assigned", "In Progress") THEN 1 ELSE 0 END) as pending_count,
-                SUM(CASE WHEN verification_status = "Valid Violation" THEN 1 ELSE 0 END) as verified_valid_count,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as resolved_count,
+                SUM(CASE WHEN status IN (?, ?, ?, ?, ?) THEN 1 ELSE 0 END) as pending_count,
+                SUM(CASE WHEN verification_status = ? THEN 1 ELSE 0 END) as verified_valid_count,
                 AVG(CASE WHEN response_time_hours IS NOT NULL THEN response_time_hours ELSE NULL END) as avg_response_time,
-                ROUND(SUM(CASE WHEN status = "Resolved" THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as resolution_rate,
-                ROUND(SUM(CASE WHEN verification_status = "Valid Violation" THEN 1 ELSE 0 END) * 100.0 / NULLIF(SUM(CASE WHEN verification_status IS NOT NULL AND verification_status != "Pending" THEN 1 ELSE 0 END), 0), 2) as verification_completion_rate
-            ')
+                ROUND(SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as resolution_rate,
+                ROUND(SUM(CASE WHEN verification_status = ? THEN 1 ELSE 0 END) * 100.0 / NULLIF(SUM(CASE WHEN verification_status IS NOT NULL AND verification_status != ? THEN 1 ELSE 0 END), 0), 2) as verification_completion_rate
+            ', [
+            'Resolved',
+            'Submitted',
+            'For Verification',
+            'Verified',
+            'Assigned',
+            'In Progress',
+            'Valid Violation',
+            'Resolved',
+            'Valid Violation',
+            'Pending',
+        ])
             ->where(function ($query) {
                 $query->whereNotNull('detected_barangay')->orWhereNotNull('manually_assigned_barangay');
             })

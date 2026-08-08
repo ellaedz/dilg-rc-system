@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\ViolationReport;
 use App\Services\BarangayAssignmentService;
-use Illuminate\Http\Request;
 
 class DilgDashboardController extends Controller
 {
@@ -29,8 +28,8 @@ class DilgDashboardController extends Controller
         $barangayStats = ViolationReport::selectRaw('
                 COALESCE(detected_barangay, manually_assigned_barangay) as detected_barangay,
                 COUNT(*) as total_reports,
-                SUM(CASE WHEN status = "Resolved" THEN 1 ELSE 0 END) as resolved_count
-            ')
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as resolved_count
+            ', ['Resolved'])
             ->where(function ($query) {
                 $query->whereNotNull('detected_barangay')->orWhereNotNull('manually_assigned_barangay');
             })
@@ -39,17 +38,18 @@ class DilgDashboardController extends Controller
 
         // Calculate resolution rate in PHP
         $topBarangay = $barangayStats
-            ->map(function($b) {
-                $b->resolution_rate = $b->total_reports > 0 
-                    ? round(($b->resolved_count / $b->total_reports) * 100, 2) 
+            ->map(function ($b) {
+                $b->resolution_rate = $b->total_reports > 0
+                    ? round(($b->resolved_count / $b->total_reports) * 100, 2)
                     : 0;
+
                 return $b;
             })
             ->sortByDesc('resolution_rate')
             ->first();
 
         $stats['top_barangay'] = $topBarangay ? $topBarangay->detected_barangay : 'N/A';
-        $stats['top_barangay_resolution_rate'] = $topBarangay ? $topBarangay->resolution_rate . '%' : '0%';
+        $stats['top_barangay_resolution_rate'] = $topBarangay ? $topBarangay->resolution_rate.'%' : '0%';
 
         // Barangay with most pending reports
         $mostPendingBarangay = ViolationReport::selectRaw('
@@ -76,9 +76,16 @@ class DilgDashboardController extends Controller
         $reportsByBarangay = ViolationReport::selectRaw('
                 COALESCE(detected_barangay, manually_assigned_barangay) as detected_barangay,
                 COUNT(*) as total_reports,
-                SUM(CASE WHEN status = "Resolved" THEN 1 ELSE 0 END) as resolved_count,
-                SUM(CASE WHEN status IN ("Submitted", "For Verification", "Verified", "Assigned", "In Progress") THEN 1 ELSE 0 END) as pending_count
-            ')
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as resolved_count,
+                SUM(CASE WHEN status IN (?, ?, ?, ?, ?) THEN 1 ELSE 0 END) as pending_count
+            ', [
+            'Resolved',
+            'Submitted',
+            'For Verification',
+            'Verified',
+            'Assigned',
+            'In Progress',
+        ])
             ->where(function ($query) {
                 $query->whereNotNull('detected_barangay')->orWhereNotNull('manually_assigned_barangay');
             })

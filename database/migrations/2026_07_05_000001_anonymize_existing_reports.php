@@ -2,14 +2,14 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     /**
      * Run the migrations.
-     * 
+     *
      * This migration anonymizes all existing violation reports to comply with
      * Phase 4A.1 Anonymous Citizen Reporting requirements.
      */
@@ -26,12 +26,13 @@ return new class extends Migration
             'contact_number' => null, // Remove all contact numbers for privacy
         ]);
 
-        // Step 3: Update timeline entries to show anonymous submissions
+        // updated_by is a nullable user ID. Anonymous system actions therefore
+        // use null; storing a text sentinel violates the PostgreSQL bigint type.
         DB::table('report_timelines')
-            ->where('updated_by', '!=', 'Anonymous Citizen')
+            ->whereNotNull('updated_by')
             ->where('status', 'Submitted')
             ->update([
-                'updated_by' => 'Anonymous Citizen',
+                'updated_by' => null,
                 'remarks' => 'Report submitted anonymously via mobile app',
             ]);
 

@@ -77,7 +77,7 @@ class ManualBarangayRoutingTest extends TestCase
             'longitude' => 121.4100,
             'timestamp' => now(),
             'status' => 'Submitted',
-            'verification_status' => 'Unverified',
+            'verification_status' => 'Pending',
             'municipality_validated' => true,
             'municipality_name' => 'Santa Cruz',
             'barangay_detection_status' => 'barangay_boundary_unavailable',

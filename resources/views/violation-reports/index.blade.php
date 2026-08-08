@@ -349,7 +349,7 @@
                 @forelse($reports as $report)
                 <tr>
                     <td><strong>{{ $report->report_id }}</strong></td>
-                    <td>{{ $report->selected_violation_type }}</td>
+                    <td>{{ $report->citizen_violation_type_label }}</td>
                     <td>{{ $report->detected_barangay }}</td>
                     <td><x-status-badge :status="$report->status" /></td>
                     <td>{{ $report->timestamp ? $report->timestamp->format('M d, Y h:i A') : 'N/A' }}</td>

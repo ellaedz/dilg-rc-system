@@ -81,7 +81,7 @@ export function PhotoEvidencePicker({
             {formatFileSize(imageFileSize)}
           </Text>
           <Text style={styles.privacy}>
-            Local draft only. Phase 5C analyzes this processed copy on the device and does not upload it.
+            Stored in app-owned draft storage. It uploads only after you press Submit Report.
           </Text>
           <SecondaryButton disabled={isBusy} onPress={onRemovePhoto} title="Remove Photo" />
         </View>

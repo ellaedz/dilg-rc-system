@@ -1,12 +1,12 @@
 import type * as ImagePickerTypes from 'expo-image-picker';
+import { randomUUID } from 'expo-crypto';
 import { router } from 'expo-router';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Linking, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { AppCard } from '@/components/AppCard';
 import { AppHeader } from '@/components/AppHeader';
 import { FormFieldError } from '@/components/FormFieldError';
-import { InferenceResultCard } from '@/components/InferenceResultCard';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { PhotoEvidencePicker } from '@/components/PhotoEvidencePicker';
 import { PrimaryButton } from '@/components/PrimaryButton';
@@ -17,16 +17,20 @@ import { colors } from '@/constants/colors';
 import { useReportDraft } from '@/hooks/useReportDraft';
 import { useTrackingIds } from '@/hooks/useTrackingIds';
 import {
-  mapImageClassToViolationType,
-  needsManualReviewFromImage,
   submitMobileReport,
   toApiError,
   validateMunicipality,
 } from '@/services/api';
-import { imageInferenceService } from '@/services/ImageInferenceService';
-import type { ImageSource, ReportDraft, TrackingRecord } from '@/types/report';
+import { runSingleSubmission } from '@/services/submissionCoordinator';
+import {
+  discardSubmissionRecovery,
+  listSubmissionJournal,
+  loadSubmissionSnapshot,
+  prepareSubmissionSnapshot,
+  updateSubmissionJournal,
+} from '@/services/submissionRecovery';
+import type { ImageSource, ReportDraft, SubmissionJournalRecord, SubmissionSnapshot } from '@/types/report';
 import { imageExists, processSelectedImage } from '@/utils/imageProcessing';
-import { emptyImageInferenceFields } from '@/utils/inferenceResult';
 import { hasValidationErrors, validateSubmissionDraft, type ReportDraftValidationErrors } from '@/utils/validators';
 
 const DESCRIPTION_MAX_LENGTH = 500;
@@ -76,38 +80,26 @@ export default function SubmitReportScreen() {
     continueStoredDraft,
     discardStoredDraft,
   } = useReportDraft();
-  const { saveTrackingRecord } = useTrackingIds();
+  const { saveSubmittedReport } = useTrackingIds();
   const [errors, setErrors] = useState<ReportDraftValidationErrors>({});
   const [feedback, setFeedback] = useState<string | null>(null);
   const [permissionMessage, setPermissionMessage] = useState<string | null>(null);
   const [isPreparingPhoto, setIsPreparingPhoto] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [gpsStatus, setGpsStatus] = useState<GpsStatus>('idle');
-  const [modelStatus, setModelStatus] = useState<'loading' | 'ready' | 'error'>('loading');
-  const [modelError, setModelError] = useState<string | null>(null);
+  const [recoveryRecords, setRecoveryRecords] = useState<SubmissionJournalRecord[]>([]);
   const draftRef = useRef(draft);
 
   useEffect(() => {
     draftRef.current = draft;
   }, [draft]);
 
-  const initializeModel = useCallback(async () => {
-    setModelStatus('loading');
-    setModelError(null);
-    try {
-      await imageInferenceService.initialize();
-      setModelStatus('ready');
-    } catch (error) {
-      setModelStatus('error');
-      setModelError(error instanceof Error ? error.message : 'AI model could not be loaded.');
-    }
-  }, []);
-
   useEffect(() => {
-    void initializeModel();
-  }, [initializeModel]);
+    void listSubmissionJournal().then((records) => {
+      setRecoveryRecords(records.filter((record) => record.state !== 'submitted'));
+    });
+  }, []);
 
   useEffect(() => {
     if (isDraftLoading || !pendingStoredDraft) return;
@@ -137,8 +129,6 @@ export default function SubmitReportScreen() {
     [draft.gpsTimestamp],
   );
   const accuracy = getAccuracyLabel(draft.gpsAccuracy);
-  const selectedViolationType = mapImageClassToViolationType(draft.imageResult);
-
   function applyDraft(partialDraft: Partial<ReportDraft>) {
     const nextDraft = { ...draftRef.current, ...partialDraft };
     draftRef.current = nextDraft;
@@ -159,12 +149,12 @@ export default function SubmitReportScreen() {
   }
 
   async function prepareImage(asset: ImagePickerTypes.ImagePickerAsset, imageSource: ImageSource) {
-    if (isAnalyzing || isSubmitting) return;
+    if (isSubmitting) return;
     setIsPreparingPhoto(true);
     setPermissionMessage(null);
 
     try {
-      const processedImage = await processSelectedImage(asset, imageSource);
+      const processedImage = await processSelectedImage(asset, imageSource, draftRef.current.localDraftId);
       const nextDraft: ReportDraft = {
         ...draftRef.current,
         ...processedImage,
@@ -179,8 +169,6 @@ export default function SubmitReportScreen() {
         needsManualBarangayReview: false,
         assignedBarangayOffice: null,
         detectedBarangay: null,
-        needsManualReview: false,
-        ...emptyImageInferenceFields(),
       };
 
       draftRef.current = nextDraft;
@@ -199,7 +187,7 @@ export default function SubmitReportScreen() {
   }
 
   async function handleTakePhoto() {
-    if (isAnalyzing || isPreparingPhoto || isSubmitting) return;
+    if (isPreparingPhoto || isSubmitting) return;
     setFeedback(null);
     setPermissionMessage(null);
 
@@ -226,7 +214,7 @@ export default function SubmitReportScreen() {
   }
 
   async function handleChooseFromGallery() {
-    if (isAnalyzing || isPreparingPhoto || isSubmitting) return;
+    if (isPreparingPhoto || isSubmitting) return;
     setFeedback(null);
     setPermissionMessage(null);
 
@@ -271,57 +259,9 @@ export default function SubmitReportScreen() {
       needsManualBarangayReview: false,
       assignedBarangayOffice: null,
       detectedBarangay: null,
-      needsManualReview: false,
-      ...emptyImageInferenceFields(),
     });
     setGpsStatus('idle');
     setFeedback('Photo removed from this local draft.');
-  }
-
-  async function handleAnalyzePhoto() {
-    if (!draft.imageUri || isAnalyzing || isSubmitting) return;
-
-    const analyzedImageUri = draft.imageUri;
-    setIsAnalyzing(true);
-    setFeedback(null);
-    try {
-      const clearedDraft: ReportDraft = { ...draftRef.current, needsManualReview: false, ...emptyImageInferenceFields() };
-      draftRef.current = clearedDraft;
-      updateDraft(clearedDraft);
-
-      const result = await imageInferenceService.predict(analyzedImageUri);
-      const currentDraft = draftRef.current;
-      if (currentDraft.imageUri !== analyzedImageUri) {
-        setFeedback('The photo changed during analysis, so the outdated AI result was discarded.');
-        return;
-      }
-
-      const identity = imageInferenceService.getModelIdentity();
-      const nextDraft: ReportDraft = {
-        ...currentDraft,
-        imageResult: result.primaryClass,
-        imageConfidence: result.primaryClass ? result.primaryConfidence : null,
-        imageInferenceTime: result.inferenceTimeMs,
-        imageValidationStatus: result.validationStatus,
-        imageDetections: result.detections,
-        imageModelVersion: identity.version,
-        imageModelHash: identity.hash,
-        needsManualReview: needsManualReviewFromImage(result.validationStatus),
-      };
-
-      draftRef.current = nextDraft;
-      updateDraft(nextDraft);
-      await saveDraft(nextDraft);
-      setFeedback(
-        result.validationStatus === 'error'
-          ? result.errorMessage ?? 'AI analysis failed. Retry or replace the photo.'
-          : 'AI-assisted image result saved locally. Authorized staff must still verify the classification.',
-      );
-    } catch {
-      setFeedback('The AI result could not be saved. Please analyze the photo again.');
-    } finally {
-      setIsAnalyzing(false);
-    }
   }
 
   async function handleCaptureGps() {
@@ -386,13 +326,53 @@ export default function SubmitReportScreen() {
     }
   }
 
+  async function executePreparedSubmission(record: SubmissionJournalRecord, snapshot: SubmissionSnapshot) {
+    const localRecordId = record.localRecordId ?? randomUUID();
+    await updateSubmissionJournal(record.localDraftId, 'submitting', {
+      localRecordId,
+      lastErrorCode: null,
+      lastErrorMessage: null,
+    });
+    let submitted;
+    try {
+      submitted = await submitMobileReport(snapshot, setUploadProgress);
+      await saveSubmittedReport(submitted, localRecordId);
+      await updateSubmissionJournal(record.localDraftId, 'submitted', {
+        localRecordId,
+        reportNumber: submitted.reportNumber,
+        lastErrorCode: null,
+        lastErrorMessage: null,
+      });
+    } catch (error) {
+      const apiError = toApiError(error);
+      const nextState =
+        apiError.status === 409 || apiError.status === 422
+          ? 'failed_permanent'
+          : !apiError.status || apiError.status === 408
+            ? 'uncertain'
+            : 'failed_retryable';
+      await updateSubmissionJournal(record.localDraftId, nextState, {
+        localRecordId,
+        lastErrorCode: apiError.status ? `HTTP_${apiError.status}` : 'RESPONSE_UNCONFIRMED',
+        lastErrorMessage: getSubmissionMessage(error),
+      });
+      throw error;
+    }
+    try {
+      await discardSubmissionRecovery(record.localDraftId);
+      if (draftRef.current.localDraftId === record.localDraftId) await clearDraft();
+    } catch {
+      setFeedback('The report was submitted, but local cleanup needs attention.');
+    }
+    router.push(`/submission-success?localRecordId=${encodeURIComponent(localRecordId)}`);
+    return submitted;
+  }
+
   async function handleSubmitReport() {
     if (isSubmitting) return;
-
     setIsSubmitting(true);
     setUploadProgress(0);
     setFeedback(null);
-
     try {
       const processedImageExists = await imageExists(draft.imageUri);
       const validationErrors = validateSubmissionDraft(draft, { processedImageExists });
@@ -403,37 +383,48 @@ export default function SubmitReportScreen() {
         return;
       }
 
-      const submitted = await submitMobileReport(draft, setUploadProgress);
-      const trackingRecord: TrackingRecord = {
-        trackingId: submitted.trackingId,
-        submissionDate: new Date().toISOString(),
-        violationType: submitted.selectedViolationType ?? selectedViolationType,
-        currentStatus: submitted.status,
-        verificationStatus: submitted.verificationStatus,
-        municipalityName: submitted.municipalityName,
-        assignedBarangay: submitted.detectedBarangay,
-        latestAction: null,
-        lastSync: new Date().toISOString(),
-      };
-
-      await saveTrackingRecord(trackingRecord);
-      await clearDraft();
-      router.push(
-        `/submission-success?trackingId=${encodeURIComponent(submitted.trackingId)}` +
-          `&status=${encodeURIComponent(submitted.status)}` +
-          `&aiStatus=${encodeURIComponent(submitted.aiProcessingStatus ?? 'pending')}` +
-          `&finalAiCategory=${encodeURIComponent(submitted.finalAiCategory ?? '')}`,
-      );
+      await runSingleSubmission(draftRef.current.localDraftId, async () => {
+        const prepared = await prepareSubmissionSnapshot(draftRef.current);
+        if (prepared.record.state === 'failed_permanent') {
+          throw new Error('This prepared submission was permanently rejected. Discard it before creating a new request.');
+        }
+        return executePreparedSubmission(prepared.record, prepared.snapshot);
+      });
     } catch (error) {
       setFeedback(getSubmissionMessage(error));
       await saveDraft(draftRef.current);
+      setRecoveryRecords((await listSubmissionJournal()).filter((record) => record.state !== 'submitted'));
     } finally {
       setIsSubmitting(false);
     }
   }
 
+  async function handleRetryRecovery(record: SubmissionJournalRecord) {
+    if (isSubmitting || !['uncertain', 'failed_retryable', 'prepared'].includes(record.state)) return;
+    setIsSubmitting(true);
+    setUploadProgress(0);
+    setFeedback('Retrying the same saved request with its original Idempotency-Key.');
+    try {
+      await runSingleSubmission(record.localDraftId, async () =>
+        executePreparedSubmission(record, await loadSubmissionSnapshot(record)),
+      );
+    } catch (error) {
+      setFeedback(getSubmissionMessage(error));
+      setRecoveryRecords((await listSubmissionJournal()).filter((item) => item.state !== 'submitted'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleDiscardRecovery(record: SubmissionJournalRecord) {
+    if (isSubmitting) return;
+    await discardSubmissionRecovery(record.localDraftId);
+    setRecoveryRecords((await listSubmissionJournal()).filter((item) => item.state !== 'submitted'));
+    setFeedback('The selected local recovery snapshot was explicitly discarded.');
+  }
+
   async function handleClearDraft() {
-    if (isAnalyzing || isSubmitting) return;
+    if (isSubmitting) return;
     await clearDraft();
     setErrors({});
     setGpsStatus('idle');
@@ -442,7 +433,7 @@ export default function SubmitReportScreen() {
 
   return (
     <Screen>
-      <AppHeader title="Submit Report" subtitle="Photo, AI check, GPS, and Laravel submission" />
+      <AppHeader title="Submit Report" subtitle="Photo, GPS, and secure Laravel submission" />
       <ReportProgress />
 
       {feedback ? (
@@ -466,7 +457,7 @@ export default function SubmitReportScreen() {
           imageSource={draft.imageSource}
           imageUri={draft.imageUri}
           imageWidth={draft.imageWidth}
-          isBusy={isPreparingPhoto || isAnalyzing || isSubmitting}
+          isBusy={isPreparingPhoto || isSubmitting}
           onChooseFromGallery={handleChooseFromGallery}
           onRemovePhoto={handleRemovePhoto}
           onTakePhoto={handleTakePhoto}
@@ -474,22 +465,12 @@ export default function SubmitReportScreen() {
         />
       </AppCard>
 
-      <InferenceResultCard
-        detections={draft.imageDetections}
-        hasImage={Boolean(draft.imageUri)}
-        inferenceTimeMs={draft.imageInferenceTime}
-        isAnalyzing={isAnalyzing}
-        modelError={modelError}
-        modelStatus={modelStatus}
-        onAnalyze={handleAnalyzePhoto}
-        onChooseAnother={handleChooseFromGallery}
-        onRetake={handleTakePhoto}
-        onRetryModel={initializeModel}
-        primaryClass={draft.imageResult}
-        primaryConfidence={draft.imageConfidence}
-        validationStatus={draft.imageValidationStatus}
+      <AppCard
+        icon="AI"
+        title="Server AI Assessment"
+        description="The photograph will be analyzed securely by the CIVICLEAR server after submission. The result is only a possible violation until authorized staff verifies it."
+        tone="warning"
       />
-      <FormFieldError message={errors.imageValidationStatus} />
 
       <AppCard
         icon="TEXT"
@@ -514,14 +495,6 @@ export default function SubmitReportScreen() {
           </Text>
         </View>
         <FormFieldError message={errors.description} />
-      </AppCard>
-
-      <AppCard icon="AI" title="AI Suggested Type" description="This is not final. Authorized staff will verify or correct it.">
-        <Text style={styles.value}>{selectedViolationType}</Text>
-        <Text style={styles.helper}>
-          Image result: {draft.imageResult ?? 'No supported class detected'}; manual review:{' '}
-          {draft.needsManualReview || needsManualReviewFromImage(draft.imageValidationStatus) ? 'Yes' : 'No'}
-        </Text>
       </AppCard>
 
       <AppCard icon="GPS" title="GPS Location" description="Capture the incident point using foreground location only.">
@@ -568,17 +541,49 @@ export default function SubmitReportScreen() {
         </AppCard>
       ) : null}
 
+      {recoveryRecords.length > 0 ? (
+        <AppCard
+          icon="SYNC"
+          title="Saved Submission Recovery"
+          description="These requests were not silently resent. Retry uses the original photograph and Idempotency-Key."
+          tone="warning"
+        >
+          {recoveryRecords.map((record) => (
+            <View key={record.localDraftId} style={styles.recoveryItem}>
+              <Text style={styles.value}>State: {record.state.replaceAll('_', ' ')}</Text>
+              <Text style={styles.helper}>{record.lastErrorMessage ?? 'Prepared locally and not yet confirmed.'}</Text>
+              <View style={styles.rowActions}>
+                {['prepared', 'uncertain', 'failed_retryable'].includes(record.state) ? (
+                  <PrimaryButton
+                    disabled={isSubmitting}
+                    onPress={() => handleRetryRecovery(record)}
+                    title="Retry Same Request"
+                    variant="secondary"
+                  />
+                ) : null}
+                <PrimaryButton
+                  disabled={isSubmitting}
+                  onPress={() => handleDiscardRecovery(record)}
+                  title="Discard Local Recovery"
+                  variant="danger"
+                />
+              </View>
+            </View>
+          ))}
+        </AppCard>
+      ) : null}
+
       <PrivacyNotice />
 
       <View style={styles.actions}>
         <PrimaryButton
           accessibilityLabel="Submit Report"
-          disabled={isAnalyzing || isPreparingPhoto}
+          disabled={isPreparingPhoto}
           loading={isSubmitting}
           onPress={handleSubmitReport}
           title="Submit Report"
         />
-        <PrimaryButton disabled={isAnalyzing || isSubmitting} onPress={handleClearDraft} title="Clear Local Draft" variant="outline" />
+        <PrimaryButton disabled={isSubmitting} onPress={handleClearDraft} title="Clear Local Draft" variant="outline" />
       </View>
 
       <LoadingOverlay message="Preparing photo..." visible={isPreparingPhoto} />
@@ -657,5 +662,11 @@ const styles = StyleSheet.create({
   progressFill: {
     backgroundColor: colors.primaryGold,
     height: 10,
+  },
+  recoveryItem: {
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    gap: 8,
+    paddingTop: 12,
   },
 });

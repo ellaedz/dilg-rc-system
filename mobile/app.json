@@ -13,6 +13,7 @@
     },
     "android": {
       "package": "com.dilgrc.citizen",
+      "allowBackup": false,
       "blockedPermissions": [
         "android.permission.RECORD_AUDIO"
       ],
@@ -37,7 +38,6 @@
     "plugins": [
       "expo-router",
       "expo-dev-client",
-      "react-native-fast-tflite",
       [
         "expo-camera",
         {
@@ -63,6 +63,12 @@
           "image": "./assets/images/splash-icon.png",
           "resizeMode": "contain",
           "backgroundColor": "#F8FAFC"
+        }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": false
         }
       ]
     ],

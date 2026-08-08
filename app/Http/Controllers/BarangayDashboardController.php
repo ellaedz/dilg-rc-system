@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\ViolationReport;
 use App\Services\BarangayAssignmentService;
-use Illuminate\Http\Request;
 
 class BarangayDashboardController extends Controller
 {
@@ -15,7 +14,7 @@ class BarangayDashboardController extends Controller
     {
         // Verify barangay exists
         $barangayDetails = BarangayAssignmentService::getBarangayByName($barangay);
-        if (!$barangayDetails) {
+        if (! $barangayDetails) {
             abort(404, 'Barangay not found');
         }
 
@@ -39,9 +38,9 @@ class BarangayDashboardController extends Controller
             ->whereNotNull('response_time_hours')
             ->get();
 
-        $stats['avg_response_time'] = $resolvedReports->isEmpty() 
-            ? 'N/A' 
-            : round($resolvedReports->avg('response_time_hours'), 1) . ' hours';
+        $stats['avg_response_time'] = $resolvedReports->isEmpty()
+            ? 'N/A'
+            : round($resolvedReports->avg('response_time_hours'), 1).' hours';
 
         // Recent reports for this barangay
         $recentReports = ViolationReport::forEffectiveBarangay($barangay)
@@ -51,6 +50,7 @@ class BarangayDashboardController extends Controller
 
         // Reports by violation type for this barangay
         $reportsByType = ViolationReport::forEffectiveBarangay($barangay)
+            ->citizenClassified()
             ->selectRaw('selected_violation_type, COUNT(*) as count')
             ->groupBy('selected_violation_type')
             ->orderBy('count', 'desc')

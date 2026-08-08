@@ -47,6 +47,22 @@ return [
             'report' => false,
         ],
 
+        'report_photos' => [
+            'driver' => 'local',
+            'root' => env('REPORT_PHOTO_LOCAL_ROOT')
+                ?: storage_path('app/private/report-photos'),
+            'throw' => true,
+            'report' => false,
+        ],
+
+        'report_photo_quarantine' => [
+            'driver' => 'local',
+            'root' => env('REPORT_PHOTO_QUARANTINE_LOCAL_ROOT')
+                ?: storage_path('app/private/report-photo-quarantine'),
+            'throw' => true,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

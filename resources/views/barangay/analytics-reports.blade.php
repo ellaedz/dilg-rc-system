@@ -376,7 +376,7 @@ function showExportPlaceholder(format) {
                 @forelse($recentReports as $report)
                     <tr>
                         <td><strong>{{ $report->report_id }}</strong></td>
-                        <td>{{ $report->selected_violation_type }}</td>
+                        <td>{{ $report->citizen_violation_type_label }}</td>
                         <td><x-status-badge :status="$report->status" size="sm" /></td>
                         <td>{{ $report->created_at->format('M d, Y') }}</td>
                         <td>

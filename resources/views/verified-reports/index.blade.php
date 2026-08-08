@@ -363,7 +363,7 @@
                 @forelse($reports as $report)
                 <tr>
                     <td><strong>{{ $report->report_id }}</strong></td>
-                    <td>{{ $report->selected_violation_type }}</td>
+                    <td>{{ $report->citizen_violation_type_label }}</td>
                     <td>{{ $report->detected_barangay }}</td>
                     <td>
                         @if($report->assigned_personnel)

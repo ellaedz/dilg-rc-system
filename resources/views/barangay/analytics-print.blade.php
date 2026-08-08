@@ -484,7 +484,7 @@
                     @forelse($recentActions as $report)
                         <tr>
                             <td style="font-weight: 600;">{{ $report->report_id }}</td>
-                            <td>{{ $report->selected_violation_type }}</td>
+                            <td>{{ $report->citizen_violation_type_label }}</td>
                             <td><x-status-badge :status="$report->status" size="sm" /></td>
                             <td>{{ Str::limit($report->action_taken, 50) }}</td>
                             <td>{{ $report->date_updated ? $report->date_updated->format('M d, Y') : 'N/A' }}</td>

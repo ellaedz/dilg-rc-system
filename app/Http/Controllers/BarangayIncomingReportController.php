@@ -15,7 +15,7 @@ class BarangayIncomingReportController extends Controller
     {
         // Verify barangay exists
         $barangayDetails = BarangayAssignmentService::getBarangayByName($barangay);
-        if (!$barangayDetails) {
+        if (! $barangayDetails) {
             abort(404, 'Barangay not found');
         }
 
@@ -26,10 +26,10 @@ class BarangayIncomingReportController extends Controller
         // Search
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('report_id', 'like', "%{$search}%")
-                  ->orWhere('submitted_by', 'like', "%{$search}%")
-                  ->orWhere('selected_violation_type', 'like', "%{$search}%");
+                    ->orWhere('submitted_by', 'like', "%{$search}%")
+                    ->orWhere('selected_violation_type', 'like', "%{$search}%");
             });
         }
 
@@ -56,8 +56,10 @@ class BarangayIncomingReportController extends Controller
         $report->update([
             'status' => 'Verified',
             'verification_status' => 'Valid Violation',
+            'verified_by' => $request->user()?->id,
+            'verified_at' => now(),
             'remarks' => $request->remarks,
-            'date_updated' => now()
+            'date_updated' => now(),
         ]);
 
         return redirect()->route('barangay.incoming-reports', $barangay)
@@ -77,8 +79,10 @@ class BarangayIncomingReportController extends Controller
         $report->update([
             'status' => 'Rejected',
             'verification_status' => 'Invalid Report',
+            'verified_by' => $request->user()?->id,
+            'verified_at' => now(),
             'remarks' => $request->remarks ?? 'Report rejected by barangay staff',
-            'date_updated' => now()
+            'date_updated' => now(),
         ]);
 
         return redirect()->route('barangay.incoming-reports', $barangay)
@@ -100,7 +104,7 @@ class BarangayIncomingReportController extends Controller
         return response()->json([
             'reports' => $reports,
             'count' => $reports->count(),
-            'timestamp' => now()->toISOString()
+            'timestamp' => now()->toISOString(),
         ]);
     }
 }

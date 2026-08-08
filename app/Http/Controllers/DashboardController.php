@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\ViolationReport;
-use App\Services\BarangayAssignmentService;
-use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
@@ -25,11 +23,12 @@ class DashboardController extends Controller
             'reports_with_photo' => ViolationReport::whereNotNull('photo_path')->count(),
             'dataset_status' => 'Not Connected',
             'ai_model_status' => 'Not Connected',
-            'gis_status' => 'Not Connected'
+            'gis_status' => 'Not Connected',
         ];
 
         // Top violation type
-        $topViolationType = ViolationReport::selectRaw('selected_violation_type, COUNT(*) as count')
+        $topViolationType = ViolationReport::citizenClassified()
+            ->selectRaw('selected_violation_type, COUNT(*) as count')
             ->groupBy('selected_violation_type')
             ->orderBy('count', 'desc')
             ->first();
@@ -53,13 +52,13 @@ class DashboardController extends Controller
         $recentActivities = ViolationReport::orderBy('created_at', 'desc')
             ->limit(10)
             ->get()
-            ->map(function($report) {
+            ->map(function ($report) {
                 return [
                     'id' => $report->report_id,
-                    'description' => $report->selected_violation_type . ' - ' . substr($report->description, 0, 50) . '...',
+                    'description' => $report->citizen_violation_type_label.' - '.substr($report->description, 0, 50).'...',
                     'barangay' => $report->detected_barangay ?? 'N/A',
                     'status' => $report->status,
-                    'date' => $report->created_at->format('Y-m-d H:i')
+                    'date' => $report->created_at->format('Y-m-d H:i'),
                 ];
             });
 
@@ -74,7 +73,8 @@ class DashboardController extends Controller
             ->get();
 
         // Reports by violation type
-        $reportsByType = ViolationReport::selectRaw('selected_violation_type, COUNT(*) as count')
+        $reportsByType = ViolationReport::citizenClassified()
+            ->selectRaw('selected_violation_type, COUNT(*) as count')
             ->groupBy('selected_violation_type')
             ->orderBy('count', 'desc')
             ->get();

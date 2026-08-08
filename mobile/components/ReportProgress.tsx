@@ -4,13 +4,13 @@ import { colors } from '@/constants/colors';
 
 const steps = [
   { number: 1, label: 'Photo and Context', active: true },
-  { number: 2, label: 'AI Image Check', active: true },
-  { number: 3, label: 'Location and Submission', active: false },
+  { number: 2, label: 'GPS Validation', active: true },
+  { number: 3, label: 'Secure Submission', active: true },
 ];
 
 export function ReportProgress() {
   return (
-    <View accessibilityLabel="Report progress, photo and AI image-check steps available" style={styles.container}>
+    <View accessibilityLabel="Report progress: photo, GPS validation, and secure submission" style={styles.container}>
       {steps.map((step) => (
         <View key={step.number} style={styles.step}>
           <View style={[styles.circle, step.active && styles.activeCircle]}>
@@ -21,7 +21,6 @@ export function ReportProgress() {
               Step {step.number}
             </Text>
             <Text style={styles.description}>{step.label}</Text>
-            {!step.active ? <Text style={styles.future}>Future phase</Text> : null}
           </View>
         </View>
       ))}

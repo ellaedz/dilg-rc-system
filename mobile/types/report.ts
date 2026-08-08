@@ -1,29 +1,5 @@
 export type ImageSource = 'camera' | 'gallery';
 
-export type InferenceValidationStatus = 'accepted' | 'low_confidence' | 'no_detection' | 'error';
-
-export type Detection = {
-  classId: number;
-  className: string;
-  confidence: number;
-  xCenter: number;
-  yCenter: number;
-  width: number;
-  height: number;
-  xMin: number;
-  yMin: number;
-  xMax: number;
-  yMax: number;
-};
-
-export type InferenceTiming = {
-  initializationTimeMs: number | null;
-  preprocessingTimeMs: number;
-  inferenceTimeMs: number;
-  decodingTimeMs: number;
-  totalTimeMs: number;
-};
-
 export type MunicipalityValidationStatus = 'inside' | 'outside' | 'barangay_unavailable' | 'unknown';
 
 export type StatusTimelineItem = {
@@ -32,17 +8,8 @@ export type StatusTimelineItem = {
   updatedAt: string | null;
 };
 
-export type ImageInferenceResult = {
-  primaryClass: string | null;
-  primaryConfidence: number;
-  detections: Detection[];
-  inferenceTimeMs: number;
-  timing: InferenceTiming;
-  validationStatus: InferenceValidationStatus;
-  errorMessage?: string;
-};
-
 export type ReportDraft = {
+  localDraftId: string;
   description: string;
   imageUri: string | null;
   imageSource: ImageSource | null;
@@ -58,22 +25,14 @@ export type ReportDraft = {
   municipalityName: string | null;
   barangayDetectionStatus: string | null;
   needsManualBarangayReview: boolean;
-  needsManualReview: boolean;
   assignedBarangayOffice: string | null;
   detectedBarangay: string | null;
-  imageResult: string | null;
-  imageConfidence: number | null;
-  imageInferenceTime: number | null;
-  imageValidationStatus: InferenceValidationStatus | null;
-  imageDetections: Detection[];
-  imageModelVersion: string | null;
-  imageModelHash: string | null;
 };
 
 export type SubmittedReport = {
-  reportId: string;
-  trackingId: string;
-  selectedViolationType: string | null;
+  reportNumber: string;
+  trackingToken: string;
+  idempotentReplay: boolean;
   status: string;
   verificationStatus: string | null;
   isInsideSantaCruz: boolean;
@@ -92,7 +51,7 @@ export type SubmittedReport = {
 };
 
 export type ReportStatus = {
-  trackingId: string;
+  reportNumber: string;
   currentStatus: string;
   verificationStatus: string | null;
   municipalityName: string | null;
@@ -111,8 +70,13 @@ export type ReportStatus = {
   timeline: StatusTimelineItem[];
 };
 
+export type TrackingCredentialStatus = 'available' | 'legacy_sequential_only' | 'missing';
+
 export type TrackingRecord = {
-  trackingId: string;
+  localRecordId: string;
+  reportNumber: string | null;
+  credentialStatus: TrackingCredentialStatus;
+  legacySequentialId: string | null;
   submissionDate: string;
   violationType: string | null;
   currentStatus: string;
@@ -121,4 +85,42 @@ export type TrackingRecord = {
   assignedBarangay: string | null;
   latestAction: string | null;
   lastSync: string | null;
+};
+
+export type SubmissionState =
+  | 'draft'
+  | 'prepared'
+  | 'submitting'
+  | 'uncertain'
+  | 'submitted'
+  | 'failed_retryable'
+  | 'failed_permanent';
+
+export type SubmissionSnapshot = {
+  schemaVersion: 1;
+  localDraftId: string;
+  idempotencyKey: string;
+  photoUri: string;
+  photoName: string;
+  photoMimeType: 'image/jpeg';
+  description: string;
+  latitude: number;
+  longitude: number;
+  gpsAccuracy: number;
+  timestamp: string;
+  preparedAt: string;
+};
+
+export type SubmissionJournalRecord = {
+  localDraftId: string;
+  idempotencyKey: string;
+  state: SubmissionState;
+  snapshotUri: string;
+  createdAt: string;
+  updatedAt: string;
+  attemptCount: number;
+  lastErrorCode: string | null;
+  lastErrorMessage: string | null;
+  localRecordId: string | null;
+  reportNumber: string | null;
 };

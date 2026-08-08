@@ -2,6 +2,11 @@
 
 return [
 
+    'ai_inference' => [
+        'url' => env('AI_INFERENCE_URL', 'http://127.0.0.1:9000'),
+        'timeout' => env('AI_INFERENCE_TIMEOUT', 20),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services

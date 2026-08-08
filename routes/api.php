@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\MobileReportApiController;
 use App\Http\Controllers\Api\GISApiController;
+use App\Http\Controllers\Api\MobileReportApiController;
+use App\Http\Middleware\RejectOversizedPostBody;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,22 +28,24 @@ use App\Http\Controllers\Api\GISApiController;
 
 // Public citizen/mobile API routes. Throttles limit anonymous abuse.
 Route::prefix('mobile')->group(function () {
-    
+
     // Submit new violation report
-    Route::post('/reports', [MobileReportApiController::class, 'store'])->middleware('throttle:10,1');
-    
+    Route::post('/reports', [MobileReportApiController::class, 'store'])
+        ->middleware([RejectOversizedPostBody::class, 'throttle:10,1']);
+
     // Get violation report details
-    // Get report status by report_id (e.g., RCV-2026-0001)
-    Route::get('/reports/status/{tracking_id}', [MobileReportApiController::class, 'status'])->middleware('throttle:30,1');
+    // Public status requires the opaque Tracking Token, never a sequential Report Number.
+    Route::get('/reports/status/{tracking_token}', [MobileReportApiController::class, 'status'])
+        ->middleware('throttle:30,1');
 
     // Numeric report details are staff-only; the public uses the minimal status endpoint.
     Route::get('/reports/{id}', [MobileReportApiController::class, 'show'])
         ->whereNumber('id')
         ->middleware(['web', 'auth', 'throttle:60,1']);
-    
+
     // Get list of violation types
     Route::get('/violation-types', [MobileReportApiController::class, 'violationTypes']);
-    
+
     // Get list of barangays
     Route::get('/barangays', [MobileReportApiController::class, 'barangays']);
 });
@@ -74,7 +76,7 @@ Route::prefix('mobile')->group(function () {
 Route::prefix('gis')->group(function () {
     // Detect barangay from GPS coordinates
     Route::post('/detect-barangay', [GISApiController::class, 'detectBarangay'])->middleware('throttle:30,1');
-    
+
     /*
     |--------------------------------------------------------------------------
     | PHASE 4D - GIS Report Markers, Clustering, and Hotspots API
@@ -85,15 +87,15 @@ Route::prefix('gis')->group(function () {
     | Recommend correct barangay office for citizen follow-up.
     |
     */
-    
+
     // Get all reports with GPS coordinates for map markers
     Route::middleware(['web', 'auth', 'throttle:60,1'])->group(function () {
         Route::get('/reports', [GISApiController::class, 'reports']);
-    
-    // Get barangay office locations for map markers
+
+        // Get barangay office locations for map markers
         Route::get('/barangay-offices', [GISApiController::class, 'barangayOffices']);
-    
-    // Get hotspot summary statistics
+
+        // Get hotspot summary statistics
         Route::get('/hotspots-summary', [GISApiController::class, 'hotspotsSummary']);
     });
 });

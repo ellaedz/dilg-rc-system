@@ -1,12 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { randomUUID } from 'expo-crypto';
 import { createContext, PropsWithChildren, useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { ReportDraft } from '@/types/report';
-import { emptyImageInferenceFields } from '@/utils/inferenceResult';
+import { deleteDraftPhoto } from '@/utils/imageProcessing';
 
 const STORAGE_KEY = 'dilg_rc_report_draft_v1';
 
 export const createEmptyReportDraft = (): ReportDraft => ({
+  localDraftId: randomUUID(),
   description: '',
   imageUri: null,
   imageSource: null,
@@ -22,10 +24,8 @@ export const createEmptyReportDraft = (): ReportDraft => ({
   municipalityName: null,
   barangayDetectionStatus: null,
   needsManualBarangayReview: false,
-  needsManualReview: false,
   assignedBarangayOffice: null,
   detectedBarangay: null,
-  ...emptyImageInferenceFields(),
 });
 
 type ReportDraftContextValue = {
@@ -46,15 +46,36 @@ export const ReportDraftContext = createContext<ReportDraftContextValue | null>(
 function normalizeDraft(candidate: Partial<ReportDraft>): ReportDraft {
   const supportedCandidate = { ...candidate } as Partial<ReportDraft> & {
     selectedViolationType?: unknown;
+    needsManualReview?: unknown;
+    imageResult?: unknown;
+    imageConfidence?: unknown;
+    imageInferenceTime?: unknown;
+    imageValidationStatus?: unknown;
+    imageDetections?: unknown;
+    imageModelVersion?: unknown;
+    imageModelHash?: unknown;
   };
 
-  // Phase 5B originally asked citizens to classify reports. Discard that legacy
-  // draft value because classification belongs to AI-assisted staff verification.
+  // Discard Phase 5B/5C citizen classification and phone-inference fields when an
+  // existing Stage A draft is loaded. Classification now belongs to server AI and
+  // authorized staff verification.
   delete supportedCandidate.selectedViolationType;
+  delete supportedCandidate.needsManualReview;
+  delete supportedCandidate.imageResult;
+  delete supportedCandidate.imageConfidence;
+  delete supportedCandidate.imageInferenceTime;
+  delete supportedCandidate.imageValidationStatus;
+  delete supportedCandidate.imageDetections;
+  delete supportedCandidate.imageModelVersion;
+  delete supportedCandidate.imageModelHash;
 
   return {
     ...createEmptyReportDraft(),
     ...supportedCandidate,
+    localDraftId:
+      typeof candidate.localDraftId === 'string' && /^[0-9a-f-]{36}$/i.test(candidate.localDraftId)
+        ? candidate.localDraftId
+        : randomUUID(),
     description: candidate.description ?? '',
     timestamp: candidate.timestamp || new Date().toISOString(),
     latitude: typeof candidate.latitude === 'number' ? candidate.latitude : null,
@@ -65,16 +86,8 @@ function normalizeDraft(candidate: Partial<ReportDraft>): ReportDraft {
     municipalityName: typeof candidate.municipalityName === 'string' ? candidate.municipalityName : null,
     barangayDetectionStatus: typeof candidate.barangayDetectionStatus === 'string' ? candidate.barangayDetectionStatus : null,
     needsManualBarangayReview: Boolean(candidate.needsManualBarangayReview),
-    needsManualReview: Boolean(candidate.needsManualReview),
     assignedBarangayOffice: typeof candidate.assignedBarangayOffice === 'string' ? candidate.assignedBarangayOffice : null,
     detectedBarangay: typeof candidate.detectedBarangay === 'string' ? candidate.detectedBarangay : null,
-    imageResult: typeof candidate.imageResult === 'string' ? candidate.imageResult : null,
-    imageConfidence: typeof candidate.imageConfidence === 'number' ? candidate.imageConfidence : null,
-    imageInferenceTime: typeof candidate.imageInferenceTime === 'number' ? candidate.imageInferenceTime : null,
-    imageValidationStatus: candidate.imageValidationStatus ?? null,
-    imageDetections: Array.isArray(candidate.imageDetections) ? candidate.imageDetections : [],
-    imageModelVersion: typeof candidate.imageModelVersion === 'string' ? candidate.imageModelVersion : null,
-    imageModelHash: typeof candidate.imageModelHash === 'string' ? candidate.imageModelHash : null,
   };
 }
 
@@ -105,11 +118,13 @@ export function ReportDraftProvider({ children }: PropsWithChildren) {
   );
 
   const clearDraft = useCallback(async () => {
+    const previousDraftId = draft.localDraftId;
     const emptyDraft = createEmptyReportDraft();
     setDraft(emptyDraft);
     setPendingStoredDraft(null);
     await AsyncStorage.removeItem(STORAGE_KEY);
-  }, []);
+    await deleteDraftPhoto(previousDraftId);
+  }, [draft.localDraftId]);
 
   const hasDraft = useCallback(async () => {
     return (await AsyncStorage.getItem(STORAGE_KEY)) !== null;

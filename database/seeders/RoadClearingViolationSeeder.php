@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\ViolationReport;
 use App\Services\BarangayAssignmentService;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class RoadClearingViolationSeeder extends Seeder
 {
@@ -68,7 +68,7 @@ class RoadClearingViolationSeeder extends Seeder
             [
                 'submitted_by' => 'Roberto Garcia',
                 'contact_number' => '09177773333',
-                'description' => "Store extension encroaching 2 meters into the sidewalk. Customers chairs and tables blocking pedestrian path completely.",
+                'description' => 'Store extension encroaching 2 meters into the sidewalk. Customers chairs and tables blocking pedestrian path completely.',
                 'selected_violation_type' => 'Encroachment',
                 'latitude' => 14.3000,
                 'longitude' => 121.4230,
@@ -148,23 +148,27 @@ class RoadClearingViolationSeeder extends Seeder
         ];
 
         foreach ($violations as $violationData) {
+            $violationData['is_test_data'] = true;
+            $violationData['legacy_verification_status'] = $violationData['verification_status'] ?? null;
+            $violationData['verification_status'] = 'Pending';
+            $violationData['report_status'] = $violationData['status'];
             // Auto-detect barangay from GPS
             if (isset($violationData['latitude']) && isset($violationData['longitude'])) {
                 $barangayData = BarangayAssignmentService::detectBarangay(
                     $violationData['latitude'],
                     $violationData['longitude']
                 );
-                
+
                 $violationData['detected_barangay'] = $barangayData['detected_barangay'];
                 $violationData['assigned_barangay_office'] = $barangayData['assigned_barangay_office'];
-                $violationData['location_context'] = 'Within ' . $barangayData['detected_barangay'] . ' boundary';
+                $violationData['location_context'] = 'Within '.$barangayData['detected_barangay'].' boundary';
             }
 
             // Generate report ID
             $violationData['report_id'] = ViolationReport::generateReportId();
             $violationData['timestamp'] = $violationData['created_at'];
             $violationData['date_submitted'] = $violationData['created_at'];
-            
+
             // Set date_updated for processed reports
             if (in_array($violationData['status'], ['Verified', 'Assigned', 'In Progress', 'Action Taken', 'Resolved'])) {
                 $violationData['date_updated'] = Carbon::now()->subDays(rand(1, 5));

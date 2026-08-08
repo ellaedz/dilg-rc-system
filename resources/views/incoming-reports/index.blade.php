@@ -328,7 +328,7 @@
 
                     <div class="report-field">
                         <span class="field-label">Violation Type:</span>
-                        <span class="field-value"><strong>{{ $report->selected_violation_type }}</strong></span>
+                        <span class="field-value"><strong>{{ $report->citizen_violation_type_label }}</strong></span>
                     </div>
 
                     <div class="report-field">

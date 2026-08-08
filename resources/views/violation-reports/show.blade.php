@@ -241,7 +241,7 @@
 
                 <div class="detail-row">
                     <div class="detail-label">Violation Type:</div>
-                    <div class="detail-value"><strong>{{ $violationReport->selected_violation_type }}</strong></div>
+                    <div class="detail-value"><strong>{{ $violationReport->citizen_violation_type_label }}</strong></div>
                 </div>
 
                 <div class="detail-row">
@@ -274,13 +274,89 @@
                 </div>
             </div>
 
+            @php
+                $categoryLabels = [
+                    'construction_materials' => 'Construction Materials Blocking the Road',
+                    'garbage_debris' => 'Garbage or Debris on the Road',
+                    'illegal_parking' => 'Illegal Parking',
+                    'road_obstruction' => 'Road Obstruction',
+                    'sidewalk_obstruction' => 'Sidewalk Obstruction',
+                    'no_violation' => 'No Clear Violation Detected',
+                ];
+                $plainCategory = static function (?string $category, string $fallback = 'Not available') use ($categoryLabels): string {
+                    if (!$category) {
+                        return $fallback;
+                    }
+
+                    return $categoryLabels[$category] ?? ucwords(str_replace('_', ' ', $category));
+                };
+                $processingStatusLabels = [
+                    'pending' => 'Waiting for Analysis',
+                    'processing' => 'Analysis in Progress',
+                    'completed' => 'Analysis Complete',
+                    'failed' => 'Analysis Unavailable',
+                ];
+                $decisionSourceLabels = [
+                    'image_text_agreement' => 'Photo and description suggest the same violation',
+                    'strong_disagreement_manual_review' => 'Photo and description do not agree; staff review is required',
+                    'image_priority' => 'Based mainly on the photo',
+                    'nlp_priority' => 'Based mainly on the description',
+                    'weak_evidence_manual_review' => 'Evidence is unclear; staff review is required',
+                ];
+                $barangayStatusLabels = [
+                    'barangay_boundary_unavailable' => 'Inside Santa Cruz; barangay needs staff assignment',
+                    'barangay_not_matched' => 'Inside Santa Cruz; barangay could not be identified automatically',
+                    'auto_detected' => $violationReport->detected_barangay
+                        ? 'Inside Santa Cruz; barangay identified as '.$violationReport->detected_barangay
+                        : 'Inside Santa Cruz; barangay identified automatically',
+                    'outside_coverage' => 'Outside Santa Cruz coverage',
+                ];
+                $locationCheck = $violationReport->municipality_validated
+                    ? ($barangayStatusLabels[$violationReport->barangay_detection_status] ?? 'Inside Santa Cruz; barangay status needs review')
+                    : 'Outside Santa Cruz coverage';
+            @endphp
+
+            <div class="detail-card" style="margin-top: 1.5rem;">
+                <div class="detail-header">
+                    <h3 class="detail-title">AI Initial Assessment</h3>
+                    <span class="badge {{ $violationReport->ai_processing_status === 'completed' ? 'badge-success' : ($violationReport->ai_processing_status === 'failed' ? 'badge-error' : 'badge-warning') }}">
+                        {{ $processingStatusLabels[$violationReport->ai_processing_status ?? 'pending'] ?? 'Status Unavailable' }}
+                    </span>
+                </div>
+
+                <div class="detail-row"><div class="detail-label">Suggested From Photo:</div><div class="detail-value">{{ $plainCategory($violationReport->predicted_violation_category) }}</div></div>
+                <div class="detail-row"><div class="detail-label">Photo Match Score:</div><div class="detail-value">{{ $violationReport->confidence_score !== null ? number_format((float) $violationReport->confidence_score * 100, 2).'%' : 'Not available' }}</div></div>
+                <div class="detail-row"><div class="detail-label">Suggested From Description:</div><div class="detail-value">{{ $plainCategory($violationReport->text_prediction) }}</div></div>
+                <div class="detail-row"><div class="detail-label">Description Match Score:</div><div class="detail-value">{{ $violationReport->text_confidence !== null ? number_format((float) $violationReport->text_confidence * 100, 2).'%' : 'Not available' }}</div></div>
+                <div class="detail-row"><div class="detail-label">Location Check:</div><div class="detail-value">{{ $locationCheck }}</div></div>
+                <div class="detail-row"><div class="detail-label">AI Suggested Violation:</div><div class="detail-value"><strong>{{ $plainCategory($violationReport->final_ai_prediction, 'Waiting for AI analysis') }}</strong></div></div>
+                <div class="detail-row"><div class="detail-label">Overall Match Score:</div><div class="detail-value">{{ $violationReport->final_ai_confidence !== null ? number_format((float) $violationReport->final_ai_confidence * 100, 2).'%' : 'Not available' }}</div></div>
+                <div class="detail-row"><div class="detail-label">Reason for Suggestion:</div><div class="detail-value">{{ $decisionSourceLabels[$violationReport->ai_decision_source] ?? 'Not available' }}</div></div>
+                <div class="detail-row"><div class="detail-label">Staff Review Needed:</div><div class="detail-value">{{ $violationReport->ai_needs_manual_review ? 'Yes' : 'No' }}</div></div>
+
+                <div class="alert alert-warning" style="margin-top: 1rem;">
+                    AI suggestions are for initial assessment only. Staff must review the evidence and confirm the official violation.
+                </div>
+
+                @if(!$isBarangayView && in_array($violationReport->ai_processing_status, ['pending', 'failed'], true))
+                    <form method="POST" action="{{ route('violation-reports.retry-ai', $violationReport) }}" style="margin-top: 1rem;">
+                        @csrf
+                        <button type="submit" class="btn btn-warning btn-sm">Retry AI Analysis</button>
+                    </form>
+                @endif
+            </div>
+
             <!-- Photo Evidence -->
             <div class="detail-card" style="margin-top: 1.5rem;">
                 <div class="detail-header">
                     <h3 class="detail-title">📷 Photo Evidence</h3>
                 </div>
-                @if($violationReport->image_path)
-                    <img src="{{ asset('storage/' . $violationReport->image_path) }}" alt="Violation Photo" class="photo-preview">
+                @if($violationReport->photo_object_key)
+                    <img src="{{ route('violation-reports.photo', $violationReport) }}" alt="Violation Photo" class="photo-preview">
+                @elseif($violationReport->image_path)
+                    <div class="no-photo">
+                        Legacy photo evidence requires controlled private migration.
+                    </div>
                 @else
                     <div class="no-photo">
                         📷 No photo attached
@@ -432,7 +508,7 @@
                     // Prepare report data
                     const reportData = {
                         tracking_id: @json($violationReport->report_id),
-                        violation_type: @json($violationReport->selected_violation_type),
+                        violation_type: @json($violationReport->citizen_selected_violation_type),
                         status: @json($violationReport->status),
                         detected_barangay: @json($violationReport->effective_barangay),
                         assigned_barangay_office: @json($violationReport->assigned_barangay_office),

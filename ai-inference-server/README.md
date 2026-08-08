@@ -1,17 +1,19 @@
 # DILG-RC Local AI Inference Server
 
-One local FastAPI service for the trained CivicClear NLP model, Santa Cruz municipal
-coverage validation, and image/text fusion. Image inference stays on the Android device.
+The Phase 8C FastAPI service owns image inference, trained-text inference, Santa Cruz
+municipal validation, and advisory fusion. The previous Android TFLite implementation
+is intentionally retained until later mobile parity and migration work.
 
-## Model
+## Models
 
-- Format: scikit-learn joblib pipeline
-- Vectorizer: `TfidfVectorizer`
-- Classifier/label encoder: `LogisticRegression.classes_`
-- Training serialization version: scikit-learn 1.9.0
-- Artifact SHA-256: `eef576aa7b257b60674548c1e0322a9f8872cb543869314bae54bb445d238f6b`
-- Classes: `construction_materials`, `garbage_debris`, `illegal_parking`,
-  `no_violation`, `road_obstruction`, `sidewalk_obstruction`
+- Image: YOLOv8s Float16 TFLite weights with Float32 input/output, run by
+  `ai-edge-litert==2.1.6`.
+- Image input: RGB Float32 NHWC `[1, 640, 640, 3]`, normalized by `/255`, with
+  aspect-ratio-preserving 640-pixel letterboxing using RGB `(114, 114, 114)`.
+- Image output: raw Float32 `[1, 9, 8400]` with normalized xywh coordinates, decoded
+  with a 0.25 candidate threshold, per-class 0.45 IoU NMS, and 20-detection maximum.
+  Results below 0.60 remain low-confidence evidence requiring manual review.
+- Text: scikit-learn 1.9.0 joblib pipeline using TF-IDF and logistic regression.
 
 `no_violation` remains an explicit non-violation signal and always requires staff
 review. It is never falsely converted into a violation class.
@@ -26,7 +28,25 @@ pip install -r requirements.txt
 uvicorn main:app --host 0.0.0.0 --port 9000 --reload
 ```
 
-Endpoints: `GET /health`, `POST /predict/text`, `POST /predict/location`, and
-`POST /predict/multimodal`. This server is local-only for Phase 6A-6D.
+New multipart endpoints:
 
-Run tests with `pytest`.
+- `POST /v1/predict/image`
+- `POST /v1/predict/multimodal` with `image`, `text_report`, `latitude`, `longitude`,
+  and optional non-authoritative `barangay_hint`
+
+Compatibility endpoints remain available:
+
+- `POST /predict/text`
+- `POST /predict/location`
+- `POST /predict/multimodal`
+
+`GET /health` always provides process liveness and safe component status. `GET /ready`
+returns HTTP 503 if image inference, NLP, fusion, or the municipal boundary is
+unavailable. Missing barangay polygons are reported as a routing limitation but do not
+make inference unready.
+
+Run tests with:
+
+```powershell
+pytest -q -p no:cacheprovider
+```

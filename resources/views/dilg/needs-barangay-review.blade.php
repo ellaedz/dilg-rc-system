@@ -40,7 +40,7 @@
                 @forelse($reports as $report)
                     <tr>
                         <td><a class="link link-primary font-semibold" href="{{ route('violation-reports.show', $report) }}">{{ $report->report_id }}</a></td>
-                        <td>{{ $report->selected_violation_type }}</td>
+                        <td>{{ $report->citizen_violation_type_label }}</td>
                         <td class="font-mono text-xs">{{ $report->latitude }}, {{ $report->longitude }}</td>
                         <td>
                             @if($report->municipality_validated)

@@ -19,10 +19,10 @@ class IncomingReportController extends Controller
         // Search
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('report_id', 'like', "%{$search}%")
-                  ->orWhere('submitted_by', 'like', "%{$search}%")
-                  ->orWhere('selected_violation_type', 'like', "%{$search}%");
+                    ->orWhere('submitted_by', 'like', "%{$search}%")
+                    ->orWhere('selected_violation_type', 'like', "%{$search}%");
             });
         }
 
@@ -57,13 +57,16 @@ class IncomingReportController extends Controller
     public function verify(Request $request, ViolationReport $report)
     {
         $request->validate([
-            'remarks' => 'nullable|string'
+            'remarks' => 'nullable|string',
         ]);
 
         $report->update([
             'status' => 'Verified',
+            'verification_status' => 'Valid Violation',
+            'verified_by' => $request->user()?->id,
+            'verified_at' => now(),
             'remarks' => $request->remarks,
-            'date_updated' => now()
+            'date_updated' => now(),
         ]);
 
         return redirect()->route('incoming-reports.index')
@@ -76,13 +79,16 @@ class IncomingReportController extends Controller
     public function reject(Request $request, ViolationReport $report)
     {
         $request->validate([
-            'remarks' => 'required|string'
+            'remarks' => 'required|string',
         ]);
 
         $report->update([
             'status' => 'Rejected',
+            'verification_status' => 'Invalid Report',
+            'verified_by' => $request->user()?->id,
+            'verified_at' => now(),
             'remarks' => $request->remarks,
-            'date_updated' => now()
+            'date_updated' => now(),
         ]);
 
         return redirect()->route('incoming-reports.index')

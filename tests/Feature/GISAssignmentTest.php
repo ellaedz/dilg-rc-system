@@ -38,7 +38,7 @@ class GISAssignmentTest extends TestCase
             ->assertJsonPath('data.needs_manual_barangay_review', true);
 
         $this->assertDatabaseHas('violation_reports', [
-            'report_id' => $response->json('data.tracking_id'),
+            'report_number' => $response->json('data.report_number'),
             'detected_barangay' => null,
             'needs_manual_barangay_review' => true,
         ]);

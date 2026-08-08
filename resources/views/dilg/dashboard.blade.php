@@ -71,7 +71,7 @@
                                         <span class="badge badge-error badge-sm text-white">Needs review</span>
                                     @endif
                                 </td>
-                                <td><span class="block max-w-48 truncate" title="{{ $report->selected_violation_type }}">{{ $report->selected_violation_type }}</span></td>
+                                <td><span class="block max-w-48 truncate" title="{{ $report->citizen_violation_type_label }}">{{ $report->citizen_violation_type_label }}</span></td>
                                 <td><x-status-badge :status="$report->status" size="sm" /></td>
                                 <td class="whitespace-nowrap text-sm text-slate-500">{{ $report->created_at->format('M d, Y') }}</td>
                                 <td><a href="{{ route('violation-reports.show', $report) }}" class="btn btn-sm btn-ghost" aria-label="View report {{ $report->report_id }}"><i class="fas fa-chevron-right" aria-hidden="true"></i></a></td>

@@ -20,7 +20,7 @@
         <div class="dashboard-metric-label">GPS available on page</div><div class="dashboard-metric-value">{{ number_format($reports->whereNotNull('latitude')->count()) }}</div>
     </article>
     <article class="dashboard-metric !min-h-0" style="--metric-color:#7c3aed;--metric-bg:#ede9fe">
-        <div class="dashboard-metric-label">Photo available on page</div><div class="dashboard-metric-value">{{ number_format($reports->whereNotNull('image_path')->count()) }}</div>
+        <div class="dashboard-metric-label">Photo available on page</div><div class="dashboard-metric-value">{{ number_format($reports->filter(fn ($report) => $report->photo_object_key || $report->image_path)->count()) }}</div>
     </article>
 </section>
 
@@ -48,7 +48,7 @@
                     <dl class="grid gap-x-6 gap-y-4 sm:grid-cols-2">
                         <div><dt class="text-xs font-bold uppercase tracking-wide text-slate-500">Submitted by</dt><dd class="mt-1 font-semibold text-slate-800">{{ $report->submitted_by ?: 'Not provided' }}</dd></div>
                         <div><dt class="text-xs font-bold uppercase tracking-wide text-slate-500">Contact</dt><dd class="mt-1 text-slate-700">{{ $report->contact_number ?: 'Not provided' }}</dd></div>
-                        <div class="sm:col-span-2"><dt class="text-xs font-bold uppercase tracking-wide text-slate-500">Violation type</dt><dd class="mt-1 font-semibold text-slate-800">{{ $report->selected_violation_type }}</dd></div>
+                        <div class="sm:col-span-2"><dt class="text-xs font-bold uppercase tracking-wide text-slate-500">Violation type</dt><dd class="mt-1 font-semibold text-slate-800">{{ $report->citizen_violation_type_label }}</dd></div>
                         <div class="sm:col-span-2">
                             <dt class="text-xs font-bold uppercase tracking-wide text-slate-500">GPS location</dt>
                             <dd class="mt-1">
@@ -67,10 +67,14 @@
                 </div>
 
                 <div>
-                    @if($report->image_path)
-                        <a href="{{ asset('storage/' . $report->image_path) }}" target="_blank" rel="noopener" class="block overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
-                            <img src="{{ asset('storage/' . $report->image_path) }}" alt="Evidence for report {{ $report->report_id }}" class="h-56 w-full object-cover transition-transform hover:scale-[1.02] lg:h-full lg:min-h-56">
+                    @if($report->photo_object_key)
+                        <a href="{{ route('violation-reports.photo', $report) }}" target="_blank" rel="noopener" class="block overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+                            <img src="{{ route('violation-reports.photo', $report) }}" alt="Evidence for report {{ $report->report_id }}" class="h-56 w-full object-cover transition-transform hover:scale-[1.02] lg:h-full lg:min-h-56">
                         </a>
+                    @elseif($report->image_path)
+                        <div class="grid h-56 place-items-center rounded-xl border-2 border-dashed border-amber-300 bg-amber-50 text-center text-sm text-amber-800">
+                            <span><i class="fas fa-lock mb-2 block text-3xl" aria-hidden="true"></i>Legacy photo requires private migration</span>
+                        </div>
                     @else
                         <div class="grid h-56 place-items-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 text-center text-sm text-slate-500">
                             <span><i class="far fa-image mb-2 block text-3xl text-slate-300" aria-hidden="true"></i>No photo evidence</span>

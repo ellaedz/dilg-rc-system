@@ -4,8 +4,8 @@ export function PrivacyNotice() {
   return (
     <AppCard
       icon="PR"
-      title="Anonymous and local-first"
-      description="Reporting is anonymous. Your name, email, and home address are not required. The photo and location must relate to the road-clearing incident. Photo evidence will be sent only after the citizen confirms and submits the report in a later phase."
+      title="Anonymous and privacy-aware"
+      description="Reporting requires no name, email, or home address. Evidence is uploaded only after you press Submit. The private Tracking Token is stored in the device secure store and must not be shared publicly."
       tone="info"
     />
   );

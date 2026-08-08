@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Models\ViolationReport;
+use App\Services\ReportCredentialService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -38,7 +39,8 @@ class GISApiAuthorizationTest extends TestCase
             'manual_assignment_reason' => 'Internal routing evidence',
         ]);
 
-        $response = $this->getJson('/api/mobile/reports/status/RCV-2026-9103');
+        $token = app(ReportCredentialService::class)->replayToken($report);
+        $response = $this->getJson('/api/mobile/reports/status/'.$token);
 
         $response->assertOk()
             ->assertJsonMissingPath('data.contact_number')
@@ -49,8 +51,15 @@ class GISApiAuthorizationTest extends TestCase
 
     private function report(string $reportId, ?string $manualBarangay): ViolationReport
     {
+        $credentials = app(ReportCredentialService::class)->issue();
+
         return ViolationReport::create([
             'report_id' => $reportId,
+            'report_number' => $reportId,
+            'token_derivation_nonce' => $credentials['token_derivation_nonce'],
+            'tracking_token_hash' => $credentials['tracking_token_hash'],
+            'idempotency_key_hash' => app(ReportCredentialService::class)
+                ->hashIdempotencyKey('gis-auth-test-'.bin2hex(random_bytes(12))),
             'submitted_by' => 'Anonymous Citizen',
             'description' => 'Test report',
             'selected_violation_type' => 'Road Obstruction',
@@ -58,7 +67,7 @@ class GISApiAuthorizationTest extends TestCase
             'longitude' => 121.4100,
             'timestamp' => now(),
             'status' => 'Submitted',
-            'verification_status' => 'Unverified',
+            'verification_status' => 'Pending',
             'municipality_validated' => true,
             'municipality_name' => 'Santa Cruz',
             'barangay_detection_status' => 'barangay_boundary_unavailable',

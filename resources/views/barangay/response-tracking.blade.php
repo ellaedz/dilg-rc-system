@@ -148,7 +148,7 @@
                         <p class="text-xs text-gray-500">{{ $report->created_at->format('M d, Y h:i A') }}</p>
                     </div>
                     <div class="text-sm">
-                        <span class="text-gray-600">{{ $report->selected_violation_type }}</span>
+                        <span class="text-gray-600">{{ $report->citizen_violation_type_label }}</span>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">

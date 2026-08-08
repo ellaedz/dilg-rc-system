@@ -52,7 +52,7 @@
                     @foreach($reports as $report)
                         <tr>
                             <td class="font-extrabold text-slate-800">{{ $report->report_id }}</td>
-                            <td><span class="block max-w-52 truncate" title="{{ $report->selected_violation_type }}">{{ $report->selected_violation_type }}</span></td>
+                            <td><span class="block max-w-52 truncate" title="{{ $report->citizen_violation_type_label }}">{{ $report->citizen_violation_type_label }}</span></td>
                             <td>
                                 @if($report->assigned_personnel)
                                     <span class="font-semibold text-slate-700"><i class="far fa-user mr-1 text-slate-400" aria-hidden="true"></i>{{ $report->assigned_personnel }}</span>

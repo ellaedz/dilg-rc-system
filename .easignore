@@ -1,0 +1,48 @@
+# EAS builds only the standalone Expo application in mobile/. Exclude unrelated
+# repository-root applications explicitly while leaving mobile/ included normally.
+/ai-inference-server/
+/app/
+/bootstrap/
+/config/
+/database/
+/public/
+/resources/
+/routes/
+/storage/
+/tests/
+/vendor/
+/node_modules/
+
+# Root Laravel/frontend manifests are unrelated to the Expo application.
+/composer.json
+/composer.lock
+/package.json
+/package-lock.json
+/phpunit.xml
+/vite.config.js
+/.env
+/.env.*
+/.phpunit.cache/
+/.phpunit.result.cache
+
+# Mobile dependencies and generated build state are recreated by EAS.
+/mobile/node_modules/
+/mobile/.expo/
+/mobile/dist/
+/mobile/web-build/
+/mobile/android/
+/mobile/ios/
+/mobile/.kotlin/
+/mobile/.metro-health-check*
+/mobile/*.tsbuildinfo
+/mobile/npm-debug.*
+/mobile/yarn-debug.*
+/mobile/yarn-error.*
+
+# Local configuration must come from the EAS preview environment.
+/mobile/.env
+/mobile/.env*.local
+
+# Local-only editor and assistant state.
+/mobile/.DS_Store
+/mobile/.claude/

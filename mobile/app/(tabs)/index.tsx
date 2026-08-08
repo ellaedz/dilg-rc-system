@@ -10,7 +10,7 @@ import { MUNICIPALITY } from '@/constants/config';
 import { useTrackingIds } from '@/hooks/useTrackingIds';
 
 export default function HomeScreen() {
-  const { trackingIds, isLoading } = useTrackingIds();
+  const { trackingRecords, isLoading } = useTrackingIds();
 
   return (
     <Screen>
@@ -23,7 +23,7 @@ export default function HomeScreen() {
             <Text style={styles.subtitle}>{MUNICIPALITY}</Text>
           </View>
         </View>
-        <StatusBadge label="Phase 5C - On-device AI image analysis" tone="info" />
+        <StatusBadge label="Phase 8F Stage B - Server AI reporting" tone="info" />
       </View>
 
       <View style={styles.actions}>
@@ -33,11 +33,11 @@ export default function HomeScreen() {
 
       <AppCard
         icon="ID"
-        title="Saved Tracking IDs"
+        title="Saved Report Credentials"
         description={
           isLoading
-            ? 'Loading saved Tracking IDs...'
-            : `${trackingIds.length} Tracking ID${trackingIds.length === 1 ? '' : 's'} saved on this device.`
+            ? 'Loading securely saved report credentials...'
+            : `${trackingRecords.length} report credential${trackingRecords.length === 1 ? '' : 's'} saved on this device.`
         }
       >
         <PrimaryButton title="Open Report History" variant="secondary" onPress={() => router.push('/report-history')} />
@@ -46,13 +46,13 @@ export default function HomeScreen() {
       <AppCard
         icon="FLOW"
         title="Report process"
-        description="Step 1: photo and details. Step 2: on-device AI image check. Step 3: future GPS location and Laravel submission."
+        description="Step 1: photo and details. Step 2: GPS validation. Step 3: secure Laravel submission and server AI processing."
       />
 
       <View style={styles.badgeGrid}>
         <AppCard icon="ANON" title="Anonymous" description="No name, email, home address, login, or registration required." tone="success" />
-        <AppCard icon="AI" title="AI Image Check" description="Runs once per selected photo in the custom development build. Staff verification is still required." tone="success" />
-        <AppCard icon="GPS" title="GPS Assignment" description="Coming in Phase 5D. No fake coordinates." tone="warning" />
+        <AppCard icon="AI" title="Server AI" description="The server suggests a possible violation after submission. Authorized staff verification is still required." tone="success" />
+        <AppCard icon="GPS" title="Incident GPS" description="Foreground location validates the incident point. No fake coordinates." tone="success" />
         <AppCard icon="GIS" title="GIS Routing" description="Laravel keeps municipal validation and barangay review logic." tone="info" />
       </View>
 

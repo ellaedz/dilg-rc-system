@@ -1,19 +1,26 @@
 import type { ReportDraft } from '@/types/report';
 
-const trackingIdPattern = /^RCV-\d{4}-\d{4}$/;
+const trackingTokenPattern = /^[A-Za-z0-9_-]{43}$/;
+const legacyReportNumberPattern = /^RCV-\d{4}-\d{4}$/;
 const allowedImagePattern = /\.(jpg|jpeg|png|webp)(\?.*)?$/i;
 
-export function normalizeTrackingId(value: string): string {
-  return value.trim().toUpperCase();
+export function normalizeTrackingToken(value: string): string {
+  return value.trim();
 }
 
-export function isValidTrackingId(value: string): boolean {
-  return trackingIdPattern.test(normalizeTrackingId(value));
+export function isValidTrackingToken(value: string): boolean {
+  return trackingTokenPattern.test(normalizeTrackingToken(value));
 }
 
-export function getTrackingIdValidationMessage(value: string): string | null {
-  if (!value.trim()) return 'Enter your Tracking ID.';
-  if (!isValidTrackingId(value)) return 'Use the format RCV-YYYY-NNNN, for example RCV-2026-0001.';
+export function isLegacyReportNumber(value: string): boolean {
+  return legacyReportNumberPattern.test(value.trim().toUpperCase());
+}
+
+export function getTrackingTokenValidationMessage(value: string): string | null {
+  if (!value.trim()) return 'Enter your Tracking Token.';
+  if (!isValidTrackingToken(value)) {
+    return 'Enter the exact 43-character Tracking Token. It is case-sensitive.';
+  }
   return null;
 }
 
@@ -64,10 +71,6 @@ export function validateSubmissionDraft(
   options: ReportDraftValidationOptions = {},
 ): ReportDraftValidationErrors {
   const errors = validateReportDraft(draft, options);
-
-  if (!draft.imageValidationStatus || draft.imageValidationStatus === 'error') {
-    errors.imageValidationStatus = 'Analyze the selected photo successfully before submission.';
-  }
 
   if (draft.description.trim().length < 10) {
     errors.description = 'Write at least 10 characters before submitting.';

@@ -10,10 +10,10 @@ export default function PrivacyScreen() {
       <PrivacyNotice />
       <AppCard icon="CAM" title="Camera" description="The camera opens only after the citizen taps Take Photo. There is no video, background camera use, facial recognition, or continuous camera-frame inference." />
       <AppCard icon="PHOTO" title="Gallery" description="The app accesses selected photos only when the citizen chooses an image as road-clearing evidence. It does not modify the original gallery photo." />
-      <AppCard icon="LOCAL" title="Local draft storage" description="Optional text, processed image URI, timestamp, AI suggestion, confidence, detections, and model identity are stored locally. Citizen identity and citizen-selected violation categories are not stored." />
-      <AppCard icon="AI" title="AI-assisted analysis" description="TensorFlow Lite runs on the device only after Analyze Photo is tapped. The result is a suggestion for staff review, not an official decision." />
-      <AppCard icon="GPS" title="Incident location only" description="GPS capture is not active yet. When added later, it must refer to the incident location, not the citizen's home address." />
-      <AppCard icon="ID" title="Tracking ID required" description="The Tracking ID is the citizen's way to check report status. Without it, anonymous reports cannot be personally recovered." />
+      <AppCard icon="LOCAL" title="Crash-safe local recovery" description="A prepared request uses an app-owned photograph snapshot and stable Idempotency-Key. Interrupted requests are shown for an explicit retry and are never silently uploaded." />
+      <AppCard icon="AI" title="Server AI assessment" description="The phone sends evidence without a trusted category or confidence. The server may suggest a possible violation, but only authorized staff can verify it." />
+      <AppCard icon="GPS" title="Incident location only" description="Foreground GPS must refer to the incident location, not the citizen's home address. Background location is not requested." />
+      <AppCard icon="ID" title="Private Tracking Token" description="The opaque case-sensitive token is stored with the operating system secure store. Report Numbers and local record IDs are not accepted as anonymous tracking credentials." />
     </Screen>
   );
 }

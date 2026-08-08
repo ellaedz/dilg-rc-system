@@ -319,11 +319,11 @@ return [
     */
 
     'verification_statuses' => [
-        'Unverified',
+        'Pending',
         'Valid Violation',
-        'Duplicate Report',
         'Invalid Report',
+        'Duplicate',
         'Outside Jurisdiction',
-        'Needs Additional Information',
+        'Insufficient Evidence',
     ],
 ];

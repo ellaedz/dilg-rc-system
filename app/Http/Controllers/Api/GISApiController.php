@@ -110,7 +110,8 @@ class GISApiController extends Controller
             ->pluck('aggregate', 'effective_barangay')
             ->toArray();
 
-        $violationCounts = (clone $base)->selectRaw('selected_violation_type, COUNT(*) as aggregate')
+        $violationCounts = (clone $base)->citizenClassified()
+            ->selectRaw('selected_violation_type, COUNT(*) as aggregate')
             ->groupBy('selected_violation_type')->orderByDesc('aggregate')
             ->pluck('aggregate', 'selected_violation_type')->toArray();
 

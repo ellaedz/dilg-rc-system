@@ -26,22 +26,32 @@ export default function ReportHistoryScreen() {
   const {
     trackingRecords,
     isLoading,
-    removeTrackingId,
-    clearTrackingIds,
+    getTrackingToken,
+    removeTrackingRecord,
+    clearTrackingRecords,
     updateTrackingRecordFromStatus,
   } = useTrackingIds();
   const [refreshingId, setRefreshingId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   async function refreshRecord(record: TrackingRecord) {
-    setRefreshingId(record.trackingId);
+    setRefreshingId(record.localRecordId);
     setMessage(null);
     try {
-      const status = await getReportStatus(record.trackingId);
-      await updateTrackingRecordFromStatus(status);
-      setMessage(`${record.trackingId} refreshed.`);
+      const token = await getTrackingToken(record.localRecordId);
+      if (!token) {
+        setMessage(
+          record.credentialStatus === 'legacy_sequential_only'
+            ? `${record.reportNumber} is legacy history without an opaque Tracking Token.`
+            : 'The secure Tracking Token is unavailable.',
+        );
+        return;
+      }
+      const status = await getReportStatus(token);
+      await updateTrackingRecordFromStatus(record.localRecordId, status);
+      setMessage(`${status.reportNumber} refreshed.`);
     } catch (error) {
-      setMessage(toApiError(error).status === 404 ? `${record.trackingId} was not found.` : toApiError(error).message);
+      setMessage(toApiError(error).status === 404 ? 'The saved Tracking Token was not found.' : toApiError(error).message);
     } finally {
       setRefreshingId(null);
     }
@@ -55,7 +65,7 @@ export default function ReportHistoryScreen() {
 
   return (
     <Screen>
-      <AppHeader title="Report History" subtitle="Tracking IDs saved locally on this device" />
+      <AppHeader title="Report History" subtitle="Safe metadata with private tokens in SecureStore" />
 
       {isLoading ? <LoadingState message="Loading saved reports..." /> : null}
 
@@ -63,7 +73,7 @@ export default function ReportHistoryScreen() {
         <AppCard
           icon="EMPTY"
           title="No saved reports yet"
-          description="After successful submission, the Tracking ID and latest public status will appear here."
+          description="After successful submission, the Report Number and latest public status will appear here."
         />
       ) : null}
 
@@ -71,10 +81,10 @@ export default function ReportHistoryScreen() {
 
       {trackingRecords.map((record) => (
         <AppCard
-          key={record.trackingId}
+          key={record.localRecordId}
           icon="ID"
-          title={record.trackingId}
-          description={record.violationType ?? 'Road clearing report'}
+          title={record.reportNumber ?? 'Saved private tracking token'}
+          description={record.violationType ? `Possible violation: ${record.violationType}` : 'Road clearing report'}
         >
           <View style={styles.meta}>
             <StatusBadge label={record.currentStatus} tone={record.currentStatus === 'Rejected' ? 'error' : 'info'} />
@@ -86,14 +96,20 @@ export default function ReportHistoryScreen() {
             <Text style={styles.line}>Last Sync: {formatManila(record.lastSync)}</Text>
           </View>
           <View style={styles.rowActions}>
-            <PrimaryButton onPress={() => router.push(`/track-report?trackingId=${encodeURIComponent(record.trackingId)}`)} title="Track" variant="outline" />
             <PrimaryButton
-              loading={refreshingId === record.trackingId}
+              disabled={record.credentialStatus !== 'available'}
+              onPress={() => router.push(`/track-report?localRecordId=${encodeURIComponent(record.localRecordId)}`)}
+              title="Track"
+              variant="outline"
+            />
+            <PrimaryButton
+              disabled={record.credentialStatus !== 'available'}
+              loading={refreshingId === record.localRecordId}
               onPress={() => refreshRecord(record)}
               title="Refresh"
               variant="secondary"
             />
-            <PrimaryButton onPress={() => removeTrackingId(record.trackingId)} title="Delete" variant="danger" />
+            <PrimaryButton onPress={() => removeTrackingRecord(record.localRecordId)} title="Delete" variant="danger" />
           </View>
         </AppCard>
       ))}
@@ -101,11 +117,11 @@ export default function ReportHistoryScreen() {
       {trackingRecords.length > 0 ? (
         <View style={styles.actions}>
           <PrimaryButton disabled={Boolean(refreshingId)} title="Refresh All" onPress={refreshAll} />
-          <PrimaryButton title="Clear Saved History" variant="danger" onPress={clearTrackingIds} />
+          <PrimaryButton title="Clear Saved History" variant="danger" onPress={clearTrackingRecords} />
         </View>
       ) : null}
 
-      <Text style={styles.note}>Anonymous reports can only be checked later with their Tracking ID.</Text>
+      <Text style={styles.note}>Anonymous reports can only be checked later with their private opaque Tracking Token.</Text>
     </Screen>
   );
 }

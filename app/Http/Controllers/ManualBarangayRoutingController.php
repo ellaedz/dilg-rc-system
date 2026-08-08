@@ -37,6 +37,7 @@ class ManualBarangayRoutingController extends Controller
                 'manual_assignment_by' => $request->user()->id,
                 'manual_assignment_at' => now(),
                 'needs_manual_barangay_review' => false,
+                'barangay_assignment_status' => 'manually_assigned',
                 'assigned_barangay_office' => 'Barangay Hall - '.$validated['selected_barangay'],
                 'location_context' => 'Inside Santa Cruz; Temporarily routed by DILG',
                 'date_updated' => now(),

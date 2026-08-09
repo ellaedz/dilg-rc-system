@@ -776,22 +776,28 @@ new write freeze and reconciliation of every PostgreSQL-only row.
 
 ### Implementation tasks
 
-- [ ] Create a private report-photo bucket.
-- [ ] Implement the Supabase adapter behind the Phase 8D storage interface.
-- [ ] Upload only sanitized photographs.
-- [ ] Store private object keys in PostgreSQL.
-- [ ] Generate short-lived signed URLs only after staff authorization.
-- [ ] Never return signed URLs or object keys through public tracking.
+- [x] Create a private report-photo bucket.
+- [x] Implement the Supabase adapter behind the Phase 8D storage interface.
+- [x] Upload only sanitized photographs.
+- [x] Store private object keys in PostgreSQL.
+- [x] Generate short-lived signed URLs only after staff authorization.
+- [x] Never return signed URLs or object keys through public tracking.
 - [ ] Implement resumable failures, quarantine cleanup, orphan detection, retention, and
       deletion.
-- [ ] Reconcile partial database/storage failures.
+- [x] Reconcile partial database/storage failures.
 
 ### Exit gate
 
-- [ ] Public bucket access is disabled.
-- [ ] Authorized staff access works and expires.
-- [ ] Citizen tracking cannot access private photographs.
-- [ ] Storage integration and failure tests pass.
+- [x] Public bucket access is disabled.
+- [x] Authorized staff access works and expires.
+- [x] Citizen tracking cannot access private photographs.
+- [x] Storage integration and failure tests pass.
+
+Phase 9B activated normal Supabase private photograph writes on 2026-08-09 after the
+private-bucket canary, verified PostgreSQL backup, 16-object migration, controlled test
+report, persisted server configuration, and HTTP health check passed. All 18 local files
+remain available for recovery. Automated retention/deletion remains intentionally
+deferred until a municipal evidence-retention policy is explicitly approved.
 
 ---
 

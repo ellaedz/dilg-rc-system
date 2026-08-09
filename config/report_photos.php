@@ -1,7 +1,10 @@
 <?php
 
 return [
+    'driver' => env('REPORT_PHOTO_STORAGE_DRIVER', 'local'),
     'disk' => env('REPORT_PHOTO_DISK', 'report_photos'),
+    'supabase_disk' => 'supabase_report_photos',
+    'signed_url_ttl_seconds' => (int) env('REPORT_PHOTO_SIGNED_URL_TTL_SECONDS', 120),
     'quarantine_disk' => env('REPORT_PHOTO_QUARANTINE_DISK', 'report_photo_quarantine'),
     'max_bytes' => (int) env('REPORT_PHOTO_MAX_BYTES', 5 * 1024 * 1024),
     'max_width' => (int) env('REPORT_PHOTO_MAX_WIDTH', 8000),

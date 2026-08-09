@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Contracts\PrivateReportPhotoStorage;
+use App\Contracts\ResolvesPrivateReportPhotoStorage;
 use App\Data\AiProcessingResult;
 use App\Exceptions\AiProcessingException;
 use App\Models\ViolationReport;
@@ -21,7 +22,7 @@ class ProcessReportAi
     public const TRIGGER_STAFF_RETRY = 'staff_retry';
 
     public function __construct(
-        private readonly PrivateReportPhotoStorage $photoStorage,
+        private readonly ResolvesPrivateReportPhotoStorage $photoStorageResolver,
         private readonly FastApiInferenceResponseValidator $validator,
     ) {}
 
@@ -232,14 +233,14 @@ class ProcessReportAi
 
     private function verifyStoredPhoto(ViolationReport $report): void
     {
+        $photoStorage = $this->photoStorage($report);
         if (! in_array($report->photo_mime_type, ['image/jpeg', 'image/png'], true)
             || ! is_int($report->photo_size_bytes)
             || $report->photo_size_bytes <= 0
             || ! is_string($report->photo_sha256)
             || ! preg_match('/\A[a-f0-9]{64}\z/D', $report->photo_sha256)
             || ! is_string($report->photo_object_key)
-            || $report->photo_storage_disk !== $this->photoStorage->diskName()
-            || ! $this->photoStorage->exists($report->photo_object_key)) {
+            || ! $photoStorage->exists($report->photo_object_key)) {
             throw new AiProcessingException(
                 'AI_PHOTO_UNAVAILABLE',
                 'The stored report photograph is unavailable for AI processing.'
@@ -254,7 +255,7 @@ class ProcessReportAi
             );
         }
 
-        $stream = $this->photoStorage->readStream($report->photo_object_key);
+        $stream = $photoStorage->readStream($report->photo_object_key);
         $bytesRead = 0;
         $hash = hash_init('sha256');
 
@@ -300,7 +301,7 @@ class ProcessReportAi
 
     private function send(ViolationReport $report, string $requestId): Response
     {
-        $stream = $this->photoStorage->readStream($report->photo_object_key);
+        $stream = $this->photoStorage($report)->readStream($report->photo_object_key);
         $extension = $report->photo_mime_type === 'image/png' ? 'png' : 'jpg';
 
         try {
@@ -325,6 +326,20 @@ class ProcessReportAi
                 );
         } finally {
             fclose($stream);
+        }
+    }
+
+    private function photoStorage(ViolationReport $report): PrivateReportPhotoStorage
+    {
+        try {
+            return $this->photoStorageResolver->forDisk(
+                (string) $report->photo_storage_disk
+            );
+        } catch (Throwable) {
+            throw new AiProcessingException(
+                'AI_PHOTO_UNAVAILABLE',
+                'The stored report photograph is unavailable for AI processing.'
+            );
         }
     }
 

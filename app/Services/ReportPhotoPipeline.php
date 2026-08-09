@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Contracts\PrivateReportPhotoStorage;
+use App\Contracts\ResolvesPrivateReportPhotoStorage;
 use App\Data\SanitizedReportPhoto;
 use App\Exceptions\PhotoValidationException;
 use App\Models\ViolationReport;
@@ -15,6 +16,7 @@ class ReportPhotoPipeline
     public function __construct(
         private readonly ReportPhotoSanitizer $sanitizer,
         private readonly PrivateReportPhotoStorage $storage,
+        private readonly ResolvesPrivateReportPhotoStorage $storageResolver,
     ) {}
 
     public function process(ViolationReport $report, ?UploadedFile $file): array
@@ -36,8 +38,10 @@ class ReportPhotoPipeline
 
         $tokenHash = $claim['token_hash'];
         $staleObjectKey = $claim['stale_object_key'];
+        $staleStorageDisk = $claim['stale_storage_disk'];
         if (is_string($staleObjectKey) && $staleObjectKey !== '') {
-            if (! $this->compensateObject($staleObjectKey)) {
+            if (! is_string($staleStorageDisk)
+                || ! $this->compensateObject($staleObjectKey, $staleStorageDisk)) {
                 return $this->finalizeFailure(
                     $report->id,
                     $tokenHash,
@@ -92,6 +96,7 @@ class ReportPhotoPipeline
         }
 
         $objectKey = $this->storage->generateObjectKey($photo->extension);
+        $storageDisk = $this->storage->diskName();
         $associated = ViolationReport::whereKey($report->id)
             ->where('photo_upload_status', ViolationReport::PHOTO_STATUS_PROCESSING)
             ->where('photo_processing_token_hash', $tokenHash)
@@ -99,7 +104,7 @@ class ReportPhotoPipeline
             ->whereNull('photo_pending_object_key')
             ->update([
                 'photo_pending_object_key' => $objectKey,
-                'photo_storage_disk' => $this->storage->diskName(),
+                'photo_storage_disk' => $storageDisk,
                 'photo_compensation_status' => null,
                 'updated_at' => now(),
             ]);
@@ -116,7 +121,7 @@ class ReportPhotoPipeline
         try {
             $this->storage->put($objectKey, $photo->bytes);
         } catch (Throwable) {
-            $compensated = $this->compensateObject($objectKey);
+            $compensated = $this->compensateObject($objectKey, $storageDisk);
 
             return $this->finalizeFailure(
                 $report->id,
@@ -129,7 +134,13 @@ class ReportPhotoPipeline
             );
         }
 
-        if ($this->finalizeSuccess($report->id, $tokenHash, $objectKey, $photo)) {
+        if ($this->finalizeSuccess(
+            $report->id,
+            $tokenHash,
+            $objectKey,
+            $storageDisk,
+            $photo
+        )) {
             return [
                 'outcome' => 'uploaded',
                 'status' => ViolationReport::PHOTO_STATUS_UPLOADED,
@@ -138,7 +149,7 @@ class ReportPhotoPipeline
             ];
         }
 
-        $compensated = $this->compensateObject($objectKey);
+        $compensated = $this->compensateObject($objectKey, $storageDisk);
         $this->finalizeFailure(
             $report->id,
             $tokenHash,
@@ -237,6 +248,7 @@ class ReportPhotoPipeline
             }
 
             $staleObjectKey = $locked->photo_pending_object_key;
+            $staleStorageDisk = $locked->photo_storage_disk;
             $locked->forceFill([
                 'photo_upload_status' => ViolationReport::PHOTO_STATUS_PROCESSING,
                 'photo_upload_attempts' => (int) $locked->photo_upload_attempts + 1,
@@ -255,6 +267,7 @@ class ReportPhotoPipeline
                 'status' => ViolationReport::PHOTO_STATUS_PROCESSING,
                 'token_hash' => $tokenHash,
                 'stale_object_key' => $staleObjectKey,
+                'stale_storage_disk' => $staleStorageDisk,
             ];
         }, 3);
     }
@@ -263,12 +276,14 @@ class ReportPhotoPipeline
         int $reportId,
         string $tokenHash,
         string $objectKey,
+        string $storageDisk,
         SanitizedReportPhoto $photo
     ): bool {
         return DB::transaction(function () use (
             $reportId,
             $tokenHash,
             $objectKey,
+            $storageDisk,
             $photo
         ): bool {
             $locked = ViolationReport::whereKey($reportId)->lockForUpdate()->firstOrFail();
@@ -276,6 +291,7 @@ class ReportPhotoPipeline
                 || ! is_string($locked->photo_processing_token_hash)
                 || ! hash_equals($locked->photo_processing_token_hash, $tokenHash)
                 || $locked->photo_pending_object_key !== $objectKey
+                || $locked->photo_storage_disk !== $storageDisk
                 || ! $locked->photo_processing_expires_at?->isFuture()) {
                 return false;
             }
@@ -283,7 +299,7 @@ class ReportPhotoPipeline
             $locked->forceFill([
                 'photo_object_key' => $objectKey,
                 'photo_pending_object_key' => null,
-                'photo_storage_disk' => $this->storage->diskName(),
+                'photo_storage_disk' => $storageDisk,
                 'photo_mime_type' => $photo->mimeType,
                 'photo_size_bytes' => strlen($photo->bytes),
                 'photo_width' => $photo->width,
@@ -338,11 +354,15 @@ class ReportPhotoPipeline
         ];
     }
 
-    private function compensateObject(string $objectKey): bool
+    private function compensateObject(string $objectKey, string $storageDisk): bool
     {
         try {
-            return ! $this->storage->exists($objectKey)
-                || $this->storage->delete($objectKey);
+            $storage = $storageDisk === $this->storage->diskName()
+                ? $this->storage
+                : $this->storageResolver->forDisk($storageDisk);
+
+            return ! $storage->exists($objectKey)
+                || $storage->delete($objectKey);
         } catch (Throwable) {
             return false;
         }

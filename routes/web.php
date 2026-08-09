@@ -127,6 +127,8 @@ Route::middleware(['auth'])->group(function () {
     // View Individual Violation Report (role-based layout detection)
     Route::get('/violation-reports/{violationReport}/photo', [ReportPhotoController::class, 'show'])
         ->name('violation-reports.photo');
+    Route::get('/violation-reports/{violationReport}/photo/signed', [ReportPhotoController::class, 'signed'])
+        ->name('violation-reports.photo.signed');
     Route::get('/violation-reports/{violationReport}', [ViolationReportController::class, 'show'])->name('violation-reports.show');
 });
 

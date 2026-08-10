@@ -782,8 +782,11 @@ new write freeze and reconciliation of every PostgreSQL-only row.
 - [x] Store private object keys in PostgreSQL.
 - [x] Generate short-lived signed URLs only after staff authorization.
 - [x] Never return signed URLs or object keys through public tracking.
-- [ ] Implement resumable failures, quarantine cleanup, orphan detection, retention, and
-      deletion.
+- [x] Implement resumable storage-failure handling.
+- [x] Implement quarantine cleanup.
+- [x] Implement orphan detection and preserve unclassified files.
+- [ ] Obtain an approved Santa Cruz municipal evidence-retention policy.
+- [ ] Implement retention and deletion only from the approved municipal policy.
 - [x] Reconcile partial database/storage failures.
 
 ### Exit gate
@@ -823,8 +826,11 @@ storage.
 - [ ] Preserve reports when task creation fails.
 - [ ] Add a recovery command/job for completed uploads with failed task creation and
       pending AI.
-- [ ] Record `processing_error_code = TASK_CREATION_FAILED` without misclassifying it as
-      AI evidence review.
+- [ ] Record task-dispatch failures using dedicated fields equivalent to
+      `task_creation_error_code = TASK_CREATION_FAILED` and a safe
+      `task_creation_error_message`.
+- [ ] Keep task-creation errors separate from Phase 8E AI-processing errors and never
+      misclassify either error domain as AI evidence review.
 
 ### Exit gate
 
@@ -1002,13 +1008,49 @@ Barangay routing: Manual through DILG
 
 ---
 
-# Phase 14 — Production Hardening and Thesis Demonstration
+# Phase 14 — Production Hardening, Municipal Acceptance, and Thesis Demonstration
 
-## Phase 14A — Production Hardening and Thesis Demonstration
+## Phase 14A — Production Hardening, Municipal Acceptance, and Thesis Demonstration
 
 **Branch:** `release/phase-14a-production-hardening`
 
-**Objective:** Produce a secure, measured, reproducible thesis demonstration release.
+**Objective:** Produce a secure, measured, reproducible thesis demonstration release
+and an operationally governed candidate for an authorized Santa Cruz municipal pilot.
+
+The thesis demonstration tag does not by itself authorize collection of real citizen
+reports in production. Real municipal use requires every final release gate below,
+written municipal acceptance, assigned operational ownership, and the mandatory
+evidence-retention and deletion gate.
+
+### Mandatory municipal evidence-retention and deletion gate
+
+This gate may be completed after the remaining development phases, but it must pass
+before public production launch or collection of real citizen evidence. Automatic
+deletion must remain disabled until the gate is complete.
+
+- [ ] Identify the authorized Santa Cruz system owner, records custodian, and Data
+      Protection Officer or equivalent privacy authority.
+- [ ] Obtain a written municipal policy defining retention periods for submitted,
+      verified, invalid, duplicate, outside-jurisdiction, test, and appealed reports.
+- [ ] Define who may authorize deletion and whether approval by more than one authorized
+      role is required.
+- [ ] Define legal-hold, active-investigation, complaint, appeal, and audit exceptions
+      that prevent deletion.
+- [ ] Define how retention applies to Supabase objects, PostgreSQL records, local
+      rollback copies, logical backups, exports, quarantined files, and audit logs.
+- [ ] Approve the citizen privacy notice and the process for authorized access,
+      correction, preservation, and deletion requests.
+- [ ] Implement a dry-run retention report that changes nothing and identifies every
+      candidate by internal record identity without exposing evidence publicly.
+- [ ] Implement deletion only after policy approval, with authorization, idempotency,
+      audit history, failure reconciliation, and protection against deleting active or
+      legally held evidence.
+- [ ] Test retention and deletion first with disposable test data, including partial
+      storage/database failure and recovery scenarios.
+- [ ] Obtain written municipal acceptance of the implemented policy and test evidence.
+
+If this gate is incomplete, CIVICLEAR may be demonstrated with approved test data, but
+it must not be represented as approved for unattended public production use.
 
 ### Implementation tasks
 
@@ -1020,7 +1062,7 @@ Barangay routing: Manual through DILG
       latency.
 - [ ] Review Cloud Run/Supabase limits, connections, regions, and costs.
 - [ ] Complete model and Ultralytics licensing review.
-- [ ] Finalize photograph retention and deletion rules.
+- [ ] Complete the mandatory municipal evidence-retention and deletion gate.
 - [ ] Remove remaining obsolete phone-side AI code and environment values.
 - [ ] Verify UTF-8 across source, documentation, labels, JSON, GeoJSON, and responses.
 - [ ] Verify official statistics exclude test data.
@@ -1035,6 +1077,8 @@ Barangay routing: Manual through DILG
 - [ ] Reports survive AI and infrastructure failures.
 - [ ] Staff verification and official analytics are correct.
 - [ ] Security and privacy review is complete.
+- [ ] Municipal retention/deletion policy is approved, implemented, and tested.
+- [ ] Santa Cruz operational ownership and production acceptance are documented.
 - [ ] Known GIS limitation is stated honestly.
 - [ ] Demonstration evidence and script are complete.
 

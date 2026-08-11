@@ -159,3 +159,57 @@ or repository artifacts.
 Stage 1 uses isolated SQLite, fake Cloud Task creation, fake signed-claim verification,
 and mocked FastAPI responses. Real Google Cloud APIs, IAM, queues, Cloud Run, and the live
 PostgreSQL schema remain untouched until their separate approval gates.
+
+## Stage 2 disposable PostgreSQL verification
+
+The committed Phase 10A implementation was validated against the guarded disposable
+Supabase PostgreSQL schema `civiclear_phase9a_test_20260811_phase10a_s2`.
+
+- all 20 migrations completed over a verified TLS connection;
+- 16 Phase 10A feature tests passed with 132 assertions;
+- the disposable schema was removed and its absence was verified after testing;
+- the protected live `civiclear` schema was not selected by the test connection.
+
+The full Laravel suite had already passed sequentially during Stage 1. An earlier
+failure caused by overlapping PHPUnit processes sharing fake-storage paths was not
+treated as an application defect; the focused test and the complete sequential suite
+both passed afterward.
+
+## Stage 3 live additive migration
+
+The immutable implementation commit is:
+
+```text
+cb2b709fb787947f8de936ebc2a869a1d83723e2
+```
+
+Before the live migration, Laravel entered maintenance mode and PostgreSQL produced a
+verified custom-format backup outside the repository. Its SHA-256 is:
+
+```text
+de7a7ba44f0d878fc9171e46e837260c48c3973691c9ba7f63170fa79ebf8931
+```
+
+The additive migration then completed with the following verified invariants:
+
+- migration rows increased from 19 to 20;
+- all 29 existing reports were preserved;
+- all 17 uploaded photograph records and all 17 Supabase Storage references were
+  preserved;
+- all ten Phase 10A task-state columns exist;
+- existing reports retain generation `0`, zero task-creation attempts, and null task
+  identifiers and errors;
+- the active dispatcher remains `inline`;
+- Laravel left maintenance mode successfully;
+- the Git worktree remained clean.
+
+## Post-migration manual verification
+
+The user manually verified the local submission, tracking, staff-dashboard, private
+photograph, and server-side AI flow after the migration. The protected internal task
+endpoint returned HTTP 401 without Google identity, and the recovery command refused
+to execute because `cloud_tasks` is not the active dispatcher.
+
+These results verify backward compatibility and fail-closed behavior. They do not claim
+that a real Google queue, IAM policy, deployed OIDC token, or Cloud Run delivery has been
+tested. Those remain Phase 10B and Phase 10C gates.

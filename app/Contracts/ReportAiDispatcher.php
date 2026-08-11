@@ -7,5 +7,12 @@ use App\Models\ViolationReport;
 
 interface ReportAiDispatcher
 {
-    public function dispatch(ViolationReport $report): AiProcessingResult;
+    public const TRIGGER_INITIAL = 'initial';
+
+    public const TRIGGER_STAFF_RETRY = 'staff_retry';
+
+    public function dispatch(
+        ViolationReport $report,
+        string $trigger = self::TRIGGER_INITIAL,
+    ): AiProcessingResult;
 }

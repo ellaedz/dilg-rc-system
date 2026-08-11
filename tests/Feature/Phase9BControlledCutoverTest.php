@@ -128,8 +128,10 @@ class Phase9BStage4TestAiDispatcher implements ReportAiDispatcher
         private readonly Phase9BStage4TestSupabaseStorage $storage,
     ) {}
 
-    public function dispatch(ViolationReport $report): AiProcessingResult
-    {
+    public function dispatch(
+        ViolationReport $report,
+        string $trigger = ReportAiDispatcher::TRIGGER_INITIAL,
+    ): AiProcessingResult {
         $stream = $this->storage->readStream((string) $report->photo_object_key);
         try {
             $bytes = stream_get_contents($stream);

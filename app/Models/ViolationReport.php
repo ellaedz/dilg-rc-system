@@ -19,6 +19,16 @@ class ViolationReport extends Model
 
     public const AI_STATUS_FAILED = 'failed';
 
+    public const TASK_STATUS_NOT_STARTED = 'not_started';
+
+    public const TASK_STATUS_CREATING = 'creating';
+
+    public const TASK_STATUS_CREATED = 'created';
+
+    public const TASK_STATUS_FAILED = 'failed';
+
+    public const TASK_STATUS_UNCERTAIN = 'uncertain';
+
     public const PHOTO_STATUS_NOT_PROVIDED = 'not_provided';
 
     public const PHOTO_STATUS_PENDING = 'pending';
@@ -132,6 +142,16 @@ class ViolationReport extends Model
         'photo_processing_expires_at',
         'photo_compensation_status',
         'task_creation_status',
+        'task_generation',
+        'task_creation_attempts',
+        'task_id_hash',
+        'task_creation_token_hash',
+        'task_creation_started_at',
+        'task_creation_expires_at',
+        'task_last_attempted_at',
+        'task_created_at',
+        'task_creation_error_code',
+        'task_creation_error_message',
         'barangay_assignment_status',
         'ai_manual_review_reason',
         'ai_manual_review_reasons',
@@ -170,6 +190,12 @@ class ViolationReport extends Model
         'final_ai_confidence' => 'decimal:4',
         'ai_needs_manual_review' => 'boolean',
         'ai_processing_attempts' => 'integer',
+        'task_generation' => 'integer',
+        'task_creation_attempts' => 'integer',
+        'task_creation_started_at' => 'datetime',
+        'task_creation_expires_at' => 'datetime',
+        'task_last_attempted_at' => 'datetime',
+        'task_created_at' => 'datetime',
         'ai_processing_started_at' => 'datetime',
         'ai_processing_expires_at' => 'datetime',
         'ai_last_attempted_at' => 'datetime',
@@ -220,6 +246,16 @@ class ViolationReport extends Model
         'ai_processing_started_at',
         'ai_processing_expires_at',
         'ai_last_attempted_at',
+        'task_generation',
+        'task_creation_attempts',
+        'task_id_hash',
+        'task_creation_token_hash',
+        'task_creation_started_at',
+        'task_creation_expires_at',
+        'task_last_attempted_at',
+        'task_created_at',
+        'task_creation_error_code',
+        'task_creation_error_message',
     ];
 
     /**

@@ -10,8 +10,10 @@ class InlineReportAiDispatcher implements ReportAiDispatcher
 {
     public function __construct(private readonly ProcessReportAi $processor) {}
 
-    public function dispatch(ViolationReport $report): AiProcessingResult
-    {
-        return $this->processor->process($report, ProcessReportAi::TRIGGER_INITIAL);
+    public function dispatch(
+        ViolationReport $report,
+        string $trigger = ReportAiDispatcher::TRIGGER_INITIAL,
+    ): AiProcessingResult {
+        return $this->processor->process($report, $trigger);
     }
 }

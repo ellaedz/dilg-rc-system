@@ -815,29 +815,32 @@ storage.
 
 ### Implementation tasks
 
-- [ ] Create a Cloud Tasks adapter for the Phase 8E dispatch interface.
-- [ ] Create a protected Laravel processing endpoint.
-- [ ] Authenticate expected Cloud Task OIDC identity, audience, and service account.
-- [ ] Create a task only after report and photograph storage complete.
-- [ ] Return citizen identifiers without waiting for inference.
-- [ ] Record `task_creation_status`.
-- [ ] Configure timeout, retry limit, exponential backoff, and maximum attempts.
-- [ ] Make duplicate task delivery safe.
-- [ ] Preserve reports when task creation fails.
-- [ ] Add a recovery command/job for completed uploads with failed task creation and
+- [x] Create a Cloud Tasks adapter for the Phase 8E dispatch interface.
+- [x] Create a protected Laravel processing endpoint.
+- [x] Authenticate expected Cloud Task OIDC identity, audience, and service account.
+- [x] Create a task only after report and photograph storage complete.
+- [x] Return citizen identifiers without waiting for inference.
+- [x] Record `task_creation_status`.
+- [x] Enforce and test the application timeout hierarchy and CreateTask deadline.
+- [ ] Configure and verify the real queue retry limit, exponential backoff, maximum
+      attempts, and retention during Phase 10B provisioning.
+- [x] Make duplicate task delivery safe.
+- [x] Preserve reports when task creation fails.
+- [x] Add a recovery command/job for completed uploads with failed task creation and
       pending AI.
-- [ ] Record task-dispatch failures using dedicated fields equivalent to
+- [x] Record task-dispatch failures using dedicated fields equivalent to
       `task_creation_error_code = TASK_CREATION_FAILED` and a safe
       `task_creation_error_message`.
-- [ ] Keep task-creation errors separate from Phase 8E AI-processing errors and never
+- [x] Keep task-creation errors separate from Phase 8E AI-processing errors and never
       misclassify either error domain as AI evidence review.
 
 ### Exit gate
 
-- [ ] Task delivery and duplicate delivery are idempotent.
-- [ ] Task creation failure is recoverable.
-- [ ] Citizen submission remains valid during queue failure.
-- [ ] Cloud Task integration tests pass.
+- [x] Task delivery and duplicate delivery are idempotent.
+- [x] Task creation failure is recoverable.
+- [x] Citizen submission remains valid during queue failure.
+- [x] Cloud Task integration tests pass using the guarded fake creator and verified
+      identity test doubles; real queue delivery remains a Phase 10B/10C gate.
 
 ---
 

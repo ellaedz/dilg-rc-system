@@ -2,14 +2,22 @@
 
 namespace App\Providers;
 
+use App\Contracts\CreatesCloudTask;
 use App\Contracts\PrivateReportPhotoStorage;
 use App\Contracts\ReportAiDispatcher;
 use App\Contracts\ResolvesPrivateReportPhotoStorage;
+use App\Contracts\VerifiesCloudTaskOidc;
+use App\Contracts\VerifiesGoogleIdTokenSignature;
+use App\Services\CloudTasksReportAiDispatcher;
+use App\Services\GoogleCloudTaskCreator;
+use App\Services\GoogleCloudTaskOidcVerifier;
+use App\Services\GoogleIdTokenSignatureVerifier;
 use App\Services\InlineReportAiDispatcher;
 use App\Services\LocalPrivateReportPhotoStorage;
 use App\Services\Phase9AReadOnlyRuntimeGuard;
 use App\Services\ReportPhotoStorageResolver;
 use App\Services\SupabasePrivateReportPhotoStorage;
+use Google\Auth\AccessToken;
 use Illuminate\Support\ServiceProvider;
 use RuntimeException;
 
@@ -36,9 +44,24 @@ class AppServiceProvider extends ServiceProvider
             ResolvesPrivateReportPhotoStorage::class,
             ReportPhotoStorageResolver::class
         );
+        $this->app->bind(CreatesCloudTask::class, GoogleCloudTaskCreator::class);
+        $this->app->bind(
+            VerifiesCloudTaskOidc::class,
+            GoogleCloudTaskOidcVerifier::class
+        );
+        $this->app->bind(
+            VerifiesGoogleIdTokenSignature::class,
+            fn () => new GoogleIdTokenSignatureVerifier(new AccessToken)
+        );
         $this->app->bind(
             ReportAiDispatcher::class,
-            InlineReportAiDispatcher::class
+            function ($app) {
+                return match ((string) config('cloud_tasks.dispatcher', 'inline')) {
+                    'inline' => $app->make(InlineReportAiDispatcher::class),
+                    'cloud_tasks' => $app->make(CloudTasksReportAiDispatcher::class),
+                    default => throw new RuntimeException('Invalid AI dispatcher.'),
+                };
+            }
         );
     }
 

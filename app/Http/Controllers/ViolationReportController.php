@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\ReportAiDispatcher;
 use App\Models\ViolationReport;
 use App\Services\BarangayAssignmentService;
-use App\Services\ProcessReportAi;
 use Illuminate\Http\Request;
 
 class ViolationReportController extends Controller
@@ -86,8 +86,10 @@ class ViolationReportController extends Controller
         ]);
     }
 
-    public function retryAI(ViolationReport $violationReport, ProcessReportAi $processor)
-    {
+    public function retryAI(
+        ViolationReport $violationReport,
+        ReportAiDispatcher $dispatcher,
+    ) {
         abort_unless(
             in_array(
                 $violationReport->ai_processing_status,
@@ -101,15 +103,15 @@ class ViolationReportController extends Controller
             422
         );
 
-        $result = $processor->process(
+        $result = $dispatcher->dispatch(
             $violationReport,
-            ProcessReportAi::TRIGGER_STAFF_RETRY
+            ReportAiDispatcher::TRIGGER_STAFF_RETRY
         );
-        $completed = $result->completed();
+        $accepted = $result->completed() || $result->outcome === 'queued';
 
         return back()->with(
-            $completed ? 'success' : 'error',
-            $completed
+            $accepted ? 'success' : 'error',
+            $result->completed()
                 ? 'AI processing completed.'
                 : $result->message
         );

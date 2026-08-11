@@ -21,6 +21,8 @@ class ProcessReportAi
 
     public const TRIGGER_STAFF_RETRY = 'staff_retry';
 
+    public const TRIGGER_CLOUD_TASK_DELIVERY = 'cloud_task_delivery';
+
     public function __construct(
         private readonly ResolvesPrivateReportPhotoStorage $photoStorageResolver,
         private readonly FastApiInferenceResponseValidator $validator,
@@ -110,7 +112,11 @@ class ProcessReportAi
 
     private function claim(ViolationReport $report, string $trigger): array|AiProcessingResult
     {
-        if (! in_array($trigger, [self::TRIGGER_INITIAL, self::TRIGGER_STAFF_RETRY], true)) {
+        if (! in_array($trigger, [
+            self::TRIGGER_INITIAL,
+            self::TRIGGER_STAFF_RETRY,
+            self::TRIGGER_CLOUD_TASK_DELIVERY,
+        ], true)) {
             return new AiProcessingResult(
                 'not_eligible',
                 'AI_TRIGGER_INVALID',
@@ -202,7 +208,16 @@ class ProcessReportAi
                         && $locked->ai_processing_expires_at?->isPast())
                 );
 
-            if (! $initialEligible && ! $staffEligible) {
+            $taskDeliveryEligible = $trigger === self::TRIGGER_CLOUD_TASK_DELIVERY
+                && (
+                    ($locked->ai_processing_status === ViolationReport::AI_STATUS_PENDING
+                        && $attempts === 0)
+                    || $locked->ai_processing_status === ViolationReport::AI_STATUS_FAILED
+                    || ($locked->ai_processing_status === ViolationReport::AI_STATUS_PROCESSING
+                        && $locked->ai_processing_expires_at?->isPast())
+                );
+
+            if (! $initialEligible && ! $staffEligible && ! $taskDeliveryEligible) {
                 return new AiProcessingResult(
                     'not_eligible',
                     'AI_STATE_NOT_ELIGIBLE',

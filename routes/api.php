@@ -1,9 +1,15 @@
 <?php
 
+use App\Http\Controllers\Api\CloudTaskHandlerController;
 use App\Http\Controllers\Api\GISApiController;
 use App\Http\Controllers\Api\MobileReportApiController;
 use App\Http\Middleware\RejectOversizedPostBody;
 use Illuminate\Support\Facades\Route;
+
+// Stateless internal endpoint. OIDC verification runs before report-specific work.
+// It deliberately does not share the anonymous citizen API throttle.
+Route::post('/internal/cloud-tasks/process-report-ai', CloudTaskHandlerController::class)
+    ->middleware('cloud.tasks.oidc');
 
 /*
 |--------------------------------------------------------------------------

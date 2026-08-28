@@ -1,0 +1,85 @@
+name: Phase 10B Azure immutable container build
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Full reviewed Phase 10B implementation commit SHA
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: phase10b-build
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit_sha }}
+          persist-credentials: false
+
+      - name: Verify immutable source identity
+        shell: bash
+        env:
+          COMMIT_SHA: ${{ inputs.commit_sha }}
+        run: |
+          printf '%s' "$COMMIT_SHA" | grep -Eq '^[0-9a-f]{40}$'
+          test "$(git rev-parse HEAD)" = "$COMMIT_SHA"
+          test -z "$(git status --porcelain)"
+
+      - name: Reject credential payloads in build context
+        shell: bash
+        run: |
+          git ls-files | LC_ALL=C sort > phase10b-reviewed-source-manifest.txt
+          if grep -Ei '(^|/)(\.env($|\.)|storage/app/private/|database/.*\.(sqlite|dump|sql)$)|\.(pem|key|pfx|p12|crt|gpkg)$' \
+            phase10b-reviewed-source-manifest.txt; then
+            echo 'A prohibited sensitive filename is tracked by the reviewed commit.' >&2
+            exit 1
+          fi
+          if grep -RIlE --exclude-dir=.git --exclude='*.md' \
+            '(BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY|Account[K]ey=|AKIA[0-9A-Z]{16})' .; then
+            exit 1
+          fi
+
+      - name: Preserve filename-only reviewed source manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase10b-reviewed-source-${{ inputs.commit_sha }}
+          path: phase10b-reviewed-source-manifest.txt
+          if-no-files-found: error
+          retention-days: 14
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_BUILD_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Authenticate Docker to Basic ACR
+        run: az acr login --name "${{ vars.AZURE_ACR_NAME }}"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Laravel
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: ${{ vars.AZURE_ACR_LOGIN_SERVER }}/civiclear-laravel:${{ inputs.commit_sha }}
+          provenance: true
+          sbom: true
+
+      - name: Build and push FastAPI
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ai-inference-server/Dockerfile
+          push: true
+          tags: ${{ vars.AZURE_ACR_LOGIN_SERVER }}/civiclear-fastapi:${{ inputs.commit_sha }}
+          provenance: true
+          sbom: true

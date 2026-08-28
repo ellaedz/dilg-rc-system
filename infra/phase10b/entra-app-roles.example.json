@@ -1,0 +1,28 @@
+{
+  "laravelTaskApi": {
+    "identifierUri": "api://REPLACE-LARAVEL-TASK-API-APPLICATION-ID",
+    "appRoles": [
+      {
+        "allowedMemberTypes": ["Application"],
+        "description": "Invoke the protected CIVICLEAR AI task handler.",
+        "displayName": "CIVICLEAR AI Task Invoke",
+        "id": "REPLACE-WITH-NEW-GUID",
+        "isEnabled": true,
+        "value": "Civiclear.AiTask.Invoke"
+      }
+    ]
+  },
+  "fastApi": {
+    "identifierUri": "api://REPLACE-FASTAPI-APPLICATION-ID",
+    "appRoles": [
+      {
+        "allowedMemberTypes": ["Application"],
+        "description": "Invoke the private CIVICLEAR inference API.",
+        "displayName": "CIVICLEAR FastAPI Invoke",
+        "id": "REPLACE-WITH-NEW-GUID",
+        "isEnabled": true,
+        "value": "Civiclear.FastApi.Invoke"
+      }
+    ]
+  }
+}

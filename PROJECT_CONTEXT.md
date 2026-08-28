@@ -409,3 +409,19 @@ HTTP checks. Supabase and the live `.env` were unchanged. The reconciliation che
 identified only controlled test report `RCV-2026-0028` and its timeline as newer than
 the frozen snapshot. The roadmap recovery exit gate is therefore tested, while a real
 rollback remains separately approval-gated and must reconcile all PostgreSQL deltas.
+
+## Phase 10B Azure deployment transition
+
+Phase 10B now targets Azure Container Apps rather than Google Cloud Run. The local
+Stage 1 implementation keeps Phase 10A's deterministic task generations, database
+leases, dispatch statuses, and idempotent processing endpoint while adding an Azure
+Queue REST adapter, an event-driven worker, explicit user-assigned managed identities,
+and Microsoft Entra application-role authorization. FastAPI remains internal and the
+mobile application still communicates only with Laravel.
+
+No Azure resource, Entra application, Key Vault secret, image, or deployment has been
+created by Stage 1. The checked-in infrastructure is a reviewable template only, with
+Consumption scale-to-zero limits and no embedded secret values. MPDO barangay polygon
+integration remains Phase 13A. Staff verification remains authoritative: AI runs after
+submission and presents its category automatically, while staff verify, reject, or
+explicitly correct that recommendation rather than manually starting inference.

@@ -26,6 +26,7 @@ class ProcessReportAi
     public function __construct(
         private readonly ResolvesPrivateReportPhotoStorage $photoStorageResolver,
         private readonly FastApiInferenceResponseValidator $validator,
+        private readonly FastApiRequestAuthenticator $requestAuthenticator,
     ) {}
 
     public function process(
@@ -320,25 +321,27 @@ class ProcessReportAi
         $extension = $report->photo_mime_type === 'image/png' ? 'png' : 'jpg';
 
         try {
-            return Http::acceptJson()
+            $endpoint = rtrim((string) config('ai_inference.url'), '/')
+                .'/v1/predict/multimodal';
+            $request = Http::acceptJson()
                 ->withHeaders(['X-Request-ID' => $requestId])
                 ->connectTimeout((int) config('ai_inference.connect_timeout_seconds', 3))
                 ->timeout((int) config('ai_inference.timeout_seconds', 20))
-                ->withOptions(['stream' => true])
+                ->withOptions(['stream' => true]);
+            $request = $this->requestAuthenticator->authenticate($request, $endpoint);
+
+            return $request
                 ->attach(
                     'image',
                     $stream,
                     'report-evidence.'.$extension,
                     ['Content-Type' => $report->photo_mime_type]
                 )
-                ->post(
-                    rtrim((string) config('ai_inference.url'), '/').'/v1/predict/multimodal',
-                    [
-                        'text_report' => $report->description,
-                        'latitude' => (string) $report->latitude,
-                        'longitude' => (string) $report->longitude,
-                    ]
-                );
+                ->post($endpoint, [
+                    'text_report' => $report->description,
+                    'latitude' => (string) $report->latitude,
+                    'longitude' => (string) $report->longitude,
+                ]);
         } finally {
             fclose($stream);
         }

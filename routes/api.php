@@ -11,6 +11,12 @@ use Illuminate\Support\Facades\Route;
 Route::post('/internal/cloud-tasks/process-report-ai', CloudTaskHandlerController::class)
     ->middleware('cloud.tasks.oidc');
 
+// Azure Queue workers use the same idempotent generation contract through an
+// Entra-protected endpoint. The provider-specific legacy route remains available
+// only while the dispatcher is explicitly configured for Google Cloud Tasks.
+Route::post('/internal/ai-tasks/process-report-ai', CloudTaskHandlerController::class)
+    ->middleware('cloud.tasks.oidc');
+
 /*
 |--------------------------------------------------------------------------
 | API Routes

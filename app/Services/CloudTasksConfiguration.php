@@ -6,8 +6,17 @@ use RuntimeException;
 
 class CloudTasksConfiguration
 {
+    public function __construct(private readonly AzureQueueConfiguration $azure) {}
+
     public function assertDispatchReady(): void
     {
+        if ((string) config('cloud_tasks.dispatcher') === 'azure_queue') {
+            $this->azure->assertSenderReady();
+            $this->assertAzureTimeouts();
+
+            return;
+        }
+
         foreach ([
             'project',
             'location',
@@ -40,6 +49,22 @@ class CloudTasksConfiguration
             || $dispatchDeadline >= $lease
             || (int) config('cloud_tasks.create_timeout_seconds', 10) >= $dispatchDeadline) {
             throw new RuntimeException('Cloud Tasks timeout hierarchy is unsafe.');
+        }
+    }
+
+    private function assertAzureTimeouts(): void
+    {
+        $aiTimeout = (int) config('ai_inference.timeout_seconds', 30);
+        $serviceTimeout = (int) config('ai_inference.service_timeout_seconds', 40);
+        $handlerTimeout = (int) config('azure.queue.handler_timeout_seconds', 50);
+        $visibility = (int) config('azure.queue.receive_visibility_seconds', 120);
+        $lease = (int) config('ai_inference.processing_lease_seconds', 90);
+
+        if ($aiTimeout > $serviceTimeout
+            || $aiTimeout + 10 >= $handlerTimeout
+            || $handlerTimeout >= $lease
+            || $handlerTimeout >= $visibility) {
+            throw new RuntimeException('Azure AI task timeout hierarchy is unsafe.');
         }
     }
 

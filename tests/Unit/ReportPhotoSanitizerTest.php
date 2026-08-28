@@ -105,6 +105,19 @@ class ReportPhotoSanitizerTest extends TestCase
         )));
     }
 
+    public function test_sanitized_output_byte_limit_is_enforced(): void
+    {
+        config()->set('report_photos.max_sanitized_bytes', 1);
+
+        $this->assertPhotoError('PHOTO_SANITIZED_TOO_LARGE', fn () => app(
+            ReportPhotoSanitizer::class
+        )->sanitize($this->uploadedImage(
+            'evidence.png',
+            $this->pngBytes(3, 2),
+            'image/png'
+        )));
+    }
+
     public function test_animated_png_is_rejected(): void
     {
         $this->assertPhotoError('PHOTO_MULTIFRAME_UNSUPPORTED', fn () => app(

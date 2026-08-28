@@ -96,6 +96,12 @@ class ReportPhotoSanitizer
             }
 
             $sanitizedBytes = $this->encode($canvas, $outputMime);
+            if (strlen($sanitizedBytes) > (int) config('report_photos.max_sanitized_bytes')) {
+                throw $this->invalid(
+                    'PHOTO_SANITIZED_TOO_LARGE',
+                    'The sanitized photograph exceeds the allowed size.'
+                );
+            }
             $sanitizedDimensions = @getimagesizefromstring($sanitizedBytes);
             if (! is_array($sanitizedDimensions)
                 || ($sanitizedDimensions['mime'] ?? null) !== $outputMime) {

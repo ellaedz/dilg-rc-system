@@ -3,12 +3,18 @@
 namespace App\Providers;
 
 use App\Contracts\CreatesCloudTask;
+use App\Contracts\InteractsWithAzureQueue;
 use App\Contracts\PrivateReportPhotoStorage;
+use App\Contracts\ProvidesManagedIdentityToken;
 use App\Contracts\ReportAiDispatcher;
 use App\Contracts\ResolvesPrivateReportPhotoStorage;
 use App\Contracts\VerifiesCloudTaskOidc;
 use App\Contracts\VerifiesGoogleIdTokenSignature;
 use App\Services\CloudTasksReportAiDispatcher;
+use App\Services\AzureEntraAccessTokenVerifier;
+use App\Services\AzureManagedIdentityTokenProvider;
+use App\Services\AzureQueueRestClient;
+use App\Services\AzureQueueTaskCreator;
 use App\Services\GoogleCloudTaskCreator;
 use App\Services\GoogleCloudTaskOidcVerifier;
 use App\Services\GoogleIdTokenSignatureVerifier;
@@ -44,10 +50,22 @@ class AppServiceProvider extends ServiceProvider
             ResolvesPrivateReportPhotoStorage::class,
             ReportPhotoStorageResolver::class
         );
-        $this->app->bind(CreatesCloudTask::class, GoogleCloudTaskCreator::class);
+        $this->app->singleton(
+            ProvidesManagedIdentityToken::class,
+            AzureManagedIdentityTokenProvider::class,
+        );
+        $this->app->bind(InteractsWithAzureQueue::class, AzureQueueRestClient::class);
+        $this->app->bind(CreatesCloudTask::class, function ($app) {
+            return match ((string) config('cloud_tasks.dispatcher', 'inline')) {
+                'azure_queue' => $app->make(AzureQueueTaskCreator::class),
+                default => $app->make(GoogleCloudTaskCreator::class),
+            };
+        });
         $this->app->bind(
             VerifiesCloudTaskOidc::class,
-            GoogleCloudTaskOidcVerifier::class
+            fn ($app) => (string) config('cloud_tasks.dispatcher', 'inline') === 'azure_queue'
+                ? $app->make(AzureEntraAccessTokenVerifier::class)
+                : $app->make(GoogleCloudTaskOidcVerifier::class)
         );
         $this->app->bind(
             VerifiesGoogleIdTokenSignature::class,
@@ -59,6 +77,7 @@ class AppServiceProvider extends ServiceProvider
                 return match ((string) config('cloud_tasks.dispatcher', 'inline')) {
                     'inline' => $app->make(InlineReportAiDispatcher::class),
                     'cloud_tasks' => $app->make(CloudTasksReportAiDispatcher::class),
+                    'azure_queue' => $app->make(CloudTasksReportAiDispatcher::class),
                     default => throw new RuntimeException('Invalid AI dispatcher.'),
                 };
             }

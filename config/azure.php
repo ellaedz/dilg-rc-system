@@ -1,0 +1,52 @@
+<?php
+
+return [
+    'identity' => [
+        'endpoint' => env('IDENTITY_ENDPOINT'),
+        'header' => env('IDENTITY_HEADER'),
+        'laravel_client_id' => env('AZURE_LARAVEL_MANAGED_IDENTITY_CLIENT_ID'),
+        'worker_client_id' => env('AZURE_WORKER_MANAGED_IDENTITY_CLIENT_ID'),
+        'connect_timeout_seconds' => max(1, (int) env('AZURE_IDENTITY_CONNECT_TIMEOUT', 2)),
+        'timeout_seconds' => max(1, (int) env('AZURE_IDENTITY_TIMEOUT', 5)),
+        'allowed_client_ids' => [
+            env('AZURE_LARAVEL_MANAGED_IDENTITY_CLIENT_ID'),
+            env('AZURE_WORKER_MANAGED_IDENTITY_CLIENT_ID'),
+        ],
+        'allowed_resources' => [
+            'https://storage.azure.com/',
+            env('AZURE_TASK_API_RESOURCE'),
+            env('AI_INFERENCE_ENTRA_RESOURCE'),
+        ],
+    ],
+    'queue' => [
+        'account' => env('AZURE_QUEUE_STORAGE_ACCOUNT'),
+        'primary_queue' => env('AZURE_AI_PRIMARY_QUEUE', 'civiclear-ai-processing'),
+        'quarantine_queue' => env('AZURE_AI_QUARANTINE_QUEUE', 'civiclear-ai-quarantine'),
+        'storage_resource' => 'https://storage.azure.com/',
+        'laravel_client_id' => env('AZURE_LARAVEL_MANAGED_IDENTITY_CLIENT_ID'),
+        'worker_client_id' => env('AZURE_WORKER_MANAGED_IDENTITY_CLIENT_ID'),
+        'task_api_resource' => env('AZURE_TASK_API_RESOURCE'),
+        'task_handler_url' => env('AZURE_TASK_HANDLER_URL'),
+        'worker_context' => false,
+        'connect_timeout_seconds' => max(1, (int) env('AZURE_QUEUE_CONNECT_TIMEOUT', 3)),
+        'request_timeout_seconds' => max(1, (int) env('AZURE_QUEUE_REQUEST_TIMEOUT', 10)),
+        'handler_timeout_seconds' => max(15, (int) env('AZURE_TASK_HANDLER_TIMEOUT', 50)),
+        'receive_visibility_seconds' => max(30, (int) env('AZURE_QUEUE_VISIBILITY_TIMEOUT', 120)),
+        'message_ttl_seconds' => max(60, (int) env('AZURE_QUEUE_MESSAGE_TTL', 604800)),
+        'maximum_dequeue_count' => max(1, (int) env('AZURE_QUEUE_MAX_DEQUEUE_COUNT', 5)),
+        'retry_initial_seconds' => max(1, (int) env('AZURE_QUEUE_RETRY_INITIAL_SECONDS', 10)),
+        'retry_max_seconds' => max(1, (int) env('AZURE_QUEUE_RETRY_MAX_SECONDS', 300)),
+    ],
+    'entra' => [
+        'tenant_id' => env('AZURE_TENANT_ID'),
+        'task_api_audience' => env('AZURE_TASK_API_AUDIENCE'),
+        'task_api_role' => env('AZURE_TASK_API_ROLE', 'Civiclear.AiTask.Invoke'),
+        'task_worker_client_id' => env('AZURE_WORKER_MANAGED_IDENTITY_CLIENT_ID'),
+        'task_worker_principal_id' => env('AZURE_WORKER_MANAGED_IDENTITY_PRINCIPAL_ID'),
+        'fastapi_audience' => env('AI_INFERENCE_ENTRA_AUDIENCE'),
+        'fastapi_role' => env('AI_INFERENCE_ENTRA_ROLE', 'Civiclear.FastApi.Invoke'),
+        'laravel_client_id' => env('AZURE_LARAVEL_MANAGED_IDENTITY_CLIENT_ID'),
+        'laravel_principal_id' => env('AZURE_LARAVEL_MANAGED_IDENTITY_PRINCIPAL_ID'),
+        'clock_skew_seconds' => max(0, (int) env('AZURE_ENTRA_CLOCK_SKEW_SECONDS', 60)),
+    ],
+];

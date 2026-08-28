@@ -2,9 +2,12 @@
 
 return [
     'url' => env('AI_INFERENCE_URL', 'http://127.0.0.1:9000'),
+    'auth_mode' => env('AI_INFERENCE_AUTH_MODE', 'none'),
+    'entra_resource' => env('AI_INFERENCE_ENTRA_RESOURCE'),
     'connect_timeout_seconds' => max(1, (int) env('AI_INFERENCE_CONNECT_TIMEOUT', 3)),
-    'timeout_seconds' => max(1, (int) env('AI_INFERENCE_TIMEOUT', 20)),
-    'processing_lease_seconds' => max(30, (int) env('AI_INFERENCE_LEASE_SECONDS', 60)),
+    'timeout_seconds' => max(1, (int) env('AI_INFERENCE_TIMEOUT', 30)),
+    'service_timeout_seconds' => max(1, (int) env('AI_INFERENCE_SERVICE_TIMEOUT_SECONDS', 40)),
+    'processing_lease_seconds' => max(30, (int) env('AI_INFERENCE_LEASE_SECONDS', 90)),
     'max_response_bytes' => max(4096, (int) env('AI_INFERENCE_MAX_RESPONSE_BYTES', 262144)),
 
     'image_classes' => [

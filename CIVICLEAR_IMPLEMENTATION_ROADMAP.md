@@ -44,16 +44,19 @@ Citizen mobile application
         │
         │ HTTPS multipart submission
         ▼
-Public Laravel API on Google Cloud Run
+Public Laravel API on Azure Container Apps
         ├── Supabase PostgreSQL
         ├── Private Supabase Storage
-        └── Google Cloud Tasks
+        └── Azure Queue Storage
+                    │
+                    ▼
+        Event-driven Container Apps Job
                     │
                     ▼
         Protected Laravel processing endpoint
                     │
                     ▼
-        Private FastAPI service on Google Cloud Run
+        Internal FastAPI service on Azure Container Apps
                     ├── Image inference
                     ├── NLP classification
                     ├── Municipality GIS validation
@@ -62,7 +65,9 @@ Public Laravel API on Google Cloud Run
 
 The mobile application communicates only with Laravel. Laravel remains the workflow,
 validation, authorization, and public API authority. FastAPI returns advisory AI
-results. Assigned barangay staff establish the official violation classification.
+results. The AI-detected category is shown automatically; assigned staff verify or
+reject it, and correct it only when the evidence shows the AI category is wrong. Staff
+verification—not AI alone—establishes the official classification.
 
 ## Non-negotiable safety rules
 
@@ -70,8 +75,8 @@ results. Assigned barangay staff establish the official violation classification
 - Never delete or overwrite an existing database or upload directory without a verified
   backup and explicit intent.
 - Never discard unrelated worktree changes.
-- Never place database credentials, Supabase service-role keys, Google service-account
-  keys, or other secrets in the mobile application or Git.
+- Never place database credentials, Supabase service-role keys, cloud credentials,
+  managed-identity token material, or other secrets in the mobile application or Git.
 - Never treat AI output as the official classification.
 - Never use barangay hall points as jurisdiction boundaries.
 - Never claim physical-device, cloud, or positive-detection acceptance without observing
@@ -806,12 +811,14 @@ deferred until a municipal evidence-retention policy is explicitly approved.
 
 # Phase 10 — Reliable Cloud Processing and Deployment
 
-## Phase 10A — Google Cloud Tasks Processing
+## Phase 10A — Durable AI Task Dispatch Foundation
 
 **Branch:** `feature/phase-10a-cloud-tasks-ai-processing`
 
-**Objective:** Implement reliable asynchronous processing after durable report and photo
-storage.
+**Objective:** Implement provider-neutral reliable asynchronous processing after durable
+report and photograph storage. The first adapter used Google Cloud Tasks; Phase 10B
+retains the same database leases, generations, status fields, and idempotent handler
+while adding the approved Azure Queue provider.
 
 ### Implementation tasks
 
@@ -822,8 +829,10 @@ storage.
 - [x] Return citizen identifiers without waiting for inference.
 - [x] Record `task_creation_status`.
 - [x] Enforce and test the application timeout hierarchy and CreateTask deadline.
-- [ ] Configure and verify the real queue retry limit, exponential backoff, maximum
-      attempts, and retention during Phase 10B provisioning.
+- [x] Define the Azure Queue retry limit, exponential visibility delay, maximum dequeue
+      count, quarantine path, and one-at-a-time worker contract locally.
+- [ ] Verify those retry and quarantine settings against real Azure resources during the
+      separately approved Phase 10B provisioning stages.
 - [x] Make duplicate task delivery safe.
 - [x] Preserve reports when task creation fails.
 - [x] Add a recovery command/job for completed uploads with failed task creation and
@@ -844,39 +853,81 @@ storage.
 
 ---
 
-## Phase 10B — Secure Cloud Run Deployment
+## Phase 10B — Secure Azure Container Apps Deployment
 
-**Branch:** `feature/phase-10b-cloud-run-secure-deployment`
+**Branch:** `feature/phase-10b-azure-secure-deployment`
 
-**Objective:** Deploy public Laravel and private FastAPI with least-privilege identity.
+**Objective:** Deploy public Laravel, an event-driven AI worker, and internal FastAPI on
+Azure Container Apps using managed identities and least-privilege authorization.
+
+**Approved evidence flow:**
+
+```text
+Mobile
+→ public Laravel Container App
+→ Supabase PostgreSQL and private Storage
+→ Azure Queue Storage
+→ event-driven Container Apps Job
+→ Entra-protected Laravel task endpoint
+→ internal Entra-protected FastAPI Container App
+→ Laravel persistence
+→ mobile status polling
+```
+
+MPDO barangay polygon integration remains Phase 13A and must not be folded into this
+deployment phase.
 
 ### Implementation tasks
 
-- [ ] Containerize Laravel and FastAPI with reproducible builds.
-- [ ] Deploy Laravel as the public service.
-- [ ] Deploy FastAPI without unauthenticated invocation.
-- [ ] Assign Laravel a dedicated service account with only required permissions.
-- [ ] Grant that identity Cloud Run Invoker only on FastAPI.
-- [ ] Send a Google-signed OIDC token using FastAPI's service URL as audience.
-- [ ] Keep secrets in Secret Manager or protected Cloud Run configuration.
-- [ ] Configure Cloud Tasks identity and endpoint protection.
-- [ ] Set CPU, memory, timeouts, concurrency, min/max instances, startup probes, and
-      health checks.
-- [ ] Limit instances/concurrency to protect Supabase connections.
-- [ ] Align regions where practical and measure latency.
-- [ ] Never include downloaded service-account keys in source or images.
+- [x] Add reproducible, non-root Laravel and FastAPI container definitions with no
+      startup migrations or secret generation.
+- [x] Add a provider-specific Azure Queue REST adapter using managed-identity bearer
+      tokens; do not introduce the retired Azure Storage PHP SDK or Shared Key signing.
+- [x] Require exact user-assigned identity client IDs and fixed resource audiences for
+      every managed-identity token request.
+- [x] Add an event worker that preserves Phase 10A generations and leases, owns Queue
+      visibility retry, quarantines exhausted messages, and exits cleanly after handling
+      a retry.
+- [x] Define Applications-only Entra roles `Civiclear.AiTask.Invoke` and
+      `Civiclear.FastApi.Invoke` and bind expected tenant, audience, role, client, and
+      managed-identity principal claims.
+- [x] Define local Bicep for Basic ACR, Consumption-only Workload Profiles v2 Container
+      Apps, bounded Log Analytics, Key Vault, Queue Storage, user-assigned identities,
+      exact queue-scope RBAC, private FastAPI ingress, and bounded scale-to-zero limits.
+- [x] Add a GitHub-hosted remote-build fallback that requires an exact reviewed commit
+      SHA, performs filename and credential checks, and produces SHA-tagged images with
+      provenance and SBOM metadata.
+- [ ] Pass the immutable pre-build source gate and create the reviewed implementation
+      commit after explicit approval.
+- [ ] Verify Azure for Students cost and quota readiness before creating any resource.
+- [ ] Create Azure resources, app registrations, roles, and assignments only after their
+      separate approval gates; never self-escalate Entra permissions.
+- [ ] Populate first Key Vault secret versions only in the separately approved protected
+      secret stage; use version-pinned references and never placeholder values.
+- [ ] Remotely build and inspect exact-commit images, record immutable digests, and deploy
+      those digests only after explicit approval.
+- [ ] Prove Laravel public ingress, FastAPI internal-only routing, Entra authorization,
+      queue send/receive/update/delete/quarantine, ACR pull, Supabase connectivity,
+      probes, timeouts, and bounded concurrency.
+- [ ] After every required queue operation works with managed identity, separately
+      approve disabling Storage Shared Key and retest the complete queue flow.
+- [ ] Resolve the production Tracking Token-in-URL blocker before production acceptance.
 
 ### Exit gate
 
-- [ ] Laravel is publicly reachable over HTTPS.
-- [ ] Unauthenticated FastAPI calls fail.
-- [ ] Laravel-to-FastAPI OIDC invocation succeeds.
-- [ ] Supabase and Cloud Tasks work from Cloud Run.
-- [ ] Health endpoints report safe readiness.
+- [ ] Laravel is publicly reachable over HTTPS through Azure Container Apps.
+- [ ] FastAPI is unreachable from the public internet and rejects unauthorized internal
+      inference requests.
+- [ ] Managed-identity Entra invocation succeeds for worker-to-Laravel and
+      Laravel-to-FastAPI only.
+- [ ] Supabase and Azure Queue processing work without Shared Key or connection strings.
+- [ ] Health endpoints report safe liveness and readiness.
+- [ ] Measured latency, cold starts, processing duration, Queue visibility, worker
+      timeout, replica limits, logs, and student budget alerts are recorded.
 
 ---
 
-## Phase 10C — Cloud End-to-End Verification
+## Phase 10C — Azure Cloud End-to-End Verification
 
 **Branch:** `test/phase-10c-cloud-end-to-end-verification`
 
@@ -886,14 +937,15 @@ storage.
 
 ```text
 Mobile
-→ Laravel Cloud Run
+→ public Laravel Container App
 → Supabase PostgreSQL
-→ Private Supabase Storage
-→ Google Cloud Tasks
-→ Protected Laravel endpoint
-→ Private FastAPI
+→ private Supabase Storage
+→ Azure Queue Storage
+→ event-driven Container Apps Job
+→ protected Laravel endpoint
+→ internal FastAPI Container App
 → Laravel persistence
-→ Mobile polling
+→ mobile polling
 ```
 
 ### Exit gate
@@ -906,7 +958,7 @@ Mobile
 - [ ] AI failure does not lose the report.
 - [ ] No-detection is controlled.
 - [ ] A representative positive image is recorded when available.
-- [ ] Cloudflare Tunnel is not required.
+- [ ] Localhost, USB forwarding, mobile hotspot, and Cloudflare Tunnel are not required.
 
 ---
 
@@ -921,7 +973,11 @@ Mobile
 ### Implementation tasks
 
 - [ ] Preserve AI recommendation and confidence.
-- [ ] Add barangay staff controls for `official_violation_type`.
+- [ ] Present the completed AI category automatically; staff normally verifies or
+      rejects it instead of manually initiating AI or re-entering the category.
+- [ ] Populate `official_violation_type` from the reviewed AI category only when staff
+      verifies it; allow an explicit correction when the evidence shows the AI result is
+      wrong.
 - [ ] Record `verification_status`, `verified_by`, and `verified_at`.
 - [ ] Record AI-versus-staff agreement/correction for later model evaluation.
 - [ ] Allow authorized invalid and duplicate classifications.
@@ -931,7 +987,7 @@ Mobile
 
 ### Exit gate
 
-- [ ] AI cannot automatically verify a report.
+- [ ] AI runs automatically after submission but cannot automatically verify a report.
 - [ ] Assigned barangay staff can verify only authorized reports.
 - [ ] DILG routing remains functional.
 - [ ] Authorization, verification, and timeline tests pass.
@@ -1063,7 +1119,8 @@ it must not be represented as approved for unattended public production use.
       and OIDC.
 - [ ] Measure model startup, inference, queue, upload, polling, and total processing
       latency.
-- [ ] Review Cloud Run/Supabase limits, connections, regions, and costs.
+- [ ] Review Azure Container Apps, Queue Storage, ACR, Key Vault, and Supabase limits,
+      connections, regions, student-credit eligibility, and costs.
 - [ ] Complete model and Ultralytics licensing review.
 - [ ] Complete the mandatory municipal evidence-retention and deletion gate.
 - [ ] Remove remaining obsolete phone-side AI code and environment values.
@@ -1076,7 +1133,7 @@ it must not be represented as approved for unattended public production use.
 ### Final release gate
 
 - [ ] Real mobile submission and tracking work.
-- [ ] Private FastAPI and Cloud Task recovery work.
+- [ ] Internal FastAPI and Azure Queue recovery work.
 - [ ] Reports survive AI and infrastructure failures.
 - [ ] Staff verification and official analytics are correct.
 - [ ] Security and privacy review is complete.

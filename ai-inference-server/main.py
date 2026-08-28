@@ -18,6 +18,7 @@ from services.image_inference_service import ImageInferenceService
 from services.image_preprocessing import ImageInputError
 from services.nlp_service import NLPService
 from services.yolo_decoder import ModelContractError
+from services.entra_auth import EntraAuthenticator, EntraAuthorizationError
 
 BASE_DIR = Path(__file__).resolve().parent
 REPOSITORY_DIR = BASE_DIR.parent
@@ -34,16 +35,32 @@ image_service = ImageInferenceService(
     Path(os.getenv("IMAGE_LABELS_PATH", BASE_DIR / "models/image/labels.txt")),
     Path(os.getenv("IMAGE_METADATA_PATH", BASE_DIR / "models/image/model_metadata.json")),
 )
+entra_authenticator = EntraAuthenticator()
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    entra_authenticator.assert_configuration()
     nlp_service.load()
     image_service.load()
     yield
 
 
 app = FastAPI(title="DILG-RC AI Inference Server", version="8.3.0", lifespan=lifespan)
+
+
+@app.middleware("http")
+async def protect_inference_routes(request: Request, call_next):
+    if request.url.path.startswith(("/v1/predict/", "/predict/")):
+        try:
+            entra_authenticator.verify(request.headers.get("authorization"))
+        except EntraAuthorizationError as exc:
+            return operational_error(
+                "inference_not_authorized",
+                "The inference request is not authorized.",
+                exc.status_code,
+            )
+    return await call_next(request)
 
 
 def operational_error(code: str, message: str, status_code: int) -> JSONResponse:

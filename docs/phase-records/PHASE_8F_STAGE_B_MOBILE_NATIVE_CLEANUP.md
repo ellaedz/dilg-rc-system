@@ -69,4 +69,3 @@ Codex handoff. They are not inserted afterward into this commit.
 Stage B does not modify the Phase 8F-R recovery-discard defect, Tracking Token UX,
 branding, GIS data, barangay status fields, Laravel/FastAPI contracts, database schema,
 Supabase, Cloud Run, or final release signing.
-

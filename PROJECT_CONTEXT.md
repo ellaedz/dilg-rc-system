@@ -112,7 +112,7 @@ The SQLite source and online backup both pass integrity checks and contain 27 us
 11 violation reports, 9 report timelines, and 15 migrations.
 
 Phase 8A changes documentation only. No schema, data, runtime, dependency, or cloud
-resource change is authorized in this phase. See `PHASE_8A_BASELINE.md` for hashes,
+resource change is authorized in this phase. See `docs/phase-records/PHASE_8A_BASELINE.md` for hashes,
 toolchain versions, test results, and current blockers.
 
 ## Current phase
@@ -128,7 +128,7 @@ while excluding unrelated backend and generated files.
 
 Desktop validation is green, but physical TFLite, camera/gallery, GPS, LAN submission,
 and mobile refresh evidence must still be recorded on the Infinix Hot 40i before physical
-end-to-end acceptance is marked complete. See `PHASE_7_DEFENSE_VALIDATION.md`.
+end-to-end acceptance is marked complete. See `docs/phase-records/PHASE_7_DEFENSE_VALIDATION.md`.
 
 Phase 6A-6D source implementation is complete on
 `feature/phase-6-fastapi-ai-integration`. The repository now contains one local

@@ -29,7 +29,7 @@ Do not recreate or re-merge Phases 5D–7.
 Before creating Phase 8A, review these unexplained worktree deletions:
 
 ```text
-PHASE_7_DEFENSE_VALIDATION.md
+docs/phase-records/PHASE_7_DEFENSE_VALIDATION.md
 QUICK_UI_FIX_COMPLETE.md
 UI_REFACTOR_PHASE1_COMPLETE.md
 ```
@@ -325,7 +325,7 @@ Phase 8A commit even when no further textual correction is required.
 
 ### Commit evidence rule
 
-`PHASE_8A_BASELINE.md` must record:
+`docs/phase-records/PHASE_8A_BASELINE.md` must record:
 
 - the starting branch and complete starting commit SHA;
 - the Phase 8A branch name;
@@ -335,7 +335,7 @@ Phase 8A commit even when no further textual correction is required.
 The final Phase 8A commit SHA is created from the committed file contents, so the file
 cannot contain the SHA of the commit that contains it. Report the resulting final commit
 SHA in the Codex final response after committing. Do not amend the commit merely to
-insert its own SHA into `PHASE_8A_BASELINE.md`.
+insert its own SHA into `docs/phase-records/PHASE_8A_BASELINE.md`.
 
 ### Exit gate
 

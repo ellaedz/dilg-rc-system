@@ -253,4 +253,3 @@ All GPS barangay auto-assignment features are implemented!
 Ready for Phase 4D when you are!
 
 ═══════════════════════════════════════════════════════════════════
-

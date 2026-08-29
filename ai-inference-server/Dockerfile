@@ -17,7 +17,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     MUNICIPAL_BOUNDARY_PATH=/app/gis/boundary.geojson \
     BARANGAY_BOUNDARY_PATH=/app/gis/santa_cruz_barangays.geojson
 
-RUN apt-get update \
+RUN mkdir -p /tmp/civiclear \
+    && apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates libgomp1 \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd --gid 10001 civiclear \

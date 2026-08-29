@@ -11,6 +11,7 @@ RUN apt-get update \
         ca-certificates \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
+        libxml2-dev \
         libpng-dev \
         libpq-dev \
         libwebp-dev \

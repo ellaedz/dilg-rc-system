@@ -325,6 +325,56 @@ class Phase10BAzureDeploymentTest extends TestCase
         $this->assertSame(['Application'], $roles['fastApi']['appRoles'][0]['allowedMemberTypes']);
     }
 
+    public function test_laravel_runtime_packages_only_the_verified_public_supabase_ca(): void
+    {
+        $certificateRelativePath = 'docker/laravel/certs/supabase-root-2021.crt';
+        $certificatePath = base_path($certificateRelativePath);
+        $certificate = file_get_contents($certificatePath);
+        $dockerfile = file_get_contents(base_path('Dockerfile'));
+        $dockerignore = file_get_contents(base_path('.dockerignore'));
+        $buildWorkflow = file_get_contents(base_path(
+            '.github/workflows/phase10b-azure-build.yml',
+        ));
+
+        $this->assertFileExists($certificatePath);
+        $this->assertSame(
+            '700723581420dd1ac98fd7e9ac529f0ef210eadcaf87fc868a3ad7d114c2f3b7',
+            hash_file('sha256', $certificatePath),
+        );
+        $this->assertStringContainsString('-----BEGIN CERTIFICATE-----', $certificate);
+        $this->assertStringNotContainsString('PRIVATE KEY', $certificate);
+        $this->assertStringContainsString('*.crt', $dockerignore);
+        $this->assertStringContainsString(
+            '!'.$certificateRelativePath,
+            $dockerignore,
+        );
+        $this->assertStringContainsString(
+            'COPY '.$certificateRelativePath.' /usr/local/share/ca-certificates/supabase-root-2021.crt',
+            $dockerfile,
+        );
+        $this->assertStringContainsString(
+            'DB_SSLROOTCERT=/usr/local/share/ca-certificates/supabase-root-2021.crt',
+            $dockerfile,
+        );
+        $this->assertStringContainsString(
+            'chmod 0444 /usr/local/share/ca-certificates/supabase-root-2021.crt',
+            $dockerfile,
+        );
+        $this->assertStringContainsString(
+            "-e '".$certificateRelativePath."'",
+            $buildWorkflow,
+        );
+        $this->assertStringContainsString("-e '.env.example'", $buildWorkflow);
+        $this->assertStringContainsString(
+            "-e 'storage/app/private/.gitignore'",
+            $buildWorkflow,
+        );
+        $this->assertStringContainsString(
+            '\\.(pem|key|pfx|p12|crt|gpkg)$',
+            $buildWorkflow,
+        );
+    }
+
     private function worker(Phase10BFakeAzureQueue $queue): AzureAiQueueWorker
     {
         return new AzureAiQueueWorker(

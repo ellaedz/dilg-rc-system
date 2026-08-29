@@ -27,6 +27,7 @@ ai-inference-server/.pytest_cache
 *.pem
 *.key
 *.crt
+!docker/laravel/certs/supabase-root-2021.crt
 *.gpkg
 PHASE_*.md
 phase10b-reviewed-source-manifest.txt

@@ -110,6 +110,16 @@ SBOM metadata.
 files, private evidence, logs, caches, virtual environments, GIS packages, local mobile
 artifacts, tests, and Git metadata. Secrets must never be passed as build arguments.
 
+The Laravel and worker runtime image includes one narrowly allow-listed public trust
+anchor: the Supabase Root 2021 CA. Its verified SHA-256 is
+`700723581420dd1ac98fd7e9ac529f0ef210eadcaf87fc868a3ad7d114c2f3b7`. The image sets
+`DB_SSLROOTCERT` to that read-only Linux path so PostgreSQL `verify-full` can validate
+Supabase TLS in Azure. No client certificate, private key, database credential, or other
+secret is packaged in the image. The remote-build filename gate exempts only that exact
+public CA path from its certificate prohibition; every other tracked `.crt` remains
+prohibited. Its other exact exceptions are the three tracked `.env.example` templates
+and the private-storage `.gitignore` placeholder, none of which contains a credential.
+
 ## Remaining approval gates
 
 1. Complete isolated tests and full diff/secret review.

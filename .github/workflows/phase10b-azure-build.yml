@@ -36,7 +36,13 @@ jobs:
         run: |
           git ls-files | LC_ALL=C sort > phase10b-reviewed-source-manifest.txt
           if grep -Ei '(^|/)(\.env($|\.)|storage/app/private/|database/.*\.(sqlite|dump|sql)$)|\.(pem|key|pfx|p12|crt|gpkg)$' \
-            phase10b-reviewed-source-manifest.txt; then
+            phase10b-reviewed-source-manifest.txt \
+            | grep -Fvx \
+              -e '.env.example' \
+              -e 'ai-inference-server/.env.example' \
+              -e 'mobile/.env.example' \
+              -e 'storage/app/private/.gitignore' \
+              -e 'docker/laravel/certs/supabase-root-2021.crt'; then
             echo 'A prohibited sensitive filename is tracked by the reviewed commit.' >&2
             exit 1
           fi

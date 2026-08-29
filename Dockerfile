@@ -56,6 +56,7 @@ FROM php-base AS runtime
 ENV APP_ENV=production \
     APP_DEBUG=false \
     LOG_CHANNEL=stderr \
+    DB_SSLROOTCERT=/usr/local/share/ca-certificates/supabase-root-2021.crt \
     PORT=8080 \
     APACHE_PORT=8080
 
@@ -68,8 +69,10 @@ COPY docker/laravel/ports.conf /etc/apache2/ports.conf
 COPY docker/laravel/civiclear.conf /etc/apache2/sites-available/civiclear.conf
 COPY docker/laravel/php-runtime.ini /usr/local/etc/php/conf.d/99-civiclear-runtime.ini
 COPY docker/laravel/entrypoint.sh /usr/local/bin/civiclear-entrypoint
+COPY docker/laravel/certs/supabase-root-2021.crt /usr/local/share/ca-certificates/supabase-root-2021.crt
 RUN a2ensite civiclear \
-    && chmod 0555 /usr/local/bin/civiclear-entrypoint
+    && chmod 0555 /usr/local/bin/civiclear-entrypoint \
+    && chmod 0444 /usr/local/share/ca-certificates/supabase-root-2021.crt
 
 COPY --chown=www-data:www-data artisan composer.json composer.lock ./
 COPY --chown=www-data:www-data app app

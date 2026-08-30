@@ -356,6 +356,9 @@ class Phase10BAzureDeploymentTest extends TestCase
         $workloads = file_get_contents(base_path('infra/phase10b/workloads.bicep'));
         $main = file_get_contents(base_path('infra/phase10b/main.bicep'));
         $rbac = file_get_contents(base_path('infra/phase10b/rbac.bicep'));
+        $queueVisibilityRole = file_get_contents(base_path(
+            'infra/phase10b/queue-visibility-role.bicep',
+        ));
         $roles = json_decode(
             file_get_contents(base_path('infra/phase10b/entra-app-roles.example.json')),
             true,
@@ -372,6 +375,14 @@ class Phase10BAzureDeploymentTest extends TestCase
         $this->assertStringContainsString('workloadProfileType: \'Consumption\'', $main);
         $this->assertStringContainsString('c6a89b2d-59bc-44d0-9896-0f6e12d7b80a', $rbac);
         $this->assertStringContainsString('8a0f0c08-91a1-4084-bc3d-661d67233fed', $rbac);
+        $this->assertStringContainsString(
+            'Microsoft.Storage/storageAccounts/queueServices/queues/read',
+            $queueVisibilityRole,
+        );
+        $this->assertStringContainsString(
+            'Microsoft.Storage/storageAccounts/queueServices/queues/messages/write',
+            $queueVisibilityRole,
+        );
         $this->assertSame(['Application'], $roles['laravelTaskApi']['appRoles'][0]['allowedMemberTypes']);
         $this->assertSame(['Application'], $roles['fastApi']['appRoles'][0]['allowedMemberTypes']);
     }

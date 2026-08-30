@@ -9,12 +9,14 @@ resource visibilityWriter 'Microsoft.Authorization/roleDefinitions@2022-04-01' =
   name: roleGuid
   properties: {
     roleName: roleName
-    description: 'Allows only Azure Queue message content/visibility updates for CIVICLEAR retry handling.'
+    description: 'Allows CIVICLEAR queue-length scaling reads and message visibility updates on the assigned queue.'
     type: 'CustomRole'
     assignableScopes: [subscription().id]
     permissions: [
       {
-        actions: []
+        actions: [
+          'Microsoft.Storage/storageAccounts/queueServices/queues/read'
+        ]
         notActions: []
         dataActions: [
           'Microsoft.Storage/storageAccounts/queueServices/queues/messages/write'

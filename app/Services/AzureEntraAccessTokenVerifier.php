@@ -83,7 +83,7 @@ class AzureEntraAccessTokenVerifier implements VerifiesCloudTaskOidc
         if (! $response->successful() || ! is_array($response->json())) {
             throw new CloudTaskIdentityException;
         }
-        $keys = JWK::parseKeySet($response->json());
+        $keys = $this->parseKeySet($response->json());
         if ($keys === []) {
             throw new CloudTaskIdentityException;
         }
@@ -93,6 +93,18 @@ class AzureEntraAccessTokenVerifier implements VerifiesCloudTaskOidc
         ];
 
         return $keys;
+    }
+
+    /**
+     * Microsoft Entra's v1 JWKS omits the optional `alg` member, so pin the
+     * only algorithm accepted by these RSA signing keys explicitly.
+     *
+     * @param  array<string, mixed>  $jwks
+     * @return array<string, Key>
+     */
+    protected function parseKeySet(array $jwks): array
+    {
+        return JWK::parseKeySet($jwks, 'RS256');
     }
 
     private function unsignedTokenVersion(string $token): string

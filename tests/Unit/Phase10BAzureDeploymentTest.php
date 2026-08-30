@@ -14,6 +14,7 @@ use App\Services\AzureQueueConfiguration;
 use App\Services\AzureQueueRestClient;
 use App\Services\AzureQueueTaskCreator;
 use App\Services\FastApiRequestAuthenticator;
+use Firebase\JWT\Key;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -334,6 +335,22 @@ class Phase10BAzureDeploymentTest extends TestCase
         (new Phase10BControlledEntraVerifier($claims))->verify('header.payload.signature');
     }
 
+    public function test_entra_verifier_accepts_microsoft_v1_jwks_without_optional_algorithm(): void
+    {
+        $keys = (new Phase10BJwkParsingEntraVerifier)->parseFixture([
+            'keys' => [[
+                'kty' => 'RSA',
+                'use' => 'sig',
+                'kid' => 'microsoft-v1-key',
+                'n' => 'n0silOudntxwkXPPDyWnJh_V6A9pzQFadTX5m2gMmHkNLYJWgGYwXP36l9YYiN8Btit4aaAcibCwGi6cApwCxe1kR4L5dpGyQpNdKz0BMzLB3kncNdoo0JG8D6O3Lk-IMeStyIpiz1htkgAmXSSMl5Et9exh9Rib1_OllS8pvkScKCQhpxVQriRE8mEop8wOX68tD1rt5YOulAysynJ8a_1URPvrMf0TtpGwYTsSnyyz0a7i_ZwYsxauzh82xVJwrJYUnReyTAScCm5RtiEJDIcno73D8WUwaeT7NBh8h9gTbxVU7PAOf20-EDm_v27r_w6h8fmkEl6b8ombjCd_1Q',
+                'e' => 'AQAB',
+            ]],
+        ]);
+
+        $this->assertArrayHasKey('microsoft-v1-key', $keys);
+        $this->assertSame('RS256', $keys['microsoft-v1-key']->getAlgorithm());
+    }
+
     public function test_deployment_artifacts_preserve_cost_identity_and_network_gates(): void
     {
         $workloads = file_get_contents(base_path('infra/phase10b/workloads.bicep'));
@@ -449,6 +466,18 @@ class Phase10BControlledEntraVerifier extends AzureEntraAccessTokenVerifier
     protected function decodeToken(string $token, string $tenant): object
     {
         return (object) $this->claims;
+    }
+}
+
+class Phase10BJwkParsingEntraVerifier extends AzureEntraAccessTokenVerifier
+{
+    /**
+     * @param  array<string, mixed>  $jwks
+     * @return array<string, Key>
+     */
+    public function parseFixture(array $jwks): array
+    {
+        return $this->parseKeySet($jwks);
     }
 }
 

@@ -283,6 +283,7 @@ class Phase10BAzureDeploymentTest extends TestCase
         $claims = [
             'aud' => 'api://civiclear-task-api',
             'iss' => 'https://login.microsoftonline.com/'.self::TENANT_ID.'/v2.0',
+            'ver' => '2.0',
             'tid' => self::TENANT_ID,
             'azp' => self::WORKER_CLIENT_ID,
             'oid' => self::WORKER_PRINCIPAL_ID,
@@ -295,7 +296,40 @@ class Phase10BAzureDeploymentTest extends TestCase
         $verified = $verifier->verify('header.payload.signature');
         $this->assertSame(self::WORKER_PRINCIPAL_ID, $verified['oid']);
 
+        $managedIdentityClaims = $claims;
+        $managedIdentityClaims['iss'] = 'https://sts.windows.net/'.self::TENANT_ID.'/';
+        $managedIdentityClaims['ver'] = '1.0';
+        $managedIdentityClaims['appid'] = $managedIdentityClaims['azp'];
+        unset($managedIdentityClaims['azp']);
+        $managedIdentityVerified = (new Phase10BControlledEntraVerifier($managedIdentityClaims))
+            ->verify('header.payload.signature');
+        $this->assertSame(self::WORKER_CLIENT_ID, $managedIdentityVerified['appid']);
+
         $claims['roles'] = ['Unapproved.Role'];
+        $this->expectException(CloudTaskIdentityException::class);
+        (new Phase10BControlledEntraVerifier($claims))->verify('header.payload.signature');
+    }
+
+    public function test_entra_verifier_rejects_a_token_version_issuer_mismatch(): void
+    {
+        config([
+            'azure.entra.tenant_id' => self::TENANT_ID,
+            'azure.entra.task_api_audience' => 'api://civiclear-task-api',
+            'azure.entra.task_api_role' => 'Civiclear.AiTask.Invoke',
+            'azure.entra.task_worker_client_id' => self::WORKER_CLIENT_ID,
+            'azure.entra.task_worker_principal_id' => self::WORKER_PRINCIPAL_ID,
+        ]);
+
+        $claims = [
+            'aud' => 'api://civiclear-task-api',
+            'iss' => 'https://login.microsoftonline.com/'.self::TENANT_ID.'/v2.0',
+            'ver' => '1.0',
+            'tid' => self::TENANT_ID,
+            'appid' => self::WORKER_CLIENT_ID,
+            'oid' => self::WORKER_PRINCIPAL_ID,
+            'roles' => ['Civiclear.AiTask.Invoke'],
+        ];
+
         $this->expectException(CloudTaskIdentityException::class);
         (new Phase10BControlledEntraVerifier($claims))->verify('header.payload.signature');
     }
@@ -311,7 +345,7 @@ class Phase10BAzureDeploymentTest extends TestCase
             flags: JSON_THROW_ON_ERROR,
         );
 
-        $this->assertStringContainsString("external: false", $workloads);
+        $this->assertStringContainsString('external: false', $workloads);
         $this->assertStringContainsString('minReplicas: 0, maxReplicas: 2', $workloads);
         $this->assertStringContainsString('minReplicas: 0, maxReplicas: 1', $workloads);
         $this->assertStringContainsString('minExecutions: 0', $workloads);
@@ -405,7 +439,6 @@ class Phase10BAzureDeploymentTest extends TestCase
     {
         return 'header.payload.signature';
     }
-
 }
 
 class Phase10BControlledEntraVerifier extends AzureEntraAccessTokenVerifier

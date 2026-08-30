@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -19,7 +21,7 @@ class ControlledAuthenticator(EntraAuthenticator):
         self.expected_principal_id = PRINCIPAL
         self.required_role = ROLE
         self._claims = claims
-        self._jwks = None
+        self._jwks = {}
 
     def _decode(self, token: str) -> dict:
         assert token == "header.payload.signature"
@@ -29,6 +31,7 @@ class ControlledAuthenticator(EntraAuthenticator):
 def valid_claims() -> dict:
     return {
         "iss": f"https://login.microsoftonline.com/{TENANT}/v2.0",
+        "ver": "2.0",
         "tid": TENANT,
         "azp": CLIENT,
         "oid": PRINCIPAL,
@@ -44,6 +47,69 @@ def test_entra_authenticator_binds_application_and_managed_identity_claims():
     assert claims["oid"] == PRINCIPAL
 
 
+def test_entra_authenticator_accepts_managed_identity_v1_claims():
+    claims = valid_claims()
+    claims.update(
+        {
+            "iss": f"https://sts.windows.net/{TENANT}/",
+            "ver": "1.0",
+            "appid": claims.pop("azp"),
+        }
+    )
+
+    verified = ControlledAuthenticator(claims).verify(
+        "Bearer header.payload.signature"
+    )
+
+    assert verified["appid"] == CLIENT
+
+
+@pytest.mark.parametrize(
+    ("version", "expected_issuer", "expected_key_path"),
+    [
+        ("1.0", f"https://sts.windows.net/{TENANT}/", "discovery/keys"),
+        (
+            "2.0",
+            f"https://login.microsoftonline.com/{TENANT}/v2.0",
+            "discovery/v2.0/keys",
+        ),
+    ],
+)
+def test_decode_selects_signing_keys_for_token_version(
+    monkeypatch, version, expected_issuer, expected_key_path
+):
+    key_urls = []
+
+    class ControlledJwkClient:
+        def __init__(self, url, **_kwargs):
+            key_urls.append(url)
+
+        def get_signing_key_from_jwt(self, _token):
+            return SimpleNamespace(key="signing-key")
+
+    def controlled_decode(_token, key=None, **kwargs):
+        if key is None:
+            assert kwargs["options"]["verify_signature"] is False
+            return {"ver": version}
+
+        assert key == "signing-key"
+        assert kwargs["issuer"] == expected_issuer
+        return {"ver": version}
+
+    monkeypatch.setattr("services.entra_auth.PyJWKClient", ControlledJwkClient)
+    monkeypatch.setattr("services.entra_auth.jwt.decode", controlled_decode)
+
+    authenticator = EntraAuthenticator.__new__(EntraAuthenticator)
+    authenticator.tenant_id = TENANT
+    authenticator.audience = "api://civiclear-fastapi"
+    authenticator._jwks = {}
+
+    assert authenticator._decode("header.payload.signature")["ver"] == version
+    assert key_urls == [
+        f"https://login.microsoftonline.com/{TENANT}/{expected_key_path}"
+    ]
+
+
 @pytest.mark.parametrize(
     ("claim", "value"),
     [
@@ -51,6 +117,8 @@ def test_entra_authenticator_binds_application_and_managed_identity_claims():
         ("azp", "66666666-6666-4666-8666-666666666666"),
         ("oid", "66666666-6666-4666-8666-666666666666"),
         ("roles", ["Unapproved.Role"]),
+        ("iss", f"https://sts.windows.net/{TENANT}/"),
+        ("ver", "1.0"),
     ],
 )
 def test_entra_authenticator_rejects_wrong_identity_claims(claim, value):

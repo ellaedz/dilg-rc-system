@@ -6,6 +6,7 @@ use App\Contracts\VerifiesCloudTaskOidc;
 use App\Exceptions\CloudTaskIdentityException;
 use Firebase\JWT\JWK;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Illuminate\Support\Facades\Http;
 use Throwable;
 
@@ -22,8 +23,6 @@ class AzureEntraAccessTokenVerifier implements VerifiesCloudTaskOidc
             $expectedClient = strtolower($this->guid('task_worker_client_id'));
             $expectedPrincipal = strtolower($this->guid('task_worker_principal_id'));
             $requiredRole = $this->required('task_api_role');
-            $issuer = "https://login.microsoftonline.com/{$tenant}/v2.0";
-
             $previousLeeway = JWT::$leeway;
             JWT::$leeway = (int) config('azure.entra.clock_skew_seconds', 60);
             try {
@@ -36,6 +35,7 @@ class AzureEntraAccessTokenVerifier implements VerifiesCloudTaskOidc
                 throw new CloudTaskIdentityException;
             }
 
+            $issuer = $this->issuer($tenant, $claims['ver'] ?? null);
             $actualAudience = $claims['aud'] ?? null;
             $actualClient = strtolower((string) ($claims['azp'] ?? $claims['appid'] ?? ''));
             $actualPrincipal = strtolower((string) ($claims['oid'] ?? ''));
@@ -63,18 +63,22 @@ class AzureEntraAccessTokenVerifier implements VerifiesCloudTaskOidc
 
     protected function decodeToken(string $token, string $tenant): object
     {
-        return JWT::decode($token, $this->keys($tenant));
+        $version = $this->unsignedTokenVersion($token);
+
+        return JWT::decode($token, $this->keys($tenant, $version));
     }
 
-    /** @return array<string, \Firebase\JWT\Key> */
-    private function keys(string $tenant): array
+    /** @return array<string, Key> */
+    private function keys(string $tenant, string $version): array
     {
-        $cached = self::$keySets[$tenant] ?? null;
+        $cacheKey = "{$tenant}:{$version}";
+        $cached = self::$keySets[$cacheKey] ?? null;
         if ($cached && $cached['expires_at'] > time()) {
             return $cached['keys'];
         }
 
-        $url = "https://login.microsoftonline.com/{$tenant}/discovery/v2.0/keys";
+        $keyPath = $version === '1.0' ? 'discovery/keys' : 'discovery/v2.0/keys';
+        $url = "https://login.microsoftonline.com/{$tenant}/{$keyPath}";
         $response = Http::acceptJson()->connectTimeout(3)->timeout(8)->get($url);
         if (! $response->successful() || ! is_array($response->json())) {
             throw new CloudTaskIdentityException;
@@ -83,12 +87,48 @@ class AzureEntraAccessTokenVerifier implements VerifiesCloudTaskOidc
         if ($keys === []) {
             throw new CloudTaskIdentityException;
         }
-        self::$keySets[$tenant] = [
+        self::$keySets[$cacheKey] = [
             'keys' => $keys,
             'expires_at' => time() + 3600,
         ];
 
         return $keys;
+    }
+
+    private function unsignedTokenVersion(string $token): string
+    {
+        $segments = explode('.', $token);
+        if (count($segments) !== 3) {
+            throw new CloudTaskIdentityException;
+        }
+
+        $claims = json_decode(
+            JWT::urlsafeB64Decode($segments[1]),
+            true,
+            flags: JSON_THROW_ON_ERROR,
+        );
+        if (! is_array($claims)) {
+            throw new CloudTaskIdentityException;
+        }
+
+        return $this->tokenVersion($claims['ver'] ?? null);
+    }
+
+    private function issuer(string $tenant, mixed $version): string
+    {
+        return match ($this->tokenVersion($version)) {
+            '1.0' => "https://sts.windows.net/{$tenant}/",
+            '2.0' => "https://login.microsoftonline.com/{$tenant}/v2.0",
+        };
+    }
+
+    private function tokenVersion(mixed $version): string
+    {
+        if ($version !== '1.0' && $version !== '2.0') {
+            throw new CloudTaskIdentityException;
+        }
+
+        return $version;
     }
 
     private function required(string $key): string

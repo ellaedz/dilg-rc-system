@@ -897,14 +897,14 @@ deployment phase.
 - [x] Add a GitHub-hosted remote-build fallback that requires an exact reviewed commit
       SHA, performs filename and credential checks, and produces SHA-tagged images with
       provenance and SBOM metadata.
-- [ ] Pass the immutable pre-build source gate and create the reviewed implementation
+- [x] Pass the immutable pre-build source gate and create the reviewed implementation
       commit after explicit approval.
-- [ ] Verify Azure for Students cost and quota readiness before creating any resource.
-- [ ] Create Azure resources, app registrations, roles, and assignments only after their
+- [x] Verify Azure for Students cost and quota readiness before creating any resource.
+- [x] Create Azure resources, app registrations, roles, and assignments only after their
       separate approval gates; never self-escalate Entra permissions.
-- [ ] Populate first Key Vault secret versions only in the separately approved protected
+- [x] Populate first Key Vault secret versions only in the separately approved protected
       secret stage; use version-pinned references and never placeholder values.
-- [ ] Remotely build and inspect exact-commit images, record immutable digests, and deploy
+- [x] Remotely build and inspect exact-commit images, record immutable digests, and deploy
       those digests only after explicit approval.
 - [ ] Prove Laravel public ingress, FastAPI internal-only routing, Entra authorization,
       queue send/receive/update/delete/quarantine, ACR pull, Supabase connectivity,
@@ -915,13 +915,13 @@ deployment phase.
 
 ### Exit gate
 
-- [ ] Laravel is publicly reachable over HTTPS through Azure Container Apps.
-- [ ] FastAPI is unreachable from the public internet and rejects unauthorized internal
+- [x] Laravel is publicly reachable over HTTPS through Azure Container Apps.
+- [x] FastAPI is unreachable from the public internet and rejects unauthorized internal
       inference requests.
-- [ ] Managed-identity Entra invocation succeeds for worker-to-Laravel and
+- [x] Managed-identity Entra invocation succeeds for worker-to-Laravel and
       Laravel-to-FastAPI only.
 - [ ] Supabase and Azure Queue processing work without Shared Key or connection strings.
-- [ ] Health endpoints report safe liveness and readiness.
+- [x] Health endpoints report safe liveness and readiness.
 - [ ] Measured latency, cold starts, processing duration, Queue visibility, worker
       timeout, replica limits, logs, and student budget alerts are recorded.
 

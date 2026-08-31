@@ -906,10 +906,10 @@ deployment phase.
       secret stage; use version-pinned references and never placeholder values.
 - [x] Remotely build and inspect exact-commit images, record immutable digests, and deploy
       those digests only after explicit approval.
-- [ ] Prove Laravel public ingress, FastAPI internal-only routing, Entra authorization,
+- [x] Prove Laravel public ingress, FastAPI internal-only routing, Entra authorization,
       queue send/receive/update/delete/quarantine, ACR pull, Supabase connectivity,
       probes, timeouts, and bounded concurrency.
-- [ ] After every required queue operation works with managed identity, separately
+- [x] After every required queue operation works with managed identity, separately
       approve disabling Storage Shared Key and retest the complete queue flow.
 - [ ] Resolve the production Tracking Token-in-URL blocker before production acceptance.
 
@@ -920,7 +920,7 @@ deployment phase.
       inference requests.
 - [x] Managed-identity Entra invocation succeeds for worker-to-Laravel and
       Laravel-to-FastAPI only.
-- [ ] Supabase and Azure Queue processing work without Shared Key or connection strings.
+- [x] Supabase and Azure Queue processing work without Shared Key or connection strings.
 - [x] Health endpoints report safe liveness and readiness.
 - [ ] Measured latency, cold starts, processing duration, Queue visibility, worker
       timeout, replica limits, logs, and student budget alerts are recorded.

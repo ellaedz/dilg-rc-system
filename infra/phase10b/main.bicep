@@ -51,7 +51,7 @@ resource queueStorage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   properties: {
     allowBlobPublicAccess: false
     allowCrossTenantReplication: false
-    allowSharedKeyAccess: true
+    allowSharedKeyAccess: false
     defaultToOAuthAuthentication: true
     minimumTlsVersion: 'TLS1_2'
     publicNetworkAccess: 'Enabled'

@@ -2,8 +2,9 @@
 
 ## Status
 
-Stage 0 inspection and Stage 1 local implementation are complete. The immutable
-pre-build commit remains approval-gated. Work is on:
+The approved Azure infrastructure and workloads are deployed. Immutable images,
+version-pinned secrets, managed-identity service calls, Supabase connectivity, and the
+complete Azure Queue lifecycle have been verified. Work remains on:
 
 ```text
 feature/phase-10b-azure-secure-deployment
@@ -15,8 +16,9 @@ The approved starting commit is:
 eb66533a4f64bc93c2a507cf71ea8879dea04dd8
 ```
 
-No Azure resource, Entra application, secret, container image, deployment, production
-database row, or production Storage object was created or changed during Stage 1.
+Stage 1 remained isolated and did not mutate cloud or production data. Later approved
+stages created and verified the Azure resources without using a production report as a
+test fixture.
 
 ## Stage 1 validation evidence
 
@@ -34,8 +36,29 @@ database row, or production Storage object was created or changed during Stage 1
   tracked `.env` file.
 - `git diff --check` passed.
 
-These are local and mocked validation results. They do not claim that images have been
-built or that Azure, Entra, Supabase-from-Azure, or physical mobile behavior works.
+These results describe the isolated Stage 1 gate. The live evidence below separately
+records what was subsequently proven in Azure; physical mobile end-to-end verification
+remains outside this phase.
+
+## Live Azure verification evidence
+
+- Immutable Laravel and FastAPI images were built from reviewed commits, pushed by
+  digest, and inspected with SPDX SBOM and SLSA provenance attestations.
+- Laravel and FastAPI Container Apps and the event-driven worker job provisioned and
+  ran successfully with user-assigned managed identities. Laravel returned HTTP 200 on
+  its public health endpoint; FastAPI remained internal-only.
+- Entra-protected Laravel-to-FastAPI and worker-to-Laravel calls acquired tokens with
+  the expected tenant, audience, application role, client ID, and principal ID.
+- A controlled marked test report completed through Supabase, Azure Queue, the worker,
+  internal FastAPI, and Laravel persistence. Supabase S3 access was also verified with
+  a create/read/delete canary before the superseded key was revoked.
+- Azure Queue send, receive, visibility update, delete, quarantine, and KEDA scaler
+  metadata access were proven with narrowly scoped managed identities.
+- Storage Shared Key was then disabled on `stcivicleara41a250a`. The complete queue
+  behavior was retested: a valid message was acknowledged, a leased task logged
+  `retry_scheduled` and was later acknowledged, and an invalid envelope logged
+  `quarantined`. The exact quarantine canary was verified and deleted, the quarantine
+  queue was empty afterward, and the temporary human queue role was removed.
 
 ## Approved architecture
 
@@ -120,22 +143,12 @@ public CA path from its certificate prohibition; every other tracked `.crt` rema
 prohibited. Its other exact exceptions are the three tracked `.env.example` templates
 and the private-storage `.gitignore` placeholder, none of which contains a credential.
 
-## Remaining approval gates
+## Remaining production acceptance gates
 
-1. Complete isolated tests and full diff/secret review.
-2. Obtain explicit approval to create the immutable pre-build implementation commit.
-3. Record the complete commit SHA and require a clean worktree.
-4. Verify Azure for Students cost, quotas, providers, regional availability, ACR mode,
-   ACR Tasks availability, Entra permissions, and custom-role permission without writes.
-5. Obtain separate approval before creating Azure resources.
-6. Obtain separate approval before creating Entra applications, app-role assignments,
-   or the narrow custom queue role.
-7. Obtain separate approval before setting the first Key Vault secret versions.
-8. Obtain separate approval before remote builds.
-9. Inspect image digests, SBOMs, vulnerabilities, and runtime contents before deployment.
-10. Obtain separate approval before deployment and production traffic.
-11. Prove all required managed-identity operations before separately approving Shared
-    Key shutdown.
+1. Resolve the Tracking Token-in-URL blocker before production acceptance.
+2. Record measured latency, cold starts, processing duration, Queue visibility, worker
+   timeout behavior, replica limits, logs, and student budget alerts.
+3. Complete Phase 10C physical mobile end-to-end verification before production traffic.
 
 If the current user cannot create the narrow queue visibility role or assign the Entra
 application roles, stop and report the exact permission gap. Do not self-assign broader
@@ -147,11 +160,10 @@ a silent workaround.
 - Public tracking still carries the opaque Tracking Token in a GET path. It must move to
   a non-URL credential transport before production acceptance.
 - MPDO barangay polygons are validated input for Phase 13A but are not yet integrated.
-- Real Azure resources, real managed-identity operations, remote images, deployment,
-  cloud latency, cold starts, and mobile end-to-end behavior remain unverified.
-- Storage Shared Key remains enabled in the initial template solely as a controlled
-  migration state and must not be disabled until every required managed-identity queue
-  operation and scaler behavior are proven.
+- Cloud latency, cold starts, budget alerts, and physical mobile end-to-end behavior
+  remain unverified.
+- Storage Shared Key is disabled and the required managed-identity queue operations and
+  scaler behavior have been proven after shutdown.
 
 ## Test isolation
 

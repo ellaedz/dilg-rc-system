@@ -1,7 +1,8 @@
 # Phase 10B Azure infrastructure artifacts
 
-These templates are local Stage 1 artifacts. They have not been deployed or validated
-against an Azure subscription.
+These templates began as local Stage 1 artifacts and have since been deployed and
+validated against the approved Azure for Students subscription. Runtime workloads use
+immutable ACR image digests and version-pinned Key Vault references.
 
 - `main.bicep` defines Basic ACR, Queue Storage, two queues, Key Vault, three
   user-assigned identities, bounded Log Analytics, and a Workload Profiles v2 Container
@@ -23,9 +24,9 @@ Secret values are deliberately absent. `laravelSecretReferences` and
 after the separate secret-population approval. Never use `latest`, inline secret values,
 or command-line secret payloads.
 
-The initial storage account retains Shared Key only as a controlled migration state.
-After managed-identity queue send, receive, update, delete, quarantine, and scaler access
-are proven, Shared Key must be disabled through a separate reviewed change.
+Storage Shared Key is disabled. Managed-identity queue send, receive, visibility update,
+delete, quarantine, and scaler metadata access were retested successfully after the
+shutdown; connection-string fallback is not part of the deployed workload contract.
 
 ACR Tasks are not assumed. The approved remote-build fallback is the manually dispatched
 GitHub Actions workflow, which checks out an exact full commit SHA, builds on the hosted

@@ -373,6 +373,8 @@ class Phase10BAzureDeploymentTest extends TestCase
         $this->assertStringContainsString('parallelism: 1', $workloads);
         $this->assertStringContainsString("sku: { name: 'Basic' }", $main);
         $this->assertStringContainsString('workloadProfileType: \'Consumption\'', $main);
+        $this->assertStringContainsString('allowSharedKeyAccess: false', $main);
+        $this->assertStringNotContainsString('allowSharedKeyAccess: true', $main);
         $this->assertStringContainsString('c6a89b2d-59bc-44d0-9896-0f6e12d7b80a', $rbac);
         $this->assertStringContainsString('8a0f0c08-91a1-4084-bc3d-661d67233fed', $rbac);
         $this->assertStringContainsString(

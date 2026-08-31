@@ -81,7 +81,8 @@ Status responses are validated against the Report Number field. The transitional
 Public lookup uses:
 
 ```text
-GET /api/mobile/reports/status/{tracking_token}
+GET /api/mobile/reports/status
+Authorization: Bearer <tracking_token>
 ```
 
 Polling starts only while a relevant screen is mounted. It uses bounded backoff
@@ -92,10 +93,9 @@ Report status, AI-processing status, verification status, and barangay-routing s
 are displayed independently. Citizen-facing AI language says “Possible Violation” and
 never “Confirmed Violation.”
 
-Because the current Laravel contract places the bearer-equivalent token in the URL
-path, production deployment must redact `/api/mobile/reports/status/*` paths from
-proxy, CDN, Laravel, APM, and access logs before public release. Moving the credential
-to a non-logged authorization channel requires a separately versioned backend contract.
+The raw Tracking Token is never placed in a URL or query string. The mobile client sends
+it only through the standard `Authorization` header, which production proxies, APM, and
+application logs must continue to redact.
 
 ## API configuration
 

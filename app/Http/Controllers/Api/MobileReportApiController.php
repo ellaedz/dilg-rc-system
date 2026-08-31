@@ -15,6 +15,7 @@ use App\Services\ReportPhotoPipeline;
 use App\Services\ReportSubmissionFingerprint;
 use App\Support\CitizenViolationType;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -240,17 +241,22 @@ class MobileReportApiController extends Controller
 
     public function status(
         Request $request,
-        string $tracking_token,
         ReportCredentialService $credentialService
     ) {
-        if (! preg_match('/^[A-Za-z0-9_-]{43}$/', $tracking_token)) {
+        $trackingToken = $request->bearerToken();
+
+        if (! is_string($trackingToken)) {
+            return $this->trackingNotFoundResponse();
+        }
+
+        if (! preg_match('/^[A-Za-z0-9_-]{43}$/', $trackingToken)) {
             return $this->trackingNotFoundResponse();
         }
 
         try {
-            $trackingHash = $credentialService->hashTrackingToken($tracking_token);
+            $trackingHash = $credentialService->hashTrackingToken($trackingToken);
         } catch (RuntimeException) {
-            return response()->json([
+            return $this->trackingJsonResponse([
                 'success' => false,
                 'message' => 'Report tracking is temporarily unavailable.',
             ], 503);
@@ -266,19 +272,28 @@ class MobileReportApiController extends Controller
         $latestTimeline = $report->timelines->last();
         $report->setAttribute('latest_public_action', $latestTimeline?->action_taken);
 
-        return response()->json([
+        return $this->trackingJsonResponse([
             'success' => true,
             'message' => 'Report status retrieved successfully',
             'data' => (new ReportStatusResource($report))->resolve($request),
         ]);
     }
 
-    private function trackingNotFoundResponse()
+    private function trackingNotFoundResponse(): JsonResponse
     {
-        return response()->json([
+        return $this->trackingJsonResponse([
             'success' => false,
             'message' => 'Report not found.',
         ], 404);
+    }
+
+    /** @param array<string, mixed> $payload */
+    private function trackingJsonResponse(array $payload, int $status = 200): JsonResponse
+    {
+        return response()->json($payload, $status)->withHeaders([
+            'Cache-Control' => 'no-store, private',
+            'Vary' => 'Authorization',
+        ]);
     }
 
     private function submissionResponse(

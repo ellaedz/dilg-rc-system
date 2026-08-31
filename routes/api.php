@@ -45,9 +45,9 @@ Route::prefix('mobile')->group(function () {
     Route::post('/reports', [MobileReportApiController::class, 'store'])
         ->middleware([RejectOversizedPostBody::class, 'throttle:10,1']);
 
-    // Get violation report details
-    // Public status requires the opaque Tracking Token, never a sequential Report Number.
-    Route::get('/reports/status/{tracking_token}', [MobileReportApiController::class, 'status'])
+    // Public status requires the opaque Tracking Token in the Authorization header.
+    // The credential must never appear in a URL, query string, or route parameter.
+    Route::get('/reports/status', [MobileReportApiController::class, 'status'])
         ->middleware('throttle:30,1');
 
     // Numeric report details are staff-only; the public uses the minimal status endpoint.

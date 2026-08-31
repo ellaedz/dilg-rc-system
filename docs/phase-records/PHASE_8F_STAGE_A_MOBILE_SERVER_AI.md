@@ -95,9 +95,10 @@ The About screen includes a development-only, redacted API diagnostic. Android b
 is disabled in Expo configuration. The SecureStore plugin does not add separate backup
 rules because the application itself is non-backupable.
 
-The public status route currently contains the bearer-equivalent token in its URL path.
-Production access-log redaction for `/api/mobile/reports/status/*` is therefore a
-documented deployment blocker. Stage A does not silently change this backend contract.
+The production contract now keeps the bearer-equivalent token out of the URL. The
+mobile client calls `GET /api/mobile/reports/status` and supplies the exact token through
+the standard `Authorization: Bearer` header. Production proxies, APM, and application
+logs must continue to redact authorization headers.
 
 ## Automated verification
 

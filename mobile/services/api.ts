@@ -277,9 +277,11 @@ export async function getReportStatus(trackingToken: string): Promise<ReportStat
   if (!isValidTrackingToken(trackingToken)) {
     throw new Error('A valid case-sensitive Tracking Token is required.');
   }
-  const response = await api.get<ApiEnvelope<RawReportStatus>>(
-    `/mobile/reports/status/${encodeURIComponent(trackingToken)}`,
-  );
+  const response = await api.get<ApiEnvelope<RawReportStatus>>('/mobile/reports/status', {
+    headers: {
+      Authorization: `Bearer ${trackingToken}`,
+    },
+  });
   return parseReportStatus(requireEnvelopeData(response.data));
 }
 

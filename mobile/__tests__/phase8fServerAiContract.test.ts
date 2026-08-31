@@ -1,4 +1,10 @@
-import { getMobileReportTextFields, parseReportStatus, parseSubmittedReport } from '@/services/api';
+import {
+  api,
+  getMobileReportTextFields,
+  getReportStatus,
+  parseReportStatus,
+  parseSubmittedReport,
+} from '@/services/api';
 import { validateApiBaseUrl } from '@/constants/config';
 import { nextPollingDelay, startReportPolling } from '@/services/reportPolling';
 import { runSingleSubmission } from '@/services/submissionCoordinator';
@@ -88,6 +94,30 @@ describe('Phase 8F server-AI contract', () => {
     expect(getTrackingTokenValidationMessage('RCV-2026-0001')).toContain('43-character');
     expect(isLegacyReportNumber('rcv-2026-0001')).toBe(true);
     expect(maskTrackingToken(TOKEN)).not.toContain(TOKEN);
+  });
+
+  test('status lookup sends the Tracking Token only in the Authorization header', async () => {
+    const get = jest.spyOn(api, 'get').mockResolvedValue({
+      data: {
+        success: true,
+        data: {
+          report_number: 'RCV-2026-0001',
+          current_status: 'Submitted',
+          timeline: [],
+        },
+      },
+    } as never);
+
+    await expect(getReportStatus(TOKEN)).resolves.toMatchObject({
+      reportNumber: 'RCV-2026-0001',
+      currentStatus: 'Submitted',
+    });
+    expect(get).toHaveBeenCalledWith('/mobile/reports/status', {
+      headers: { Authorization: `Bearer ${TOKEN}` },
+    });
+    expect(get.mock.calls[0][0]).not.toContain(TOKEN);
+
+    get.mockRestore();
   });
 
   test('legacy history never converts a sequential identifier into a public credential', () => {

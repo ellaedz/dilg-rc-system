@@ -911,7 +911,8 @@ deployment phase.
       probes, timeouts, and bounded concurrency.
 - [x] After every required queue operation works with managed identity, separately
       approve disabling Storage Shared Key and retest the complete queue flow.
-- [ ] Resolve the production Tracking Token-in-URL blocker before production acceptance.
+- [ ] Deploy and verify the non-URL `Authorization: Bearer` Tracking Token contract
+      before production acceptance.
 
 ### Exit gate
 

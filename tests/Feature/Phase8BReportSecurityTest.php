@@ -111,8 +111,12 @@ class Phase8BReportSecurityTest extends TestCase
         $token = $submission->json('data.tracking_token');
         $reportNumber = $submission->json('data.report_number');
 
-        $this->getJson('/api/mobile/reports/status/'.$token)
-            ->assertOk()
+        $response = $this->getJson('/api/mobile/reports/status', [
+            'Authorization' => 'Bearer '.$token,
+        ]);
+
+        $response->assertOk()
+            ->assertHeader('Cache-Control', 'no-store, private')
             ->assertJsonPath('data.report_number', $reportNumber)
             ->assertJsonPath('data.current_status', 'Submitted')
             ->assertJsonMissingPath('data.tracking_token_hash')
@@ -120,10 +124,20 @@ class Phase8BReportSecurityTest extends TestCase
             ->assertJsonMissingPath('data.token_derivation_nonce')
             ->assertJsonMissingPath('data.contact_number')
             ->assertJsonMissingPath('data.ai_raw_response');
+        $this->assertStringContainsString(
+            'Authorization',
+            (string) $response->headers->get('Vary')
+        );
 
-        $this->getJson('/api/mobile/reports/status/'.$reportNumber)->assertNotFound();
-        $this->getJson('/api/mobile/reports/status/1')->assertNotFound();
-        $this->getJson('/api/mobile/reports/status/'.str_repeat('x', 43))->assertNotFound();
+        $this->getJson('/api/mobile/reports/status')->assertNotFound();
+        $this->getJson('/api/mobile/reports/status', [
+            'Authorization' => 'Bearer '.$reportNumber,
+        ])->assertNotFound();
+        $this->getJson('/api/mobile/reports/status', [
+            'Authorization' => 'Bearer '.str_repeat('x', 43),
+        ])->assertNotFound();
+        $this->getJson('/api/mobile/reports/status?tracking_token='.$token)->assertNotFound();
+        $this->getJson('/api/mobile/reports/status/'.$token)->assertNotFound();
     }
 
     public function test_same_idempotency_key_replays_one_report_without_duplicate_side_effects(): void

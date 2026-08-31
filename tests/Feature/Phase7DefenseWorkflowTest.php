@@ -113,7 +113,7 @@ class Phase7DefenseWorkflowTest extends TestCase
             ])
             ->assertRedirect(route('violation-reports.show', $report));
 
-        $this->getJson('/api/mobile/reports/status/'.$trackingToken)
+        $this->withToken($trackingToken)->getJson('/api/mobile/reports/status')
             ->assertOk()
             ->assertJsonPath('data.current_status', 'In Progress')
             ->assertJsonPath('data.barangay', 'Alipit')

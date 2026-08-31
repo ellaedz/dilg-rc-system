@@ -461,7 +461,8 @@ class Phase8DDurablePhotoPipelineTest extends TestCase
             $this->uploadedImage('evidence.png', $this->pngBytes(), 'image/png')
         );
 
-        $this->getJson('/api/mobile/reports/status/'.$submission->json('data.tracking_token'))
+        $this->withToken($submission->json('data.tracking_token'))
+            ->getJson('/api/mobile/reports/status')
             ->assertOk()
             ->assertJsonPath('data.photo_upload_status', 'uploaded')
             ->assertJsonPath('data.photo_available', true)

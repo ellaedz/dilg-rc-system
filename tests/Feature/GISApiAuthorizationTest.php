@@ -40,7 +40,7 @@ class GISApiAuthorizationTest extends TestCase
         ]);
 
         $token = app(ReportCredentialService::class)->replayToken($report);
-        $response = $this->getJson('/api/mobile/reports/status/'.$token);
+        $response = $this->withToken($token)->getJson('/api/mobile/reports/status');
 
         $response->assertOk()
             ->assertJsonMissingPath('data.contact_number')

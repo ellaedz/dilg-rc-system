@@ -140,12 +140,14 @@ Phase 8B does not rotate tokens.
 Public status is:
 
 ```text
-GET /api/mobile/reports/status/{tracking_token}
+GET /api/mobile/reports/status
+Authorization: Bearer <tracking_token>
 ```
 
-Laravel hashes the supplied opaque token and looks up `tracking_token_hash`. It rejects
-a Report Number, legacy `report_id`, internal numeric ID, malformed token, or unknown
-token with a generic not-found response.
+Laravel reads the opaque token only from the standard Authorization header, hashes it,
+and looks up `tracking_token_hash`. It rejects a missing credential, query-string or
+route token, Report Number, legacy `report_id`, internal numeric ID, malformed token, or
+unknown token with a generic not-found response.
 
 The creation response temporarily puts the opaque token in `tracking_id`, which is the
 field expected by the existing mobile application. It separately returns

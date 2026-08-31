@@ -171,7 +171,7 @@ class Phase6AIIntegrationTest extends TestCase
 
         $trackingToken = app(ReportCredentialService::class)->replayToken($report);
 
-        $this->getJson('/api/mobile/reports/status/'.$trackingToken)
+        $this->withToken($trackingToken)->getJson('/api/mobile/reports/status')
             ->assertOk()
             ->assertJsonPath('data.final_ai_category', 'illegal_parking')
             ->assertJsonMissing(['internal' => 'must remain private'])

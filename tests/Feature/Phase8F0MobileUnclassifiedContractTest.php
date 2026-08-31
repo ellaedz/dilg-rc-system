@@ -56,7 +56,8 @@ class Phase8F0MobileUnclassifiedContractTest extends TestCase
         $this->assertNull($report->verified_by);
         $this->assertNull($report->verified_at);
 
-        $this->getJson('/api/mobile/reports/status/'.$response->json('data.tracking_token'))
+        $this->withToken($response->json('data.tracking_token'))
+            ->getJson('/api/mobile/reports/status')
             ->assertOk()
             ->assertJsonPath('data.citizen_selected_violation_type', null)
             ->assertJsonPath('data.has_citizen_classification', false)

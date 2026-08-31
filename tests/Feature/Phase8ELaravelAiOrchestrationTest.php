@@ -561,7 +561,8 @@ class Phase8ELaravelAiOrchestrationTest extends TestCase
             ->assertJsonMissingPath('data.ai_gis_result')
             ->assertJsonMissingPath('data.photo_object_key');
 
-        $this->getJson('/api/mobile/reports/status/'.$submission->json('data.tracking_token'))
+        $this->withToken($submission->json('data.tracking_token'))
+            ->getJson('/api/mobile/reports/status')
             ->assertOk()
             ->assertJsonMissingPath('data.ai_request_id')
             ->assertJsonMissingPath('data.ai_processing_token_hash')

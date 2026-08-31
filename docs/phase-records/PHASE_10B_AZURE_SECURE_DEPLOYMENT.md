@@ -145,7 +145,8 @@ and the private-storage `.gitignore` placeholder, none of which contains a crede
 
 ## Remaining production acceptance gates
 
-1. Resolve the Tracking Token-in-URL blocker before production acceptance.
+1. Deploy and verify the locally implemented non-URL `Authorization: Bearer` Tracking
+   Token contract before production acceptance.
 2. Record measured latency, cold starts, processing duration, Queue visibility, worker
    timeout behavior, replica limits, logs, and student budget alerts.
 3. Complete Phase 10C physical mobile end-to-end verification before production traffic.
@@ -157,8 +158,9 @@ a silent workaround.
 
 ## Known production blockers outside Stage 1
 
-- Public tracking still carries the opaque Tracking Token in a GET path. It must move to
-  a non-URL credential transport before production acceptance.
+- Public tracking has been changed locally to carry the opaque Tracking Token only in
+  the Authorization header. A new immutable Laravel image must be deployed and the
+  contract verified in Azure before production acceptance.
 - MPDO barangay polygons are validated input for Phase 13A but are not yet integrated.
 - Cloud latency, cold starts, budget alerts, and physical mobile end-to-end behavior
   remain unverified.

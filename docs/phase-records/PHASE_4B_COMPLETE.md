@@ -169,9 +169,8 @@
 **Auth Required:** Yes (must be logged in)  
 **Available to:** Both DILG Admin and Barangay Staff
 
-**Login Credentials:**
-- DILG Admin: `admin@dilg.gov.ph` / `[removed-credential]`
-- Any Barangay: `{barangay-slug}@barangay.dilg.gov.ph` / `[removed-credential]`
+**Login Access:**
+- Credentials are issued securely by the system administrator and are not published in the repository.
 
 ---
 

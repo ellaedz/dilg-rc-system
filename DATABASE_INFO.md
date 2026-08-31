@@ -64,20 +64,15 @@ php artisan db:seed
 ### Complaints Table
 - Legacy table (may not be in active use)
 
-## Test Accounts
+## Account Provisioning
 
 ### DILG Admin
-- **Email**: dilg@admin.com
-- **Password**: [removed-credential]
 - **Role**: dilg_admin
 
-### Barangay Staff Examples
-- **Bagumbayan**: bagumbayan@staff.com / [removed-credential]
-- **Bubukal**: bubukal@staff.com / [removed-credential]
-- **Duhat**: duhat@staff.com / [removed-credential]
-- **Jasaan**: jasaan@staff.com / [removed-credential]
-- **Pagsawitan**: pagsawitan@staff.com / [removed-credential]
-- **Palasan**: palasan@staff.com / [removed-credential]
+### Barangay Staff
+- **Role**: barangay_staff
+- Credentials are provisioned by the system administrator and are not stored in this repository.
+- If `UserSeeder` is used, set a strong temporary `SEED_DEFAULT_PASSWORD` outside Git and rotate every account immediately afterward.
 
 ## Important Notes
 
@@ -123,4 +118,3 @@ php artisan db:seed
 - DBeaver (https://dbeaver.io/)
 - TablePlus (https://tableplus.com/)
 - Laravel Telescope (if installed)
-

@@ -162,12 +162,12 @@ http://127.0.0.1:8000/login
 
 **DILG Admin:**
 - Email: `admin@dilg.gov.ph`
-- Password: `[removed-credential]`
+- Password: issued securely by the system administrator
 - Dashboard: `http://127.0.0.1:8000/dilg-dashboard`
 
 **Barangay Staff:**
 - Email: `{barangay}@barangay.dilg.gov.ph`
-- Password: `[removed-credential]`
+- Password: issued securely by the system administrator
 - Example: `bagumbayan@barangay.dilg.gov.ph`
 
 ---
@@ -375,4 +375,3 @@ Only 20 lines for active state:
 ---
 
 **Next Action:** Tell me when you're ready for Phase 2 (Dashboard pages redesign)!
-

@@ -114,4 +114,16 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Account Seeder Password
+    |--------------------------------------------------------------------------
+    |
+    | UserSeeder refuses to run unless this value is explicitly supplied.
+    | Never commit the password or reuse it in a deployed environment.
+    |
+    */
+
+    'seed_default_password' => env('SEED_DEFAULT_PASSWORD'),
+
 ];

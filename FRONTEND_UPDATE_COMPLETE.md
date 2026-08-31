@@ -271,7 +271,7 @@ None! Login page works perfectly.
 3. ✅ Check if DILG yellow/gold colors appear
 4. ✅ Try logging in:
    - Email: `admin@dilg.gov.ph`
-   - Password: `[removed-credential]`
+   - Use credentials issued by the system administrator
 5. ✅ Check if login works
 6. ✅ Check responsive design (resize browser)
 7. ✅ Click "Forgot Password?" - modal should open
@@ -294,4 +294,3 @@ None! Login page works perfectly.
 ---
 
 **Next Action:** Tell me what you'd like to update next, or if you want to proceed to Phase 4C!
-

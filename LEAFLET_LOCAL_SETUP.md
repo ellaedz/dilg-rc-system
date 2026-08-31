@@ -180,7 +180,7 @@ dir public\gis\boundary.geojson
 ### Test 2: Open GIS Map
 ```
 1. Start server: php artisan serve
-2. Login: admin@dilg.gov.ph / [removed-credential]
+2. Log in with credentials issued by the system administrator.
 3. Click "GIS Map" in sidebar
 4. Expected: Map loads with Santa Cruz boundary visible
 ```

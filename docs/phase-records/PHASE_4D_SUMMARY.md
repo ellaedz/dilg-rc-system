@@ -53,7 +53,7 @@ GET  /api/gis/hotspots-summary   - Get hotspot statistics
 2. **Login as DILG Admin:**
    - URL: http://127.0.0.1:8000/login
    - Email: dilg_admin@example.com
-   - Password: [removed-credential]
+   - Password: issued securely by the system administrator
 
 3. **Navigate to GIS Map:**
    - URL: http://127.0.0.1:8000/gis-map
@@ -163,13 +163,13 @@ npm install leaflet.markercluster
 
 ### DILG Admin
 - Email: dilg_admin@example.com
-- Password: [removed-credential]
+- Password: issued securely by the system administrator
 - **Sees:** All reports from all 26 barangays
 - **Filters:** Can filter by any barangay
 
 ### Barangay Staff
 - Example: bagumbayan_staff@example.com
-- Password: [removed-credential]
+- Password: issued securely by the system administrator
 - **Sees:** ONLY reports from Bagumbayan
 - **Filters:** Limited to assigned barangay
 

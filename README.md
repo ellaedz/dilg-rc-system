@@ -234,8 +234,8 @@ Alipit, Bagumbayan, Bubukal, Calios, Duhat, Gatid, Jasaan, Labuin, Malinao, Oogo
 
 **Authentication:**
 - Login Route: `/login`
-- 27 Test Accounts (see `ACCOUNTS_CREDENTIALS.md`)
-- All passwords: `[removed-credential]` (for proposal/testing)
+- Account setup guidance: see `ACCOUNTS_CREDENTIALS.md`
+- Seeder credentials must be supplied through `SEED_DEFAULT_PASSWORD` and rotated after setup
 
 **DILG Admin Routes:**
 - `/dilg-dashboard` - DILG-wide analytics dashboard
@@ -1127,22 +1127,21 @@ php artisan key:generate
 # Run migrations
 php artisan migrate
 
-# Seed database (includes 27 test accounts)
-php artisan db:seed
+# Seed role accounts only after setting a strong temporary password
+# in the local .env file. Never commit that value.
+php artisan db:seed --class=UserSeeder
 
 # Start development server
 php artisan serve
 
-# Login credentials (see ACCOUNTS_CREDENTIALS.md)
-# DILG Admin: admin@dilg.gov.ph / [removed-credential]
-# Barangay Staff: {barangay-slug}@barangay.dilg.gov.ph / [removed-credential]
+# Account access is issued by the DILG-RC system administrator.
 ```
 
 ---
 
 ## 📚 Documentation Files
 
-- `ACCOUNTS_CREDENTIALS.md` - All 27 test accounts
+- `ACCOUNTS_CREDENTIALS.md` - Secure account provisioning guidance
 - `PHASE_3E_COMPLETION_REPORT.md` - Status timeline feature details
 - `TESTING_GUIDE.md` - Testing procedures
 - `QUICK_ACCESS_GUIDE.md` - Quick reference guide

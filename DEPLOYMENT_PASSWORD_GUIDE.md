@@ -1,269 +1,47 @@
-# 🔐 Password Management Guide for Deployment
+# DILG-RC Password Deployment Guide
 
-## Overview
-This guide is for **actual deployment** to Santa Cruz, Laguna barangays. Each barangay will receive their own official password that only they know.
+Passwords and recovery credentials must never be stored in this repository.
 
----
+## Initial provisioning
 
-## Current Setup (For Testing/Proposal)
+1. Generate a strong temporary password with an approved password manager.
+2. Store it in the deployment secret manager as `SEED_DEFAULT_PASSWORD`.
+3. Run `php artisan db:seed --class=UserSeeder` in the intended environment.
+4. Assign a unique password to every administrator and barangay account immediately.
+5. Remove `SEED_DEFAULT_PASSWORD` from the deployment environment after provisioning.
 
-**All accounts currently use:** `[removed-credential]`
+`UserSeeder` refuses to run if the temporary password is missing or shorter than 12 characters.
 
-This is intentional for:
-- ✅ Easy demonstration during proposal presentation
-- ✅ Simple testing during development
-- ✅ Quick access for system validation
+## Password requirements
 
----
+- Use a unique value for every account.
+- Prefer randomly generated passwords of at least 16 characters.
+- Do not derive passwords from barangay names, dates, or email addresses.
+- Do not reuse a seeding password as a permanent account password.
+- Require a secure out-of-band change at first use when the deployment supports it.
 
-## Before Deployment: Change All Passwords
+## Distribution
 
-### Step 1: Access Laravel Tinker
+- Send credentials only through an approved organizational password manager or sealed official channel.
+- Never send passwords through ordinary email, SMS, source control, tickets, screenshots, or chat.
+- Record who received each credential and when it was rotated, without recording the password itself.
 
-```bash
-cd C:\Users\63923\Desktop\database\htdocs\DILG-RC
-php artisan tinker
-```
+## Reset procedure
 
-### Step 2: Change DILG Admin Password
+1. Verify the requester through the approved DILG identity process.
+2. Generate a new random temporary password in the password manager.
+3. Update the account from an authenticated administrative environment.
+4. Deliver the temporary value through the approved secure channel.
+5. Invalidate existing sessions and require another change at first use when supported.
 
-```php
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+## Incident response
 
-$admin = User::where('email', 'admin@dilg.gov.ph')->first();
-$admin->password = Hash::make('[removed-credential]');
-$admin->save();
-echo "DILG Admin password updated!";
-```
+If a credential is committed or otherwise disclosed:
 
-### Step 3: Change Each Barangay Password
+1. Revoke or rotate it immediately.
+2. Review authentication and administrative logs for misuse.
+3. Remove the value from the current repository and rewrite Git history.
+4. Force-push the cleaned history and have collaborators re-clone.
+5. Document the incident without copying the exposed value.
 
-**Template for each barangay:**
-
-```php
-$barangay = User::where('email', 'BARANGAY-EMAIL@barangay.dilg.gov.ph')->first();
-$barangay->password = Hash::make('[removed-credential]');
-$barangay->save();
-echo "Barangay password updated!";
-```
-
-**Example for Alipit:**
-```php
-$alipit = User::where('email', 'alipit@barangay.dilg.gov.ph')->first();
-$alipit->password = Hash::make('[removed-credential]');
-$alipit->save();
-```
-
-**Example for Poblacion I:**
-```php
-$pob1 = User::where('email', 'poblacion-i@barangay.dilg.gov.ph')->first();
-$pob1->password = Hash::make('[removed-credential]');
-$pob1->save();
-```
-
----
-
-## Recommended Password Format
-
-For security and consistency, use this format:
-
-**Pattern:** `{BarangayName}{Year}{RandomWord}!`
-
-**Examples:**
-- Alipit: `[removed-credential]`
-- Bagumbayan: `[removed-credential]`
-- Poblacion I: `[removed-credential]`
-- San Jose: `[removed-credential]`
-
-**Password Requirements:**
-- Minimum 12 characters
-- Mix of uppercase and lowercase
-- Include numbers
-- Include special character (!)
-- Unique per barangay
-
----
-
-## Password Distribution Template
-
-Create a **confidential document** for each barangay:
-
-```
-CONFIDENTIAL - DILG-RC System Access Credentials
-
-Barangay: [Barangay Name]
-Municipality: Santa Cruz, Laguna
-
-Login Credentials:
-Email: [barangay-email]@barangay.dilg.gov.ph
-Password: [Their Official Password]
-
-System URL: http://[your-server-url]/login
-
-Instructions:
-1. Go to the system URL above
-2. Enter your email and password
-3. You will be redirected to your barangay dashboard
-4. You can only access reports for your barangay
-5. Contact DILG admin for any issues
-
-IMPORTANT:
-- Do not share this password with anyone outside your office
-- Keep this document secure
-- Report any unauthorized access attempts immediately
-
-Generated on: [Date]
-Authorized by: [Your Name/Position]
-```
-
----
-
-## Complete Barangay List for Password Setup
-
-Use this checklist when setting passwords:
-
-- [ ] admin@dilg.gov.ph (DILG Admin)
-- [ ] alipit@barangay.dilg.gov.ph
-- [ ] bagumbayan@barangay.dilg.gov.ph
-- [ ] bubukal@barangay.dilg.gov.ph
-- [ ] calios@barangay.dilg.gov.ph
-- [ ] duhat@barangay.dilg.gov.ph
-- [ ] gatid@barangay.dilg.gov.ph
-- [ ] jasaan@barangay.dilg.gov.ph
-- [ ] labuin@barangay.dilg.gov.ph
-- [ ] malinao@barangay.dilg.gov.ph
-- [ ] oogong@barangay.dilg.gov.ph
-- [ ] pagsawitan@barangay.dilg.gov.ph
-- [ ] palasan@barangay.dilg.gov.ph
-- [ ] patimbao@barangay.dilg.gov.ph
-- [ ] poblacion-i@barangay.dilg.gov.ph
-- [ ] poblacion-ii@barangay.dilg.gov.ph
-- [ ] poblacion-iii@barangay.dilg.gov.ph
-- [ ] poblacion-iv@barangay.dilg.gov.ph
-- [ ] poblacion-v@barangay.dilg.gov.ph
-- [ ] san-jose@barangay.dilg.gov.ph
-- [ ] san-juan@barangay.dilg.gov.ph
-- [ ] san-pablo-norte@barangay.dilg.gov.ph
-- [ ] san-pablo-sur@barangay.dilg.gov.ph
-- [ ] santisima-cruz@barangay.dilg.gov.ph
-- [ ] santo-angel-central@barangay.dilg.gov.ph
-- [ ] santo-angel-norte@barangay.dilg.gov.ph
-- [ ] santo-angel-sur@barangay.dilg.gov.ph
-
-**Total: 27 accounts (1 DILG + 26 Barangay)**
-
----
-
-## Automated Password Change Script (Optional)
-
-Create a file: `database/seeders/DeploymentPasswordSeeder.php`
-
-```php
-<?php
-
-namespace Database\Seeders;
-
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
-use App\Models\User;
-
-class DeploymentPasswordSeeder extends Seeder
-{
-    public function run(): void
-    {
-        // WARNING: Only run this ONCE during deployment!
-        
-        $passwords = [
-            'admin@dilg.gov.ph' => '[removed-credential]',
-            'alipit@barangay.dilg.gov.ph' => '[removed-credential]',
-            'bagumbayan@barangay.dilg.gov.ph' => '[removed-credential]',
-            // ... add all 26 barangays with their official passwords
-        ];
-
-        foreach ($passwords as $email => $password) {
-            $user = User::where('email', $email)->first();
-            if ($user) {
-                $user->password = Hash::make($password);
-                $user->save();
-                $this->command->info("✅ Password updated for: {$email}");
-            }
-        }
-
-        $this->command->info('🎉 All deployment passwords have been set!');
-        $this->command->warn('⚠️ Store the passwords securely and distribute to barangays!');
-    }
-}
-```
-
-**Run deployment:**
-```bash
-php artisan db:seed --class=DeploymentPasswordSeeder
-```
-
----
-
-## Security Best Practices
-
-### During Deployment:
-1. ✅ Change all passwords before going live
-2. ✅ Use strong, unique passwords per barangay
-3. ✅ Distribute passwords via secure channels (official memo, sealed envelope)
-4. ✅ Keep master password list in a secure location
-5. ✅ Never send passwords via email or SMS
-
-### After Deployment:
-1. ✅ Monitor login attempts for suspicious activity
-2. ✅ Regularly review user access logs
-3. ✅ Update passwords periodically (every 6 months)
-4. ✅ Disable accounts for inactive barangays
-5. ✅ Train barangay staff on password security
-
----
-
-## Password Reset Process (If Barangay Forgets)
-
-**For production, only DILG admin can reset passwords:**
-
-```bash
-php artisan tinker
-
-# Reset password for a barangay
-$user = User::where('email', 'barangay-email@barangay.dilg.gov.ph')->first();
-$user->password = Hash::make('[removed-credential]');
-$user->save();
-
-# Inform barangay via official communication
-```
-
----
-
-## Important Notes
-
-⚠️ **DO NOT add password change feature in the web UI**
-
-**Reasons:**
-1. More secure - passwords managed centrally by DILG
-2. Prevents unauthorized password changes
-3. Maintains accountability and control
-4. Standard practice for government systems
-5. IT administrator has full control
-
-✅ **Current approach is the correct one for government deployment**
-
----
-
-## For Your Proposal/Defense
-
-**You can explain:**
-- "Passwords are managed centrally by DILG IT administrators"
-- "Each barangay receives their official password upon deployment"
-- "This ensures security and proper access control"
-- "For demo purposes, all accounts use 'password' for easy testing"
-- "In production, each barangay will have a unique secure password"
-
----
-
-**Created for:** DILG-RC System Deployment  
-**Date:** Phase 3C Completion  
-**Purpose:** Secure password management for Santa Cruz, Laguna deployment
+History rewriting does not invalidate an exposed credential. Rotation is always required.

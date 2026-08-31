@@ -168,10 +168,9 @@
                 Password Information
             </h3>
             <div class="py-4 space-y-3">
-                <p><strong>This is a demonstration/proposal system.</strong></p>
-                <p>All test accounts use the password: <strong style="color: #D4A017;">[removed-credential]</strong></p>
+                <p><strong>Contact your DILG-RC system administrator for access.</strong></p>
                 <p class="text-sm text-gray-600">
-                    Password reset functionality will be implemented during actual deployment. For security purposes, unique passwords will be assigned to each account when the system goes live.
+                    Passwords are assigned individually and must never be shared or published.
                 </p>
             </div>
             <div class="modal-action">

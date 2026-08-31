@@ -464,7 +464,7 @@ Response: 200 OK
 ### DILG Admin Access
 
 **Username:** dilg_admin@example.com  
-**Password:** password
+**Password:** issued securely by the system administrator
 
 **Can View:**
 - ✅ All report markers from all 26 barangays
@@ -485,7 +485,7 @@ if ($user && $user->role === 'barangay_staff') {
 ### Barangay Staff Access
 
 **Example Username:** bagumbayan_staff@example.com  
-**Password:** password  
+**Password:** issued securely by the system administrator
 **Assigned Barangay:** Bagumbayan
 
 **Can View:**

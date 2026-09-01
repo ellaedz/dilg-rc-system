@@ -20,8 +20,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
+    backgroundColor: colors.background,
+    flexGrow: 1,
     padding: spacing.screen,
-    paddingBottom: 32,
+    paddingBottom: 36,
   },
   stack: {
     gap: 16,

@@ -23,7 +23,6 @@ type PhotoEvidencePickerProps = {
 
 export function PhotoEvidencePicker({
   imageUri,
-  imageSource,
   imageWidth,
   imageHeight,
   imageFileSize,
@@ -52,9 +51,10 @@ export function PhotoEvidencePicker({
       ) : (
         <View style={styles.previewWrap}>
           <Image source={{ uri: imageUri ?? undefined }} style={styles.preview} />
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{imageSource === 'camera' ? 'Camera' : 'Gallery'}</Text>
-          </View>
+          <Pressable accessibilityLabel="Remove selected photo" onPress={onRemovePhoto} style={styles.removePhoto}>
+            <Text style={styles.removePhotoText}>X</Text>
+          </Pressable>
+          <Text style={styles.selectedText}>Photo selected</Text>
         </View>
       )}
 
@@ -99,9 +99,9 @@ const styles = StyleSheet.create({
   },
   emptyArea: {
     alignItems: 'center',
-    backgroundColor: '#FFFBEB',
-    borderColor: colors.primaryGold,
-    borderRadius: 18,
+    backgroundColor: colors.softBlue,
+    borderColor: colors.primaryBlue,
+    borderRadius: 12,
     borderStyle: 'dashed',
     borderWidth: 2,
     gap: 8,
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     opacity: 0.55,
   },
   cameraIcon: {
-    backgroundColor: colors.primaryGold,
+    backgroundColor: colors.primaryBlue,
     borderRadius: 999,
     color: colors.card,
     fontSize: 14,
@@ -138,28 +138,42 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   previewWrap: {
-    borderRadius: 18,
+    alignItems: 'center',
+    backgroundColor: colors.softGreen,
+    borderColor: '#20C96B',
+    borderRadius: 10,
+    borderStyle: 'dashed',
+    borderWidth: 1.5,
+    gap: 9,
     overflow: 'hidden',
+    padding: 14,
   },
   preview: {
     backgroundColor: '#E5E7EB',
-    height: 250,
+    borderRadius: 7,
+    height: 190,
     width: '100%',
   },
-  badge: {
-    backgroundColor: 'rgba(17, 24, 39, 0.82)',
+  removePhoto: {
+    alignItems: 'center',
+    backgroundColor: colors.error,
     borderRadius: 999,
-    left: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
+    height: 34,
+    justifyContent: 'center',
     position: 'absolute',
-    top: 12,
+    right: 20,
+    top: 20,
+    width: 34,
   },
-  badgeText: {
+  removePhotoText: {
     color: colors.card,
+    fontSize: 24,
+    lineHeight: 26,
+  },
+  selectedText: {
+    color: colors.success,
     fontSize: 12,
-    fontWeight: '900',
-    textTransform: 'uppercase',
+    fontWeight: '800',
   },
   actions: {
     gap: 10,

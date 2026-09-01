@@ -13,6 +13,9 @@
     },
     "preview": {
       "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://ca-civiclear-laravel.livelysea-7e585be2.eastasia.azurecontainerapps.io/api"
+      },
       "android": {
         "buildType": "apk"
       }

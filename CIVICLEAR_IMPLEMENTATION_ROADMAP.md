@@ -831,7 +831,7 @@ while adding the approved Azure Queue provider.
 - [x] Enforce and test the application timeout hierarchy and CreateTask deadline.
 - [x] Define the Azure Queue retry limit, exponential visibility delay, maximum dequeue
       count, quarantine path, and one-at-a-time worker contract locally.
-- [ ] Verify those retry and quarantine settings against real Azure resources during the
+- [x] Verify those retry and quarantine settings against real Azure resources during the
       separately approved Phase 10B provisioning stages.
 - [x] Make duplicate task delivery safe.
 - [x] Preserve reports when task creation fails.
@@ -911,7 +911,7 @@ deployment phase.
       probes, timeouts, and bounded concurrency.
 - [x] After every required queue operation works with managed identity, separately
       approve disabling Storage Shared Key and retest the complete queue flow.
-- [ ] Deploy and verify the non-URL `Authorization: Bearer` Tracking Token contract
+- [x] Deploy and verify the non-URL `Authorization: Bearer` Tracking Token contract
       before production acceptance.
 
 ### Exit gate
@@ -923,7 +923,7 @@ deployment phase.
       Laravel-to-FastAPI only.
 - [x] Supabase and Azure Queue processing work without Shared Key or connection strings.
 - [x] Health endpoints report safe liveness and readiness.
-- [ ] Measured latency, cold starts, processing duration, Queue visibility, worker
+- [x] Measured latency, cold starts, processing duration, Queue visibility, worker
       timeout, replica limits, logs, and student budget alerts are recorded.
 
 ---

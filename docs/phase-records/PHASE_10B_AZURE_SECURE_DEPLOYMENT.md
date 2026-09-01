@@ -3,8 +3,9 @@
 ## Status
 
 The approved Azure infrastructure and workloads are deployed. Immutable images,
-version-pinned secrets, managed-identity service calls, Supabase connectivity, and the
-complete Azure Queue lifecycle have been verified. Work remains on:
+version-pinned secrets, managed-identity service calls, Supabase connectivity, the
+complete Azure Queue lifecycle, the non-URL Tracking Token contract, operational
+measurements, and student budget alerts have been verified. Phase 10B is complete on:
 
 ```text
 feature/phase-10b-azure-secure-deployment
@@ -59,6 +60,25 @@ remains outside this phase.
   `retry_scheduled` and was later acknowledged, and an invalid envelope logged
   `quarantined`. The exact quarantine canary was verified and deleted, the quarantine
   queue was empty afterward, and the temporary human queue role was removed.
+- The deployed Tracking Token contract accepts the opaque token only through
+  `Authorization: Bearer`. A controlled key-rotation repair transaction regenerated and
+  verified all 19 stored lookup hashes without logging raw tokens. Local Apache and
+  public-ingress requests with the valid header returned HTTP 200 and the expected
+  report. Missing authorization, the retired token-in-path form, and query-string token
+  input each returned HTTP 404. Responses retained `Cache-Control: no-store` and
+  `Vary: Authorization`.
+- With Laravel naturally scaled to zero, its public health cold start returned HTTP 200
+  in 27.3 seconds; five immediately warm requests completed in 75-79 milliseconds.
+  With internal FastAPI scaled to zero, its health cold start from Laravel completed in
+  29.24 seconds; five warm internal requests completed in 42-85 milliseconds.
+- The latest ten worker executions all succeeded, averaged 36 seconds, and had a
+  76-second maximum. The worker replica timeout is 180 seconds, Queue visibility is
+  120 seconds, platform retry limit and minimum executions are zero, maximum executions
+  and parallelism are one, and the scaler polling interval is 30 seconds.
+- Laravel scale limits were verified at zero to two replicas and FastAPI at zero to one.
+  The subscription now has a `civiclear-student-monthly` USD 10 monthly budget with
+  actual-cost notifications at 50, 80, and 100 percent. Budget notifications do not
+  stop resources automatically.
 
 ## Approved architecture
 
@@ -143,27 +163,23 @@ public CA path from its certificate prohibition; every other tracked `.crt` rema
 prohibited. Its other exact exceptions are the three tracked `.env.example` templates
 and the private-storage `.gitignore` placeholder, none of which contains a credential.
 
-## Remaining production acceptance gates
+## Production acceptance handoff
 
-1. Deploy and verify the locally implemented non-URL `Authorization: Bearer` Tracking
-   Token contract before production acceptance.
-2. Record measured latency, cold starts, processing duration, Queue visibility, worker
-   timeout behavior, replica limits, logs, and student budget alerts.
-3. Complete Phase 10C physical mobile end-to-end verification before production traffic.
+1. The deployed non-URL `Authorization: Bearer` Tracking Token contract is verified.
+2. Measured latency, cold starts, processing duration, Queue visibility, worker timeout
+   behavior, replica limits, logs, and student budget alerts are recorded above.
+3. Phase 10C physical mobile end-to-end verification remains required before production
+   traffic.
 
 If the current user cannot create the narrow queue visibility role or assign the Entra
 application roles, stop and report the exact permission gap. Do not self-assign broader
 administrator rights, create client secrets, or grant Storage Queue Data Contributor as
 a silent workaround.
 
-## Known production blockers outside Stage 1
+## Known production blockers after Phase 10B
 
-- Public tracking has been changed locally to carry the opaque Tracking Token only in
-  the Authorization header. A new immutable Laravel image must be deployed and the
-  contract verified in Azure before production acceptance.
 - MPDO barangay polygons are validated input for Phase 13A but are not yet integrated.
-- Cloud latency, cold starts, budget alerts, and physical mobile end-to-end behavior
-  remain unverified.
+- Physical mobile end-to-end behavior remains unverified and is the Phase 10C gate.
 - Storage Shared Key is disabled and the required managed-identity queue operations and
   scaler behavior have been proven after shutdown.
 

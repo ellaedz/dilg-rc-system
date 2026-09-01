@@ -47,19 +47,19 @@ export function PrimaryButton({
 const styles = StyleSheet.create({
   base: {
     alignItems: 'center',
-    borderRadius: 12,
+    borderRadius: 9,
     flexDirection: 'row',
     gap: 8,
     justifyContent: 'center',
-    minHeight: 52,
+    minHeight: 48,
     paddingHorizontal: 18,
     paddingVertical: 14,
   },
   primary: {
-    backgroundColor: colors.primaryGold,
+    backgroundColor: colors.primaryBlue,
   },
   secondary: {
-    backgroundColor: colors.dark,
+    backgroundColor: colors.primaryBlueDark,
   },
   outline: {
     backgroundColor: colors.card,
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: colors.card,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '800',
   },
   darkText: {

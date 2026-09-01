@@ -32,10 +32,15 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.card,
     borderColor: colors.border,
-    borderRadius: 18,
+    borderRadius: 14,
     borderWidth: 1,
     gap: 14,
     padding: 16,
+    shadowColor: '#102A5C',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   info: {
     borderColor: '#BFDBFE',
@@ -55,10 +60,10 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   icon: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: colors.softBlue,
     borderRadius: 12,
-    color: colors.text,
-    fontSize: 14,
+    color: colors.primaryBlue,
+    fontSize: 12,
     fontWeight: '900',
     minWidth: 42,
     overflow: 'hidden',
@@ -72,7 +77,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: colors.text,
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '900',
   },
   description: {

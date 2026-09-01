@@ -11,8 +11,8 @@ import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { PhotoEvidencePicker } from '@/components/PhotoEvidencePicker';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { PrivacyNotice } from '@/components/PrivacyNotice';
-import { ReportProgress } from '@/components/ReportProgress';
 import { Screen } from '@/components/Screen';
+import { SubmissionProcessingOverlay } from '@/components/SubmissionProcessingOverlay';
 import { colors } from '@/constants/colors';
 import { useReportDraft } from '@/hooks/useReportDraft';
 import { useTrackingIds } from '@/hooks/useTrackingIds';
@@ -433,8 +433,7 @@ export default function SubmitReportScreen() {
 
   return (
     <Screen>
-      <AppHeader title="Submit Report" subtitle="Photo, GPS, and secure Laravel submission" />
-      <ReportProgress />
+      <AppHeader title="Report Violation" subtitle="Secure road-clearing report" />
 
       {feedback ? (
         <AppCard
@@ -446,36 +445,8 @@ export default function SubmitReportScreen() {
       ) : null}
 
       <AppCard
-        icon="PHOTO"
-        title="Photo Evidence"
-        description="Required. Capture or choose one image that clearly shows the road or sidewalk obstruction."
-      >
-        <PhotoEvidencePicker
-          error={errors.photo}
-          imageFileSize={draft.imageFileSize}
-          imageHeight={draft.imageHeight}
-          imageSource={draft.imageSource}
-          imageUri={draft.imageUri}
-          imageWidth={draft.imageWidth}
-          isBusy={isPreparingPhoto || isSubmitting}
-          onChooseFromGallery={handleChooseFromGallery}
-          onRemovePhoto={handleRemovePhoto}
-          onTakePhoto={handleTakePhoto}
-          permissionMessage={permissionMessage}
-        />
-      </AppCard>
-
-      <AppCard
-        icon="AI"
-        title="Server AI Assessment"
-        description="The photograph will be analyzed securely by the CIVICLEAR server after submission. The result is only a possible violation until authorized staff verifies it."
-        tone="warning"
-      />
-
-      <AppCard
-        icon="TEXT"
-        title="Report Details"
-        description="Describe what the photo shows and how it affects the road or sidewalk."
+        title="Description *"
+        description="Describe what the photo shows. Server AI will suggest a possible violation after submission."
       >
         <TextInput
           accessibilityLabel="Report description"
@@ -497,7 +468,35 @@ export default function SubmitReportScreen() {
         <FormFieldError message={errors.description} />
       </AppCard>
 
-      <AppCard icon="GPS" title="GPS Location" description="Capture the incident point using foreground location only.">
+      <AppCard
+        icon="PHOTO"
+        title="Photo Evidence *"
+        description="Required to support the report and improve server-side analysis."
+      >
+        <PhotoEvidencePicker
+          error={errors.photo}
+          imageFileSize={draft.imageFileSize}
+          imageHeight={draft.imageHeight}
+          imageSource={draft.imageSource}
+          imageUri={draft.imageUri}
+          imageWidth={draft.imageWidth}
+          isBusy={isPreparingPhoto || isSubmitting}
+          onChooseFromGallery={handleChooseFromGallery}
+          onRemovePhoto={handleRemovePhoto}
+          onTakePhoto={handleTakePhoto}
+          permissionMessage={permissionMessage}
+        />
+      </AppCard>
+
+      <AppCard icon="GPS" title="Location" description="Use the current GPS position for the incident point.">
+        <View style={styles.locationPanel}>
+          <Text style={styles.locationTitle}>✓ Use current GPS location</Text>
+          <Text style={styles.locationSubtitle}>
+            {draft.latitude === null
+              ? 'Location has not been captured.'
+              : `${formatCoordinate(draft.latitude)}, ${formatCoordinate(draft.longitude)}`}
+          </Text>
+        </View>
         <View style={styles.grid}>
           <Text style={styles.label}>Status</Text>
           <Text style={styles.value}>{gpsStatus === 'ready' ? 'Inside Santa Cruz' : gpsStatus}</Text>
@@ -515,6 +514,8 @@ export default function SubmitReportScreen() {
           <Text style={styles.value}>{draft.municipalityName ?? 'Not validated'}</Text>
           <Text style={styles.label}>Barangay</Text>
           <Text style={styles.value}>{draft.detectedBarangay ?? 'Barangay assignment will be handled by DILG.'}</Text>
+          <Text style={styles.label}>Report Time</Text>
+          <Text style={styles.value}>{timestampDisplay}</Text>
         </View>
         <FormFieldError message={errors.latitude ?? errors.detectedBarangay} />
         <View style={styles.rowActions}>
@@ -527,19 +528,7 @@ export default function SubmitReportScreen() {
           <PrimaryButton onPress={() => Linking.openSettings()} title="Open Settings" variant="outline" />
         </View>
       </AppCard>
-
-      <AppCard icon="TIME" title="Timestamp" description="Generated automatically and displayed in Asia/Manila.">
-        <Text style={styles.timestamp}>{timestampDisplay}</Text>
-        <FormFieldError message={errors.timestamp} />
-      </AppCard>
-
-      {isSubmitting ? (
-        <AppCard icon="UPLOAD" title="Uploading Report" description={`Upload progress: ${uploadProgress}%`}>
-          <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: `${uploadProgress}%` }]} />
-          </View>
-        </AppCard>
-      ) : null}
+      <FormFieldError message={errors.timestamp} />
 
       {recoveryRecords.length > 0 ? (
         <AppCard
@@ -587,6 +576,7 @@ export default function SubmitReportScreen() {
       </View>
 
       <LoadingOverlay message="Preparing photo..." visible={isPreparingPhoto} />
+      <SubmissionProcessingOverlay progress={uploadProgress} visible={isSubmitting} />
     </Screen>
   );
 }
@@ -594,8 +584,8 @@ export default function SubmitReportScreen() {
 const styles = StyleSheet.create({
   textArea: {
     backgroundColor: '#F9FAFB',
-    borderColor: colors.border,
-    borderRadius: 14,
+    borderColor: '#7CA8FF',
+    borderRadius: 10,
     borderWidth: 1,
     color: colors.text,
     fontSize: 15,
@@ -634,6 +624,24 @@ const styles = StyleSheet.create({
   rowActions: {
     gap: 10,
     marginTop: 12,
+  },
+  locationPanel: {
+    backgroundColor: colors.softBlue,
+    borderColor: '#AFCBFF',
+    borderRadius: 10,
+    borderWidth: 1,
+    gap: 5,
+    padding: 14,
+  },
+  locationTitle: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: '900',
+  },
+  locationSubtitle: {
+    color: colors.muted,
+    fontSize: 13,
+    lineHeight: 19,
   },
   grid: {
     gap: 7,

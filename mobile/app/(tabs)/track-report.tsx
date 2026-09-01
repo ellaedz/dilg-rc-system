@@ -29,6 +29,11 @@ function formatManila(value: string | null): string {
   }).format(new Date(value));
 }
 
+function formatConfidence(value: number | null): string {
+  if (value === null || !Number.isFinite(value)) return 'Not available';
+  return `${Math.max(0, Math.min(100, Math.round(value <= 1 ? value * 100 : value)))}% confidence`;
+}
+
 export default function TrackReportScreen() {
   const params = useLocalSearchParams<{ localRecordId?: string }>();
   const [trackingToken, setTrackingToken] = useState('');
@@ -134,7 +139,10 @@ export default function TrackReportScreen() {
 
   return (
     <Screen>
-      <AppHeader title="Track Report" subtitle="Use the private, case-sensitive token issued by Laravel" />
+      <AppHeader
+        title={result ? 'Report Details' : 'Track Report'}
+        subtitle={result ? result.reportNumber : 'Use the private, case-sensitive token issued by Laravel'}
+      />
 
       <AppCard
         icon="ID"
@@ -190,6 +198,7 @@ export default function TrackReportScreen() {
             <Text style={styles.value}>{result.aiProcessingStatus ?? 'Pending'}</Text>
             <Text style={styles.label}>Possible Violation</Text>
             <Text style={styles.value}>{result.finalAiCategory ?? 'Awaiting server analysis'}</Text>
+            <Text style={styles.confidence}>{formatConfidence(result.finalAiConfidence)}</Text>
             {result.aiNeedsManualReview ? (
               <Text style={styles.manualReview}>Staff review is required before any AI suggestion can be confirmed.</Text>
             ) : null}
@@ -222,6 +231,18 @@ export default function TrackReportScreen() {
         </AppCard>
       ) : null}
 
+      {result ? (
+        <AppCard
+          title="What's Next?"
+          description={
+            ['Resolved', 'Closed'].includes(result.currentStatus)
+              ? 'This report has completed its public workflow.'
+              : 'Your report remains under DILG review. Keep this app installed to receive refreshed public status.'
+          }
+          tone="info"
+        />
+      ) : null}
+
       <PrivacyNotice />
     </Screen>
   );
@@ -242,8 +263,8 @@ const styles = StyleSheet.create({
   inputError: { borderColor: colors.error },
   shortcutList: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   shortcut: {
-    backgroundColor: '#FFFBEB',
-    borderColor: colors.primaryGold,
+    backgroundColor: colors.softBlue,
+    borderColor: colors.primaryBlue,
     borderRadius: 999,
     borderWidth: 1,
     paddingHorizontal: 12,
@@ -254,6 +275,7 @@ const styles = StyleSheet.create({
   grid: { gap: 8 },
   label: { color: colors.muted, fontSize: 12, fontWeight: '800', textTransform: 'uppercase' },
   value: { color: colors.text, fontSize: 15, fontWeight: '800', lineHeight: 22 },
+  confidence: { color: colors.muted, fontSize: 12, fontWeight: '700' },
   manualReview: {
     backgroundColor: '#FFF7ED',
     borderRadius: 10,
@@ -265,8 +287,8 @@ const styles = StyleSheet.create({
   },
   timeline: { gap: 8 },
   timelineItem: { borderColor: colors.border, borderRadius: 12, borderWidth: 1, padding: 12 },
-  timelineItemActive: { backgroundColor: '#FFFBEB', borderColor: colors.primaryGold },
+  timelineItemActive: { backgroundColor: colors.softBlue, borderColor: colors.primaryBlue },
   timelineStatus: { color: colors.text, fontSize: 15, fontWeight: '800' },
-  timelineStatusActive: { color: colors.dark },
+  timelineStatusActive: { color: colors.primaryBlue },
   timelineMeta: { color: colors.muted, fontSize: 12, marginTop: 4 },
 });

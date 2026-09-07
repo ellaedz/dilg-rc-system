@@ -461,13 +461,17 @@ export default function SubmitReportScreen() {
         <Text style={styles.fieldLabel}>Location</Text>
         <Pressable
           accessibilityLabel="Use current GPS location"
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: draft.latitude !== null, disabled: isSubmitting }}
           disabled={isSubmitting}
           onPress={handleCaptureGps}
           style={({ pressed }) => [styles.locationPanel, pressed && styles.locationPressed]}
         >
-          <Text style={styles.locationIcon}>⌖</Text>
+          <View style={[styles.locationCheckbox, draft.latitude !== null && styles.locationCheckboxChecked]}>
+            {draft.latitude !== null ? <Text style={styles.locationCheckmark}>✓</Text> : null}
+          </View>
           <View style={styles.locationCopy}>
-            <Text style={styles.locationTitle}>☑ Use current GPS location</Text>
+            <Text style={styles.locationTitle}>Use current GPS location</Text>
             <Text style={styles.locationSubtitle}>
               {gpsStatus === 'capturing' || gpsStatus === 'validating'
                 ? 'Finding current location...'
@@ -583,19 +587,32 @@ const styles = StyleSheet.create({
   actions: { gap: 12 },
   rowActions: { flexDirection: 'row', gap: 10, marginTop: 5 },
   locationPanel: {
-    alignItems: 'flex-start',
-    backgroundColor: colors.softBlue,
-    borderColor: '#AFCBFF',
-    borderRadius: 9,
+    alignItems: 'center',
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: 10,
     borderWidth: 1,
     flexDirection: 'row',
-    gap: 10,
-    padding: 13,
+    gap: 12,
+    minHeight: 64,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
   },
   locationPressed: { opacity: 0.78 },
-  locationIcon: { color: colors.primaryBlue, fontSize: 25, fontWeight: '900' },
+  locationCheckbox: {
+    alignItems: 'center',
+    backgroundColor: colors.card,
+    borderColor: colors.primaryBlue,
+    borderRadius: 5,
+    borderWidth: 2,
+    height: 24,
+    justifyContent: 'center',
+    width: 24,
+  },
+  locationCheckboxChecked: { backgroundColor: colors.primaryBlue },
+  locationCheckmark: { color: colors.card, fontSize: 16, fontWeight: '900', lineHeight: 18 },
   locationCopy: { flex: 1, gap: 3 },
-  locationTitle: { color: '#111827', fontSize: 12, fontWeight: '700' },
+  locationTitle: { color: '#111827', fontSize: 13, fontWeight: '800' },
   locationSubtitle: { color: '#334155', fontSize: 11, lineHeight: 15 },
   coordinates: { color: colors.muted, fontSize: 10, lineHeight: 14 },
   barangayHelp: { color: colors.muted, fontSize: 10, lineHeight: 14 },

@@ -11,16 +11,20 @@ export default function TabLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.primaryGold,
         tabBarInactiveTintColor: colors.muted,
+        tabBarLabelPosition: 'below-icon',
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '800',
-          lineHeight: 17,
-          marginTop: 2,
+          lineHeight: 15,
+          marginTop: 1,
         },
         tabBarIconStyle: {
-          marginTop: 2,
+          marginBottom: 1,
+          marginTop: 1,
         },
         tabBarItemStyle: {
+          alignItems: 'center',
+          justifyContent: 'center',
           paddingVertical: 4,
         },
         tabBarStyle: {

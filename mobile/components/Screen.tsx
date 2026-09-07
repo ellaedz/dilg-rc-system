@@ -20,6 +20,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
+    alignItems: 'center',
     backgroundColor: colors.background,
     flexGrow: 1,
     padding: spacing.screen,
@@ -27,5 +28,7 @@ const styles = StyleSheet.create({
   },
   stack: {
     gap: 16,
+    maxWidth: 480,
+    width: '100%',
   },
 });

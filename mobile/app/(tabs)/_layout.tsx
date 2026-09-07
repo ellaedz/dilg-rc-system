@@ -1,5 +1,6 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Tabs } from 'expo-router';
+import { Platform } from 'react-native';
 
 import { colors } from '@/constants/colors';
 
@@ -23,11 +24,14 @@ export default function TabLayout() {
           paddingVertical: 4,
         },
         tabBarStyle: {
+          alignSelf: 'center',
           backgroundColor: colors.card,
           borderTopColor: colors.border,
           height: 78,
+          maxWidth: Platform.OS === 'web' ? 480 : undefined,
           paddingBottom: 8,
           paddingTop: 7,
+          width: '100%',
         },
       }}
     >

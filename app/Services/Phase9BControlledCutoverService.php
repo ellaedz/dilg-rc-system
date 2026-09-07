@@ -278,11 +278,10 @@ class Phase9BControlledCutoverService
             throw new RuntimeException('The controlled Tracking Token failed verification.');
         }
 
-        $response = $this->mobileController->status(
-            Request::create('/', 'GET'),
-            $rawTrackingToken,
-            $this->credentialService,
-        );
+        $request = Request::create('/', 'GET', [], [], [], [
+            'HTTP_AUTHORIZATION' => 'Bearer '.$rawTrackingToken,
+        ]);
+        $response = $this->mobileController->status($request, $this->credentialService);
         $encoded = json_encode($response->getData(true));
         if ($response->getStatusCode() !== 200
             || ! is_string($encoded)

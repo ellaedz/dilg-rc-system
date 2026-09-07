@@ -16,12 +16,19 @@ class MobileReportResource extends JsonResource
             'citizen_selected_violation_type' => $this->citizen_selected_violation_type,
             'has_citizen_classification' => $this->has_citizen_classification,
             'image_result' => $this->predicted_violation_category,
-            'image_confidence' => $this->confidence_score !== null ? (float) $this->confidence_score : null,
             'image_validation_status' => $this->image_validation_status,
             'image_model_version' => $this->image_model_version,
             'needs_manual_review' => (bool) $this->needs_manual_review,
             'report_status' => $this->report_status,
             'ai_processing_status' => $this->ai_processing_status,
+            'text_prediction' => $this->text_prediction,
+            'text_confidence' => $this->text_confidence !== null
+                ? (float) $this->text_confidence
+                : null,
+            'image_prediction' => $this->ai_image_prediction ?: $this->predicted_violation_category,
+            'image_confidence' => $this->ai_image_confidence !== null
+                ? (float) $this->ai_image_confidence
+                : ($this->confidence_score !== null ? (float) $this->confidence_score : null),
             'final_ai_category' => $this->ai_possible_violation,
             'final_ai_confidence' => $this->ai_possible_violation_confidence !== null
                 ? (float) $this->ai_possible_violation_confidence
@@ -34,13 +41,14 @@ class MobileReportResource extends JsonResource
             'verification_status' => $this->verification_status,
             'is_inside_santa_cruz' => (bool) $this->municipality_validated,
             'municipality_name' => $this->municipality_name,
+            'reported_barangay' => $this->citizen_reported_barangay,
             'detected_barangay' => $this->detected_barangay,
             'barangay_detection_status' => $this->barangay_detection_status,
             'barangay_assignment_status' => $this->barangay_assignment_status,
             'needs_manual_barangay_review' => (bool) $this->needs_manual_barangay_review,
             'assigned_barangay_office' => $this->assigned_barangay_office,
             'location_context' => $this->location_context,
-            'note' => 'Please save your Tracking ID to check the status of your report.',
+            'note' => 'Your report has been saved. Use My Reports to check its status.',
             'description' => $this->description,
             'latitude' => (float) $this->latitude,
             'longitude' => (float) $this->longitude,

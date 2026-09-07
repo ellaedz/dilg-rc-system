@@ -45,6 +45,10 @@ type RawSubmittedReport = {
   needs_manual_barangay_review?: boolean;
   needs_manual_review?: boolean;
   ai_processing_status?: string | null;
+  text_prediction?: string | null;
+  text_confidence?: number | null;
+  image_prediction?: string | null;
+  image_confidence?: number | null;
   final_ai_category?: string | null;
   final_ai_confidence?: number | null;
   ai_needs_manual_review?: boolean;
@@ -62,6 +66,9 @@ type RawReportStatus = {
   needs_manual_barangay_review?: boolean;
   image_prediction?: string | null;
   ai_processing_status?: string | null;
+  text_prediction?: string | null;
+  text_confidence?: number | null;
+  image_confidence?: number | null;
   final_ai_category?: string | null;
   final_ai_confidence?: number | null;
   ai_needs_manual_review?: boolean;
@@ -69,6 +76,7 @@ type RawReportStatus = {
   latest_action?: string | null;
   last_updated?: string | null;
   date_submitted?: string | null;
+  description?: string | null;
   timeline?: {
     status: string;
     action?: string | null;
@@ -162,6 +170,10 @@ export function parseSubmittedReport(rawValue: unknown): SubmittedReport {
     needsManualBarangayReview: optionalBoolean(raw.needs_manual_barangay_review, 'barangay review flag'),
     needsManualReview: optionalBoolean(raw.needs_manual_review, 'manual review flag'),
     aiProcessingStatus: optionalString(raw.ai_processing_status, 'AI processing status'),
+    textPrediction: optionalString(raw.text_prediction, 'text prediction'),
+    textConfidence: optionalNumber(raw.text_confidence, 'text confidence'),
+    imagePrediction: optionalString(raw.image_prediction, 'image prediction'),
+    imageConfidence: optionalNumber(raw.image_confidence, 'image confidence'),
     finalAiCategory: optionalString(raw.final_ai_category, 'AI category'),
     finalAiConfidence: optionalNumber(raw.final_ai_confidence, 'AI confidence'),
     aiNeedsManualReview: optionalBoolean(raw.ai_needs_manual_review, 'AI review flag'),
@@ -194,6 +206,9 @@ export function parseReportStatus(rawValue: unknown): ReportStatus {
     needsManualBarangayReview: optionalBoolean(raw.needs_manual_barangay_review, 'barangay review flag'),
     imagePrediction: optionalString(raw.image_prediction, 'image prediction'),
     aiProcessingStatus: optionalString(raw.ai_processing_status, 'AI processing status'),
+    textPrediction: optionalString(raw.text_prediction, 'text prediction'),
+    textConfidence: optionalNumber(raw.text_confidence, 'text confidence'),
+    imageConfidence: optionalNumber(raw.image_confidence, 'image confidence'),
     finalAiCategory: optionalString(raw.final_ai_category, 'AI category'),
     finalAiConfidence: optionalNumber(raw.final_ai_confidence, 'AI confidence'),
     aiNeedsManualReview: optionalBoolean(raw.ai_needs_manual_review, 'AI review flag'),
@@ -201,6 +216,7 @@ export function parseReportStatus(rawValue: unknown): ReportStatus {
     latestAction: optionalString(raw.latest_action, 'latest action'),
     lastUpdated: optionalString(raw.last_updated, 'last-updated timestamp'),
     dateSubmitted: optionalString(raw.date_submitted, 'submission date'),
+    description: optionalString(raw.description, 'description'),
     timeline: (raw.timeline ?? []).map((item) => {
       if (!item || typeof item !== 'object') throw new Error('Laravel returned an invalid timeline item.');
       return {
@@ -218,13 +234,17 @@ function appendText(formData: FormData, key: string, value: string | number | bo
 }
 
 export function getMobileReportTextFields(snapshot: SubmissionSnapshot): Record<string, string> {
-  return {
+  const fields = {
     description: snapshot.description,
     latitude: String(snapshot.latitude),
     longitude: String(snapshot.longitude),
     gps_accuracy: String(snapshot.gpsAccuracy),
     timestamp: snapshot.timestamp,
   };
+
+  return snapshot.selectedBarangay
+    ? { ...fields, reported_barangay: snapshot.selectedBarangay }
+    : fields;
 }
 
 export async function validateMunicipality(latitude: number, longitude: number): Promise<MunicipalityValidationResult> {
@@ -266,11 +286,14 @@ export async function submitMobileReport(
     timeout: 30000,
     onUploadProgress: (event) => {
       if (!event.total || !onUploadProgress) return;
-      onUploadProgress(Math.min(100, Math.round((event.loaded / event.total) * 100)));
+      onUploadProgress(Math.min(80, 20 + Math.round((event.loaded / event.total) * 60)));
     },
   });
 
-  return parseSubmittedReport(requireEnvelopeData(response.data));
+  const submitted = parseSubmittedReport(requireEnvelopeData(response.data));
+  onUploadProgress?.(100);
+
+  return submitted;
 }
 
 export async function getReportStatus(trackingToken: string): Promise<ReportStatus> {

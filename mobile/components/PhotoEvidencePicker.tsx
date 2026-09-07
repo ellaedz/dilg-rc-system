@@ -1,11 +1,8 @@
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { FormFieldError } from '@/components/FormFieldError';
-import { PrimaryButton } from '@/components/PrimaryButton';
-import { SecondaryButton } from '@/components/SecondaryButton';
 import { colors } from '@/constants/colors';
 import type { ImageSource } from '@/types/report';
-import { formatFileSize } from '@/utils/imageProcessing';
 
 type PhotoEvidencePickerProps = {
   imageUri: string | null;
@@ -23,9 +20,6 @@ type PhotoEvidencePickerProps = {
 
 export function PhotoEvidencePicker({
   imageUri,
-  imageWidth,
-  imageHeight,
-  imageFileSize,
   error,
   permissionMessage,
   isBusy,
@@ -35,57 +29,36 @@ export function PhotoEvidencePicker({
 }: PhotoEvidencePickerProps) {
   const hasImage = Boolean(imageUri);
 
+  function chooseSource() {
+    Alert.alert('Add Photo Evidence', 'Choose how you want to add the required photo.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Camera', onPress: onTakePhoto },
+      { text: 'Gallery', onPress: onChooseFromGallery },
+    ]);
+  }
+
   return (
     <View style={styles.stack}>
       {!hasImage ? (
         <Pressable
           accessibilityLabel="Photo evidence upload area"
           disabled={isBusy}
-          onPress={onTakePhoto}
+          onPress={chooseSource}
           style={({ pressed }) => [styles.emptyArea, pressed && !isBusy && styles.pressed, isBusy && styles.disabled]}
         >
-          <Text style={styles.cameraIcon}>CAM</Text>
-          <Text style={styles.emptyTitle}>Add required photo evidence</Text>
-          <Text style={styles.emptyCopy}>Take a new photo or choose an existing road-clearing image from your gallery.</Text>
+          <Text style={styles.cameraIcon}>▣</Text>
+          <Text style={styles.emptyTitle}>Click to upload photo evidence</Text>
+          <Text style={styles.emptyCopy}>JPG, PNG, HEIC accepted</Text>
         </Pressable>
       ) : (
-        <View style={styles.previewWrap}>
-          <Image source={{ uri: imageUri ?? undefined }} style={styles.preview} />
+        <Pressable accessibilityLabel="Replace selected photo" onPress={chooseSource} style={styles.previewWrap}>
+          <Image source={{ uri: imageUri ?? undefined }} resizeMode="cover" style={styles.preview} />
           <Pressable accessibilityLabel="Remove selected photo" onPress={onRemovePhoto} style={styles.removePhoto}>
-            <Text style={styles.removePhotoText}>X</Text>
+            <Text style={styles.removePhotoText}>×</Text>
           </Pressable>
-          <Text style={styles.selectedText}>Photo selected</Text>
-        </View>
+          <Text style={styles.selectedText}>Photo selected ✓</Text>
+        </Pressable>
       )}
-
-      <View style={styles.actions}>
-        <PrimaryButton
-          accessibilityLabel="Take photo evidence"
-          disabled={isBusy}
-          loading={isBusy}
-          onPress={onTakePhoto}
-          title={hasImage ? 'Replace with Camera' : 'Take Photo'}
-        />
-        <SecondaryButton
-          accessibilityLabel="Choose photo evidence from gallery"
-          disabled={isBusy}
-          onPress={onChooseFromGallery}
-          title={hasImage ? 'Replace from Gallery' : 'Choose from Gallery'}
-        />
-      </View>
-
-      {hasImage ? (
-        <View style={styles.metaCard}>
-          <Text style={styles.metaText}>
-            {imageWidth && imageHeight ? `${imageWidth} x ${imageHeight}px` : 'Image dimensions unavailable'} ·{' '}
-            {formatFileSize(imageFileSize)}
-          </Text>
-          <Text style={styles.privacy}>
-            Stored in app-owned draft storage. It uploads only after you press Submit Report.
-          </Text>
-          <SecondaryButton disabled={isBusy} onPress={onRemovePhoto} title="Remove Photo" />
-        </View>
-      ) : null}
 
       {permissionMessage ? <Text style={styles.permission}>{permissionMessage}</Text> : null}
       <FormFieldError message={error} />
@@ -94,66 +67,36 @@ export function PhotoEvidencePicker({
 }
 
 const styles = StyleSheet.create({
-  stack: {
-    gap: 12,
-  },
+  stack: { gap: 10 },
   emptyArea: {
     alignItems: 'center',
-    backgroundColor: colors.softBlue,
-    borderColor: colors.primaryBlue,
-    borderRadius: 12,
+    backgroundColor: colors.card,
+    borderColor: '#C9D1DF',
+    borderRadius: 9,
     borderStyle: 'dashed',
-    borderWidth: 2,
-    gap: 8,
-    minHeight: 190,
+    borderWidth: 1,
+    gap: 7,
     justifyContent: 'center',
+    minHeight: 145,
     padding: 20,
   },
-  pressed: {
-    opacity: 0.85,
-  },
-  disabled: {
-    opacity: 0.55,
-  },
-  cameraIcon: {
-    backgroundColor: colors.primaryBlue,
-    borderRadius: 999,
-    color: colors.card,
-    fontSize: 14,
-    fontWeight: '900',
-    overflow: 'hidden',
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-  },
-  emptyTitle: {
-    color: colors.text,
-    fontSize: 18,
-    fontWeight: '900',
-    textAlign: 'center',
-  },
-  emptyCopy: {
-    color: colors.muted,
-    fontSize: 14,
-    lineHeight: 20,
-    textAlign: 'center',
-  },
+  pressed: { opacity: 0.82 },
+  disabled: { opacity: 0.55 },
+  cameraIcon: { color: '#9AA4B5', fontSize: 38, lineHeight: 42 },
+  emptyTitle: { color: '#111827', fontSize: 13, fontWeight: '700', textAlign: 'center' },
+  emptyCopy: { color: colors.muted, fontSize: 11, lineHeight: 16, textAlign: 'center' },
   previewWrap: {
     alignItems: 'center',
     backgroundColor: colors.softGreen,
     borderColor: '#20C96B',
-    borderRadius: 10,
+    borderRadius: 9,
     borderStyle: 'dashed',
     borderWidth: 1.5,
-    gap: 9,
+    gap: 8,
     overflow: 'hidden',
-    padding: 14,
+    padding: 12,
   },
-  preview: {
-    backgroundColor: '#E5E7EB',
-    borderRadius: 7,
-    height: 190,
-    width: '100%',
-  },
+  preview: { backgroundColor: '#E5E7EB', borderRadius: 7, height: 175, width: '100%' },
   removePhoto: {
     alignItems: 'center',
     backgroundColor: colors.error,
@@ -161,50 +104,21 @@ const styles = StyleSheet.create({
     height: 34,
     justifyContent: 'center',
     position: 'absolute',
-    right: 20,
-    top: 20,
+    right: 16,
+    top: 16,
     width: 34,
   },
-  removePhotoText: {
-    color: colors.card,
-    fontSize: 24,
-    lineHeight: 26,
-  },
-  selectedText: {
-    color: colors.success,
-    fontSize: 12,
-    fontWeight: '800',
-  },
-  actions: {
-    gap: 10,
-  },
-  metaCard: {
-    backgroundColor: '#F9FAFB',
-    borderColor: colors.border,
-    borderRadius: 14,
-    borderWidth: 1,
-    gap: 9,
-    padding: 12,
-  },
-  metaText: {
-    color: colors.text,
-    fontSize: 13,
-    fontWeight: '800',
-  },
-  privacy: {
-    color: colors.muted,
-    fontSize: 13,
-    lineHeight: 19,
-  },
+  removePhotoText: { color: colors.card, fontSize: 25, lineHeight: 27 },
+  selectedText: { color: colors.success, fontSize: 11, fontWeight: '800' },
   permission: {
     backgroundColor: '#FEF2F2',
     borderColor: '#FECACA',
-    borderRadius: 12,
+    borderRadius: 9,
     borderWidth: 1,
     color: colors.error,
-    fontSize: 13,
-    fontWeight: '800',
-    lineHeight: 19,
-    padding: 12,
+    fontSize: 12,
+    fontWeight: '700',
+    lineHeight: 17,
+    padding: 10,
   },
 });

@@ -24,10 +24,9 @@ export default function AboutScreen() {
   return (
     <Screen>
       <AppHeader title="About CIVICLEAR" subtitle="Road clearing transparency for Santa Cruz, Laguna" />
-      <AppCard icon="PURPOSE" title="System purpose" description="CIVICLEAR supports reporting, monitoring, verification, routing, and transparency for road-clearing concerns." />
-      <AppCard icon="MOBILE" title="Current mobile phase" description="Phase 8F Stage B sends photographs and GPS evidence to Laravel without bundling or running a phone-side AI model. Server AI produces a possible violation for authorized staff review." />
-      <AppCard icon="MAP" title="Coverage" description="Municipal GIS validation covers Santa Cruz, Laguna. When barangay polygons are unavailable, authorized staff completes barangay routing." />
-      <AppCard icon="PRIVACY" title="Private tracking" description="Report Numbers identify reports. Anonymous status access requires a separate case-sensitive Tracking Token stored in the device secure store." />
+      <AppCard icon="PURPOSE" title="What CIVICLEAR does" description="Report and monitor road-clearing concerns in Santa Cruz, Laguna." />
+      <AppCard icon="AI" title="Report classification" description="The system suggests a possible violation class for the selected barangay to review." />
+      <AppCard icon="MAP" title="Location" description="GPS and the selected barangay help staff locate the reported concern." />
 
       {__DEV__ ? (
         <AppCard

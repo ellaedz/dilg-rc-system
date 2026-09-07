@@ -17,11 +17,19 @@ class ReportStatusResource extends JsonResource
             'current_status' => $this->report_status,
             'verification_status' => $this->verification_status,
             'municipality_name' => $this->municipality_name,
+            'reported_barangay' => $this->citizen_reported_barangay,
             'barangay' => $this->effective_barangay,
             'barangay_detection_status' => $this->barangay_detection_status,
             'needs_manual_barangay_review' => (bool) $this->needs_manual_barangay_review,
-            'image_prediction' => $this->predicted_violation_category,
+            'image_prediction' => $this->ai_image_prediction ?: $this->predicted_violation_category,
             'ai_processing_status' => $this->ai_processing_status,
+            'text_prediction' => $this->text_prediction,
+            'text_confidence' => $this->text_confidence !== null
+                ? (float) $this->text_confidence
+                : null,
+            'image_confidence' => $this->ai_image_confidence !== null
+                ? (float) $this->ai_image_confidence
+                : ($this->confidence_score !== null ? (float) $this->confidence_score : null),
             'final_ai_category' => $this->ai_possible_violation,
             'final_ai_confidence' => $this->ai_possible_violation_confidence !== null
                 ? (float) $this->ai_possible_violation_confidence
@@ -34,6 +42,7 @@ class ReportStatusResource extends JsonResource
             'latest_action' => $this->latest_public_action,
             'last_updated' => $this->updated_at?->toISOString(),
             'date_submitted' => $this->date_submitted?->toDateString(),
+            'description' => $this->description,
             'timeline' => $this->timelines->map(fn ($timeline) => [
                 'status' => $timeline->status,
                 'action' => $timeline->action_taken ?: $timeline->status,

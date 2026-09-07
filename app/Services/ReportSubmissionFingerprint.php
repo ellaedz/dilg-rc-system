@@ -22,6 +22,7 @@ class ReportSubmissionFingerprint
                     ? $this->decimal($validated['gps_accuracy'], 2)
                     : null,
             'timestamp' => $this->timestamp($validated['timestamp']),
+            'reported_barangay' => $validated['reported_barangay'] ?? null,
             'contact_number' => $validated['contact_number'] ?? null,
         ]);
     }
@@ -37,6 +38,7 @@ class ReportSubmissionFingerprint
                 ? $this->decimal($report->gps_accuracy, 2)
                 : null,
             'timestamp' => $this->timestamp($report->timestamp),
+            'reported_barangay' => $report->citizen_reported_barangay,
             'contact_number' => $report->contact_number,
         ]);
     }

@@ -5,18 +5,17 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { AppCard } from '@/components/AppCard';
 import { AppHeader } from '@/components/AppHeader';
 import { LoadingState } from '@/components/LoadingState';
-import { PrimaryButton } from '@/components/PrimaryButton';
 import { Screen } from '@/components/Screen';
 import { StatusBadge } from '@/components/StatusBadge';
 import { colors } from '@/constants/colors';
 import { useTrackingIds } from '@/hooks/useTrackingIds';
-import { getReportStatus, toApiError } from '@/services/api';
 import type { TrackingRecord } from '@/types/report';
+import { humanizeLabel } from '@/utils/formatters';
 
 type HistoryFilter = 'all' | 'pending' | 'resolved';
 
 function formatDate(value: string | null): string {
-  if (!value) return 'Not synced';
+  if (!value) return 'Pending';
   return new Intl.DateTimeFormat('en-PH', {
     dateStyle: 'medium',
     timeZone: 'Asia/Manila',
@@ -28,59 +27,22 @@ function isResolved(record: TrackingRecord): boolean {
 }
 
 export default function ReportHistoryScreen() {
-  const {
-    trackingRecords,
-    isLoading,
-    getTrackingToken,
-    removeTrackingRecord,
-    clearTrackingRecords,
-    updateTrackingRecordFromStatus,
-  } = useTrackingIds();
+  const { trackingRecords, isLoading } = useTrackingIds();
   const [filter, setFilter] = useState<HistoryFilter>('all');
-  const [refreshingId, setRefreshingId] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
   const resolvedCount = trackingRecords.filter(isResolved).length;
   const pendingCount = trackingRecords.length - resolvedCount;
   const filteredRecords = useMemo(
-    () =>
-      trackingRecords.filter((record) => {
-        if (filter === 'resolved') return isResolved(record);
-        if (filter === 'pending') return !isResolved(record);
-        return true;
-      }),
+    () => trackingRecords.filter((record) => {
+      if (filter === 'resolved') return isResolved(record);
+      if (filter === 'pending') return !isResolved(record);
+      return true;
+    }),
     [filter, trackingRecords],
   );
 
-  async function refreshRecord(record: TrackingRecord) {
-    setRefreshingId(record.localRecordId);
-    setMessage(null);
-    try {
-      const token = await getTrackingToken(record.localRecordId);
-      if (!token) {
-        setMessage(
-          record.credentialStatus === 'legacy_sequential_only'
-            ? `${record.reportNumber} is legacy history without an opaque Tracking Token.`
-            : 'The secure Tracking Token is unavailable.',
-        );
-        return;
-      }
-      const status = await getReportStatus(token);
-      await updateTrackingRecordFromStatus(record.localRecordId, status);
-      setMessage(`${status.reportNumber} refreshed.`);
-    } catch (error) {
-      setMessage(toApiError(error).status === 404 ? 'The saved Tracking Token was not found.' : toApiError(error).message);
-    } finally {
-      setRefreshingId(null);
-    }
-  }
-
-  async function refreshAll() {
-    for (const record of trackingRecords) await refreshRecord(record);
-  }
-
   return (
     <Screen>
-      <AppHeader title="My Reports" subtitle="Private report credentials stay on this device" />
+      <AppHeader title="My Reports" />
 
       <View style={styles.filters}>
         {([
@@ -99,18 +61,16 @@ export default function ReportHistoryScreen() {
         ))}
       </View>
 
-      {isLoading ? <LoadingState message="Loading saved reports..." /> : null}
-
-      {!isLoading && trackingRecords.length === 0 ? (
-        <AppCard title="No saved reports yet" description="Submitted reports will appear here automatically." />
-      ) : null}
-
-      {message ? (
-        <AppCard title="History sync" description={message} tone={message.includes('refreshed') ? 'success' : 'warning'} />
-      ) : null}
+      {isLoading ? <LoadingState message="Loading reports..." /> : null}
+      {!isLoading && trackingRecords.length === 0 ? <AppCard title="No reports yet" /> : null}
 
       {filteredRecords.map((record) => (
-        <AppCard key={record.localRecordId}>
+        <Pressable
+          key={record.localRecordId}
+          disabled={record.credentialStatus !== 'available'}
+          onPress={() => router.push(`/track-report?localRecordId=${encodeURIComponent(record.localRecordId)}`)}
+          style={styles.reportCard}
+        >
           <View style={styles.cardTop}>
             <StatusBadge
               label={record.currentStatus === 'For Verification' ? 'Pending Review' : record.currentStatus}
@@ -118,44 +78,14 @@ export default function ReportHistoryScreen() {
             />
             <Text style={styles.date}>{formatDate(record.submissionDate)}</Text>
           </View>
-          <Text style={styles.violation}>{record.violationType ?? 'Road clearing report'}</Text>
-          <Text style={styles.description}>{record.latestAction ?? 'Awaiting the next public status update.'}</Text>
+          <Text style={styles.violation}>{humanizeLabel(record.violationType, 'Road Clearing Report')}</Text>
+          {record.description ? <Text numberOfLines={2} style={styles.description}>{record.description}</Text> : null}
           <View style={styles.locationRow}>
-            <Text style={styles.location}>Location: {record.assignedBarangay ?? record.municipalityName ?? 'DILG review'}</Text>
-            <Pressable
-              disabled={record.credentialStatus !== 'available'}
-              onPress={() => router.push(`/track-report?localRecordId=${encodeURIComponent(record.localRecordId)}`)}
-            >
-              <Text style={styles.detailsLink}>View Details ›</Text>
-            </Pressable>
+            <Text style={styles.location}>⌖ {record.selectedBarangay ?? record.assignedBarangay ?? record.municipalityName ?? 'Santa Cruz'}</Text>
+            <Text style={styles.detailsLink}>View Details ›</Text>
           </View>
-          <View style={styles.rowActions}>
-            <PrimaryButton
-              disabled={record.credentialStatus !== 'available'}
-              loading={refreshingId === record.localRecordId}
-              onPress={() => refreshRecord(record)}
-              title="Refresh"
-              variant="outline"
-              style={styles.flexButton}
-            />
-            <PrimaryButton
-              onPress={() => removeTrackingRecord(record.localRecordId)}
-              title="Remove"
-              variant="danger"
-              style={styles.flexButton}
-            />
-          </View>
-        </AppCard>
+        </Pressable>
       ))}
-
-      {trackingRecords.length > 0 ? (
-        <View style={styles.actions}>
-          <PrimaryButton disabled={Boolean(refreshingId)} title="Refresh All" onPress={refreshAll} />
-          <PrimaryButton title="Clear Saved History" variant="outline" onPress={clearTrackingRecords} />
-        </View>
-      ) : null}
-
-      <Text style={styles.note}>Anonymous tracking requires the private token securely stored for each report.</Text>
     </Screen>
   );
 }
@@ -164,30 +94,34 @@ const styles = StyleSheet.create({
   filters: {
     backgroundColor: colors.primaryBlue,
     flexDirection: 'row',
-    gap: 8,
+    gap: 7,
     marginHorizontal: -16,
     marginTop: -16,
-    paddingBottom: 12,
-    paddingHorizontal: 12,
+    paddingBottom: 11,
+    paddingHorizontal: 11,
   },
-  filter: {
-    backgroundColor: '#174FCF',
-    borderRadius: 9,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
+  filter: { backgroundColor: '#174FCF', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 9 },
   filterActive: { backgroundColor: colors.card },
-  filterText: { color: '#DCE7FF', fontSize: 12, fontWeight: '900' },
+  filterText: { color: '#DCE7FF', fontSize: 11, fontWeight: '900' },
   filterTextActive: { color: colors.primaryBlue },
+  reportCard: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: 9,
+    borderWidth: 1,
+    gap: 7,
+    padding: 13,
+    shadowColor: '#102A5C',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.07,
+    shadowRadius: 5,
+    elevation: 2,
+  },
   cardTop: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
-  date: { color: colors.muted, fontSize: 11 },
-  violation: { color: colors.text, fontSize: 16, fontWeight: '900' },
-  description: { color: colors.text, fontSize: 13, lineHeight: 19 },
+  date: { color: colors.muted, fontSize: 10 },
+  violation: { color: colors.text, fontSize: 14, fontWeight: '900' },
+  description: { color: colors.text, fontSize: 11, lineHeight: 16 },
   locationRow: { alignItems: 'center', flexDirection: 'row', gap: 10, justifyContent: 'space-between' },
-  location: { color: colors.muted, flex: 1, fontSize: 12 },
-  detailsLink: { color: colors.primaryBlue, fontSize: 12, fontWeight: '900' },
-  rowActions: { flexDirection: 'row', gap: 10, marginTop: 4 },
-  flexButton: { flex: 1 },
-  actions: { gap: 10 },
-  note: { color: colors.muted, fontSize: 12, lineHeight: 18, textAlign: 'center' },
+  location: { color: colors.muted, flex: 1, fontSize: 10 },
+  detailsLink: { color: colors.primaryBlue, fontSize: 10, fontWeight: '900' },
 });

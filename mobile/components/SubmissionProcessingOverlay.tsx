@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, Modal, StyleSheet, Text, View } from 'react-native';
 
 import { colors } from '@/constants/colors';
@@ -8,7 +9,28 @@ type SubmissionProcessingOverlayProps = {
 };
 
 export function SubmissionProcessingOverlay({ visible, progress }: SubmissionProcessingOverlayProps) {
-  const boundedProgress = Math.max(4, Math.min(100, progress));
+  const [displayedProgress, setDisplayedProgress] = useState(0);
+
+  useEffect(() => {
+    setDisplayedProgress(visible ? 5 : 0);
+  }, [visible]);
+
+  useEffect(() => {
+    if (!visible) return;
+    if (progress >= 100) {
+      setDisplayedProgress(100);
+      return;
+    }
+
+    const target = progress >= 80 ? 92 : Math.max(12, progress);
+    const timer = setInterval(() => {
+      setDisplayedProgress((current) => current >= target ? current : Math.min(target, current + 1));
+    }, 90);
+
+    return () => clearInterval(timer);
+  }, [progress, visible]);
+
+  const boundedProgress = Math.max(5, Math.min(100, displayedProgress));
 
   return (
     <Modal animationType="fade" transparent visible={visible}>
@@ -26,12 +48,12 @@ export function SubmissionProcessingOverlay({ visible, progress }: SubmissionPro
             <View style={styles.progressTrack}>
               <View style={[styles.progressFill, { width: `${boundedProgress}%` }]} />
             </View>
-            <Text style={styles.progressLabel}>{progress}%</Text>
+            <Text style={styles.progressLabel}>{boundedProgress}%</Text>
 
             <View style={styles.steps}>
-              <Text style={styles.activeStep}>- Preparing secure report details</Text>
-              <Text style={progress > 0 ? styles.activeStep : styles.pendingStep}>- Uploading photo evidence</Text>
-              <Text style={progress >= 90 ? styles.activeStep : styles.pendingStep}>- Starting server-side AI processing</Text>
+              <Text style={styles.activeStep}>• Preparing report details</Text>
+              <Text style={boundedProgress >= 20 ? styles.activeStep : styles.pendingStep}>• Uploading photo evidence</Text>
+              <Text style={boundedProgress >= 80 ? styles.activeStep : styles.pendingStep}>• Processing your report</Text>
             </View>
             <ActivityIndicator color={colors.primaryBlue} size="small" />
             <Text style={styles.powered}>Powered by CIVICLEAR secure server processing</Text>

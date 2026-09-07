@@ -1,16 +1,16 @@
 import type * as ImagePickerTypes from 'expo-image-picker';
 import { randomUUID } from 'expo-crypto';
 import { router } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Linking, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Alert, Linking, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { AppCard } from '@/components/AppCard';
 import { AppHeader } from '@/components/AppHeader';
+import { BarangayPicker } from '@/components/BarangayPicker';
 import { FormFieldError } from '@/components/FormFieldError';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { PhotoEvidencePicker } from '@/components/PhotoEvidencePicker';
 import { PrimaryButton } from '@/components/PrimaryButton';
-import { PrivacyNotice } from '@/components/PrivacyNotice';
 import { Screen } from '@/components/Screen';
 import { SubmissionProcessingOverlay } from '@/components/SubmissionProcessingOverlay';
 import { colors } from '@/constants/colors';
@@ -37,24 +37,8 @@ const DESCRIPTION_MAX_LENGTH = 500;
 
 type GpsStatus = 'idle' | 'capturing' | 'validating' | 'ready' | 'outside' | 'error';
 
-function formatManilaTimestamp(value: string): string {
-  const timestamp = Number.isNaN(Date.parse(value)) ? new Date() : new Date(value);
-  return new Intl.DateTimeFormat('en-PH', {
-    dateStyle: 'medium',
-    timeStyle: 'medium',
-    timeZone: 'Asia/Manila',
-  }).format(timestamp);
-}
-
 function formatCoordinate(value: number | null): string {
   return value === null ? 'Not captured' : value.toFixed(6);
-}
-
-function getAccuracyLabel(value: number | null): { label: string; tone: 'success' | 'warning' } {
-  if (value === null) return { label: 'Not captured', tone: 'warning' };
-  if (value <= 30) return { label: 'Excellent', tone: 'success' };
-  if (value <= 80) return { label: 'Acceptable', tone: 'success' };
-  return { label: 'Low accuracy. Retry GPS if possible.', tone: 'warning' };
 }
 
 function getSubmissionMessage(error: unknown): string {
@@ -90,6 +74,7 @@ export default function SubmitReportScreen() {
   const [gpsStatus, setGpsStatus] = useState<GpsStatus>('idle');
   const [recoveryRecords, setRecoveryRecords] = useState<SubmissionJournalRecord[]>([]);
   const draftRef = useRef(draft);
+  const attemptedAutomaticGps = useRef(false);
 
   useEffect(() => {
     draftRef.current = draft;
@@ -123,12 +108,14 @@ export default function SubmitReportScreen() {
     ]);
   }, [continueStoredDraft, discardStoredDraft, isDraftLoading, pendingStoredDraft]);
 
-  const timestampDisplay = useMemo(() => formatManilaTimestamp(draft.timestamp), [draft.timestamp]);
-  const gpsTimeDisplay = useMemo(
-    () => (draft.gpsTimestamp ? formatManilaTimestamp(draft.gpsTimestamp) : 'Not captured'),
-    [draft.gpsTimestamp],
-  );
-  const accuracy = getAccuracyLabel(draft.gpsAccuracy);
+  useEffect(() => {
+    if (isDraftLoading || attemptedAutomaticGps.current || draftRef.current.latitude !== null) return;
+    attemptedAutomaticGps.current = true;
+    void handleCaptureGps();
+    // GPS capture intentionally runs once when the report screen first becomes ready.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDraftLoading]);
+
   function applyDraft(partialDraft: Partial<ReportDraft>) {
     const nextDraft = { ...draftRef.current, ...partialDraft };
     draftRef.current = nextDraft;
@@ -310,6 +297,7 @@ export default function SubmitReportScreen() {
         barangayDetectionStatus: validation.barangayDetectionStatus,
         needsManualBarangayReview: validation.needsManualBarangayReview,
         assignedBarangayOffice: validation.assignedBarangayOffice,
+        selectedBarangay: draftRef.current.selectedBarangay ?? validation.detectedBarangay,
       };
       applyDraft(validatedDraft);
       await saveDraft({ ...draftRef.current, ...validatedDraft });
@@ -317,7 +305,7 @@ export default function SubmitReportScreen() {
       setGpsStatus(validation.isInsideSantaCruz ? 'ready' : 'outside');
       setFeedback(
         validation.isInsideSantaCruz
-          ? 'Location is inside Santa Cruz. Barangay assignment will be handled by DILG.'
+          ? 'GPS location captured. Select the barangay where the violation is located.'
           : 'This GPS point is outside Santa Cruz coverage.',
       );
     } catch (error) {
@@ -335,14 +323,16 @@ export default function SubmitReportScreen() {
     });
     let submitted;
     try {
+      setUploadProgress(20);
       submitted = await submitMobileReport(snapshot, setUploadProgress);
-      await saveSubmittedReport(submitted, localRecordId);
+      await saveSubmittedReport(submitted, localRecordId, snapshot);
       await updateSubmissionJournal(record.localDraftId, 'submitted', {
         localRecordId,
         reportNumber: submitted.reportNumber,
         lastErrorCode: null,
         lastErrorMessage: null,
       });
+      await new Promise((resolve) => setTimeout(resolve, 450));
     } catch (error) {
       const apiError = toApiError(error);
       const nextState =
@@ -371,7 +361,7 @@ export default function SubmitReportScreen() {
   async function handleSubmitReport() {
     if (isSubmitting) return;
     setIsSubmitting(true);
-    setUploadProgress(0);
+    setUploadProgress(5);
     setFeedback(null);
     try {
       const processedImageExists = await imageExists(draft.imageUri);
@@ -385,6 +375,7 @@ export default function SubmitReportScreen() {
 
       await runSingleSubmission(draftRef.current.localDraftId, async () => {
         const prepared = await prepareSubmissionSnapshot(draftRef.current);
+        setUploadProgress(15);
         if (prepared.record.state === 'failed_permanent') {
           throw new Error('This prepared submission was permanently rejected. Discard it before creating a new request.');
         }
@@ -423,56 +414,34 @@ export default function SubmitReportScreen() {
     setFeedback('The selected local recovery snapshot was explicitly discarded.');
   }
 
-  async function handleClearDraft() {
-    if (isSubmitting) return;
-    await clearDraft();
-    setErrors({});
-    setGpsStatus('idle');
-    setFeedback('Draft cleared. A new local draft has been started.');
-  }
-
   return (
     <Screen>
-      <AppHeader title="Report Violation" subtitle="Secure road-clearing report" />
+      <AppHeader title="Report Violation" />
 
-      {feedback ? (
-        <AppCard
-          icon="NOTE"
-          title={feedback.includes('Pending') ? 'Submission Pending' : 'Workflow status'}
-          description={feedback}
-          tone={feedback.includes('outside') || feedback.includes('Pending') || feedback.includes('complete') ? 'warning' : 'success'}
-        />
-      ) : null}
+      {feedback ? <Text style={styles.feedback}>{feedback}</Text> : null}
 
-      <AppCard
-        title="Description *"
-        description="Describe what the photo shows. Server AI will suggest a possible violation after submission."
-      >
+      <View style={styles.section}>
+        <Text style={styles.fieldLabel}>Description <Text style={styles.required}>*</Text></Text>
         <TextInput
           accessibilityLabel="Report description"
           maxLength={DESCRIPTION_MAX_LENGTH}
           multiline
           onChangeText={(description) => applyDraft({ description })}
-          placeholder="Example: A vehicle is blocking the sidewalk and pedestrians are forced to walk on the road."
+          placeholder="Describe the violation..."
           placeholderTextColor={colors.muted}
           style={[styles.textArea, errors.description && styles.inputError]}
           textAlignVertical="top"
           value={draft.description}
         />
-        <View style={styles.counterRow}>
-          <Text style={styles.helper}>Minimum 10 characters.</Text>
-          <Text style={styles.counter}>
-            {draft.description.length}/{DESCRIPTION_MAX_LENGTH}
-          </Text>
-        </View>
+        <Text style={styles.helper}>AI will automatically classify this violation</Text>
         <FormFieldError message={errors.description} />
-      </AppCard>
+      </View>
 
-      <AppCard
-        icon="PHOTO"
-        title="Photo Evidence *"
-        description="Required to support the report and improve server-side analysis."
-      >
+      <View style={styles.section}>
+        <View style={styles.labelRow}>
+          <Text style={styles.fieldLabel}>Photo Evidence <Text style={styles.required}>*</Text></Text>
+          <Text style={styles.requiredPill}>Required</Text>
+        </View>
         <PhotoEvidencePicker
           error={errors.photo}
           imageFileSize={draft.imageFileSize}
@@ -486,74 +455,70 @@ export default function SubmitReportScreen() {
           onTakePhoto={handleTakePhoto}
           permissionMessage={permissionMessage}
         />
-      </AppCard>
+      </View>
 
-      <AppCard icon="GPS" title="Location" description="Use the current GPS position for the incident point.">
-        <View style={styles.locationPanel}>
-          <Text style={styles.locationTitle}>✓ Use current GPS location</Text>
-          <Text style={styles.locationSubtitle}>
-            {draft.latitude === null
-              ? 'Location has not been captured.'
-              : `${formatCoordinate(draft.latitude)}, ${formatCoordinate(draft.longitude)}`}
-          </Text>
-        </View>
-        <View style={styles.grid}>
-          <Text style={styles.label}>Status</Text>
-          <Text style={styles.value}>{gpsStatus === 'ready' ? 'Inside Santa Cruz' : gpsStatus}</Text>
-          <Text style={styles.label}>Accuracy</Text>
-          <Text style={[styles.value, accuracy.tone === 'warning' && styles.warningText]}>
-            {draft.gpsAccuracy === null ? 'Not captured' : `${draft.gpsAccuracy.toFixed(1)}m - ${accuracy.label}`}
-          </Text>
-          <Text style={styles.label}>Coordinates</Text>
-          <Text style={styles.value}>
-            {formatCoordinate(draft.latitude)}, {formatCoordinate(draft.longitude)}
-          </Text>
-          <Text style={styles.label}>Capture Time</Text>
-          <Text style={styles.value}>{gpsTimeDisplay}</Text>
-          <Text style={styles.label}>Municipality</Text>
-          <Text style={styles.value}>{draft.municipalityName ?? 'Not validated'}</Text>
-          <Text style={styles.label}>Barangay</Text>
-          <Text style={styles.value}>{draft.detectedBarangay ?? 'Barangay assignment will be handled by DILG.'}</Text>
-          <Text style={styles.label}>Report Time</Text>
-          <Text style={styles.value}>{timestampDisplay}</Text>
-        </View>
+      <View style={styles.section}>
+        <Text style={styles.fieldLabel}>Location</Text>
+        <Pressable
+          accessibilityLabel="Use current GPS location"
+          disabled={isSubmitting}
+          onPress={handleCaptureGps}
+          style={({ pressed }) => [styles.locationPanel, pressed && styles.locationPressed]}
+        >
+          <Text style={styles.locationIcon}>⌖</Text>
+          <View style={styles.locationCopy}>
+            <Text style={styles.locationTitle}>☑ Use current GPS location</Text>
+            <Text style={styles.locationSubtitle}>
+              {gpsStatus === 'capturing' || gpsStatus === 'validating'
+                ? 'Finding current location...'
+                : draft.latitude === null
+                  ? 'Tap to get your current location'
+                  : 'Current location (GPS)'}
+            </Text>
+            {draft.latitude !== null ? (
+              <Text style={styles.coordinates}>{formatCoordinate(draft.latitude)}, {formatCoordinate(draft.longitude)}</Text>
+            ) : null}
+          </View>
+        </Pressable>
         <FormFieldError message={errors.latitude ?? errors.detectedBarangay} />
-        <View style={styles.rowActions}>
-          <PrimaryButton
-            disabled={isSubmitting}
-            loading={gpsStatus === 'capturing' || gpsStatus === 'validating'}
-            onPress={handleCaptureGps}
-            title={draft.latitude === null ? 'Capture GPS' : 'Retry GPS'}
-          />
-          <PrimaryButton onPress={() => Linking.openSettings()} title="Open Settings" variant="outline" />
-        </View>
-      </AppCard>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.fieldLabel}>Barangay <Text style={styles.required}>*</Text></Text>
+        <BarangayPicker
+          disabled={isSubmitting}
+          hasError={Boolean(errors.selectedBarangay)}
+          onChange={(selectedBarangay) => {
+            applyDraft({ selectedBarangay });
+            setErrors((current) => ({ ...current, selectedBarangay: undefined }));
+          }}
+          value={draft.selectedBarangay}
+        />
+        <Text style={styles.barangayHelp}>
+          Use your current GPS location, then select the barangay where the violation is located.
+        </Text>
+        <FormFieldError message={errors.selectedBarangay} />
+      </View>
       <FormFieldError message={errors.timestamp} />
 
       {recoveryRecords.length > 0 ? (
-        <AppCard
-          icon="SYNC"
-          title="Saved Submission Recovery"
-          description="These requests were not silently resent. Retry uses the original photograph and Idempotency-Key."
-          tone="warning"
-        >
+        <AppCard title="Unsent Reports" tone="warning">
           {recoveryRecords.map((record) => (
             <View key={record.localDraftId} style={styles.recoveryItem}>
-              <Text style={styles.value}>State: {record.state.replaceAll('_', ' ')}</Text>
-              <Text style={styles.helper}>{record.lastErrorMessage ?? 'Prepared locally and not yet confirmed.'}</Text>
+              <Text style={styles.recoveryText}>This saved report still needs attention.</Text>
               <View style={styles.rowActions}>
                 {['prepared', 'uncertain', 'failed_retryable'].includes(record.state) ? (
                   <PrimaryButton
                     disabled={isSubmitting}
                     onPress={() => handleRetryRecovery(record)}
-                    title="Retry Same Request"
+                    title="Retry"
                     variant="secondary"
                   />
                 ) : null}
                 <PrimaryButton
                   disabled={isSubmitting}
                   onPress={() => handleDiscardRecovery(record)}
-                  title="Discard Local Recovery"
+                  title="Discard"
                   variant="danger"
                 />
               </View>
@@ -562,17 +527,15 @@ export default function SubmitReportScreen() {
         </AppCard>
       ) : null}
 
-      <PrivacyNotice />
-
       <View style={styles.actions}>
         <PrimaryButton
           accessibilityLabel="Submit Report"
           disabled={isPreparingPhoto}
           loading={isSubmitting}
           onPress={handleSubmitReport}
-          title="Submit Report"
+          title="⇧  Submit Report"
         />
-        <PrimaryButton disabled={isSubmitting} onPress={handleClearDraft} title="Clear Local Draft" variant="outline" />
+        <Text style={styles.requiredNote}>All fields marked * are required, including photo evidence.</Text>
       </View>
 
       <LoadingOverlay message="Preparing photo..." visible={isPreparingPhoto} />
@@ -582,99 +545,63 @@ export default function SubmitReportScreen() {
 }
 
 const styles = StyleSheet.create({
-  textArea: {
-    backgroundColor: '#F9FAFB',
-    borderColor: '#7CA8FF',
-    borderRadius: 10,
+  section: { gap: 7 },
+  fieldLabel: { color: '#111827', fontSize: 12, fontWeight: '500' },
+  required: { color: colors.error },
+  labelRow: { alignItems: 'center', flexDirection: 'row', gap: 8 },
+  requiredPill: {
+    backgroundColor: '#FFF1F2',
+    borderColor: '#FDA4AF',
+    borderRadius: 999,
     borderWidth: 1,
+    color: colors.error,
+    fontSize: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  feedback: {
+    backgroundColor: colors.softBlue,
+    borderRadius: 8,
     color: colors.text,
-    fontSize: 15,
-    lineHeight: 22,
-    minHeight: 138,
-    padding: 14,
+    fontSize: 12,
+    lineHeight: 17,
+    padding: 10,
   },
-  inputError: {
-    borderColor: colors.error,
+  textArea: {
+    backgroundColor: colors.card,
+    borderColor: '#7CA8FF',
+    borderRadius: 9,
+    borderWidth: 1,
+    color: '#111827',
+    fontSize: 14,
+    lineHeight: 20,
+    minHeight: 110,
+    padding: 12,
   },
-  counterRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 10,
-    justifyContent: 'space-between',
-  },
-  helper: {
-    color: colors.muted,
-    flex: 1,
-    fontSize: 13,
-    lineHeight: 19,
-  },
-  counter: {
-    color: colors.muted,
-    fontSize: 13,
-    fontWeight: '900',
-  },
-  timestamp: {
-    color: colors.text,
-    fontSize: 18,
-    fontWeight: '900',
-  },
-  actions: {
-    gap: 10,
-  },
-  rowActions: {
-    gap: 10,
-    marginTop: 12,
-  },
+  inputError: { borderColor: colors.error },
+  helper: { color: colors.muted, fontSize: 10, lineHeight: 14 },
+  actions: { gap: 12 },
+  rowActions: { flexDirection: 'row', gap: 10, marginTop: 5 },
   locationPanel: {
+    alignItems: 'flex-start',
     backgroundColor: colors.softBlue,
     borderColor: '#AFCBFF',
-    borderRadius: 10,
+    borderRadius: 9,
     borderWidth: 1,
-    gap: 5,
-    padding: 14,
+    flexDirection: 'row',
+    gap: 10,
+    padding: 13,
   },
-  locationTitle: {
-    color: colors.text,
-    fontSize: 14,
-    fontWeight: '900',
-  },
-  locationSubtitle: {
-    color: colors.muted,
-    fontSize: 13,
-    lineHeight: 19,
-  },
-  grid: {
-    gap: 7,
-  },
-  label: {
-    color: colors.muted,
-    fontSize: 12,
-    fontWeight: '800',
-    textTransform: 'uppercase',
-  },
-  value: {
-    color: colors.text,
-    fontSize: 15,
-    fontWeight: '800',
-    lineHeight: 22,
-  },
-  warningText: {
-    color: colors.warning,
-  },
-  progressTrack: {
-    backgroundColor: '#F3F4F6',
-    borderRadius: 999,
-    height: 10,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    backgroundColor: colors.primaryGold,
-    height: 10,
-  },
+  locationPressed: { opacity: 0.78 },
+  locationIcon: { color: colors.primaryBlue, fontSize: 25, fontWeight: '900' },
+  locationCopy: { flex: 1, gap: 3 },
+  locationTitle: { color: '#111827', fontSize: 12, fontWeight: '700' },
+  locationSubtitle: { color: '#334155', fontSize: 11, lineHeight: 15 },
+  coordinates: { color: colors.muted, fontSize: 10, lineHeight: 14 },
+  barangayHelp: { color: colors.muted, fontSize: 10, lineHeight: 14 },
   recoveryItem: {
-    borderTopColor: colors.border,
-    borderTopWidth: 1,
     gap: 8,
-    paddingTop: 12,
   },
+  recoveryText: { color: colors.text, fontSize: 12 },
+  requiredNote: { color: colors.muted, fontSize: 10, textAlign: 'center' },
 });

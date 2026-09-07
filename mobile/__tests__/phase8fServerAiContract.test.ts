@@ -12,6 +12,8 @@ import { createIdempotencyKey, transitionSubmissionState } from '@/services/subm
 import { maskTrackingToken } from '@/services/trackingCredentials';
 import { classifyLegacyCredential } from '@/services/trackingMigration';
 import type { ReportStatus, SubmissionSnapshot } from '@/types/report';
+import { humanizeLabel } from '@/utils/formatters';
+import { createDraftPhotoFileName } from '@/utils/imageProcessing';
 import {
   getTrackingTokenValidationMessage,
   isLegacyReportNumber,
@@ -39,6 +41,9 @@ function status(currentStatus: string): ReportStatus {
     needsManualBarangayReview: true,
     imagePrediction: null,
     aiProcessingStatus: 'pending',
+    textPrediction: null,
+    textConfidence: null,
+    imageConfidence: null,
     finalAiCategory: null,
     finalAiConfidence: null,
     aiNeedsManualReview: true,
@@ -46,6 +51,7 @@ function status(currentStatus: string): ReportStatus {
     latestAction: null,
     lastUpdated: null,
     dateSubmitted: null,
+    description: null,
     timeline: [],
   };
 }
@@ -84,6 +90,40 @@ describe('Phase 8F server-AI contract', () => {
         'needs_manual_review',
       ]),
     );
+  });
+
+  test('submission sends the selected Santa Cruz barangay as a location hint', () => {
+    const snapshot: SubmissionSnapshot = {
+      schemaVersion: 1,
+      localDraftId: '15ccbdf6-0a65-4426-a690-06a5656b0bbc',
+      idempotencyKey: 'mobile-e167ca5a-d81a-418d-868e-7aef8c9fce3d',
+      photoUri: 'file:///app/civiclear/submissions/evidence.jpg',
+      photoName: 'evidence.jpg',
+      photoMimeType: 'image/jpeg',
+      description: 'A vehicle blocks the public road.',
+      latitude: 14.281,
+      longitude: 121.416,
+      gpsAccuracy: 8.5,
+      timestamp: '2026-07-29T10:00:00.000Z',
+      preparedAt: '2026-07-29T10:00:01.000Z',
+      selectedBarangay: 'Calios',
+    };
+
+    expect(getMobileReportTextFields(snapshot).reported_barangay).toBe('Calios');
+  });
+
+  test('server class labels are displayed without underscores', () => {
+    expect(humanizeLabel('illegal_parking')).toBe('Illegal Parking');
+    expect(humanizeLabel('construction_materials')).toBe('Construction Materials');
+    expect(humanizeLabel('')).toBe('Pending classification');
+  });
+
+  test('each selected report photo receives a fresh cache-safe file name', () => {
+    const first = createDraftPhotoFileName();
+    const second = createDraftPhotoFileName();
+    expect(first).not.toBe(second);
+    expect(first).toMatch(/^evidence-[0-9a-f-]{36}\.jpg$/i);
+    expect(second).toMatch(/^evidence-[0-9a-f-]{36}\.jpg$/i);
   });
 
   test('opaque Tracking Tokens remain exact and case-sensitive', () => {
@@ -134,9 +174,22 @@ describe('Phase 8F server-AI contract', () => {
       report_number: 'RCV-2026-0001',
       tracking_id: 'RCV-1900-9999',
       current_status: 'Submitted',
+      text_prediction: 'illegal_parking',
+      text_confidence: 0.81,
+      image_prediction: 'illegal_parking',
+      image_confidence: 0.88,
+      final_ai_category: 'illegal_parking',
+      final_ai_confidence: 0.845,
+      description: 'A vehicle is blocking the road.',
       timeline: [],
     });
     expect(parsed.reportNumber).toBe('RCV-2026-0001');
+    expect(parsed).toMatchObject({
+      textConfidence: 0.81,
+      imageConfidence: 0.88,
+      finalAiConfidence: 0.845,
+      description: 'A vehicle is blocking the road.',
+    });
     expect(parsed).not.toHaveProperty('trackingToken');
     expect(() =>
       parseSubmittedReport({

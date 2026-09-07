@@ -13,7 +13,7 @@ class BarangayPerformanceController extends Controller
     {
         // Get performance metrics for all barangays
         $barangayPerformance = ViolationReport::selectRaw('
-                COALESCE(detected_barangay, manually_assigned_barangay) as detected_barangay,
+                COALESCE(manually_assigned_barangay, citizen_reported_barangay, detected_barangay) as detected_barangay,
                 COUNT(*) as total_reports,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as resolved_count,
                 SUM(CASE WHEN status IN (?, ?, ?, ?, ?) THEN 1 ELSE 0 END) as pending_count,
@@ -34,9 +34,11 @@ class BarangayPerformanceController extends Controller
             'Pending',
         ])
             ->where(function ($query) {
-                $query->whereNotNull('detected_barangay')->orWhereNotNull('manually_assigned_barangay');
+                $query->whereNotNull('detected_barangay')
+                    ->orWhereNotNull('citizen_reported_barangay')
+                    ->orWhereNotNull('manually_assigned_barangay');
             })
-            ->groupByRaw('COALESCE(detected_barangay, manually_assigned_barangay)')
+            ->groupByRaw('COALESCE(manually_assigned_barangay, citizen_reported_barangay, detected_barangay)')
             ->get();
 
         // Calculate performance score

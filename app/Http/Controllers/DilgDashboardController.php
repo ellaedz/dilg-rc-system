@@ -26,14 +26,14 @@ class DilgDashboardController extends Controller
 
         // Top performing barangay (highest resolution rate)
         $barangayStats = ViolationReport::selectRaw('
-                COALESCE(detected_barangay, manually_assigned_barangay) as detected_barangay,
+                COALESCE(manually_assigned_barangay, citizen_reported_barangay, detected_barangay) as detected_barangay,
                 COUNT(*) as total_reports,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as resolved_count
             ', ['Resolved'])
             ->where(function ($query) {
-                $query->whereNotNull('detected_barangay')->orWhereNotNull('manually_assigned_barangay');
+                $query->whereNotNull('detected_barangay')->orWhereNotNull('citizen_reported_barangay')->orWhereNotNull('manually_assigned_barangay');
             })
-            ->groupByRaw('COALESCE(detected_barangay, manually_assigned_barangay)')
+            ->groupByRaw('COALESCE(manually_assigned_barangay, citizen_reported_barangay, detected_barangay)')
             ->get();
 
         // Calculate resolution rate in PHP
@@ -53,14 +53,14 @@ class DilgDashboardController extends Controller
 
         // Barangay with most pending reports
         $mostPendingBarangay = ViolationReport::selectRaw('
-                COALESCE(detected_barangay, manually_assigned_barangay) as detected_barangay,
+                COALESCE(manually_assigned_barangay, citizen_reported_barangay, detected_barangay) as detected_barangay,
                 COUNT(*) as pending_count
             ')
             ->whereIn('status', ['Submitted', 'For Verification', 'Verified', 'Assigned', 'In Progress'])
             ->where(function ($query) {
-                $query->whereNotNull('detected_barangay')->orWhereNotNull('manually_assigned_barangay');
+                $query->whereNotNull('detected_barangay')->orWhereNotNull('citizen_reported_barangay')->orWhereNotNull('manually_assigned_barangay');
             })
-            ->groupByRaw('COALESCE(detected_barangay, manually_assigned_barangay)')
+            ->groupByRaw('COALESCE(manually_assigned_barangay, citizen_reported_barangay, detected_barangay)')
             ->orderBy('pending_count', 'desc')
             ->first();
 
@@ -74,7 +74,7 @@ class DilgDashboardController extends Controller
 
         // Reports by barangay
         $reportsByBarangay = ViolationReport::selectRaw('
-                COALESCE(detected_barangay, manually_assigned_barangay) as detected_barangay,
+                COALESCE(manually_assigned_barangay, citizen_reported_barangay, detected_barangay) as detected_barangay,
                 COUNT(*) as total_reports,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as resolved_count,
                 SUM(CASE WHEN status IN (?, ?, ?, ?, ?) THEN 1 ELSE 0 END) as pending_count
@@ -87,9 +87,9 @@ class DilgDashboardController extends Controller
             'In Progress',
         ])
             ->where(function ($query) {
-                $query->whereNotNull('detected_barangay')->orWhereNotNull('manually_assigned_barangay');
+                $query->whereNotNull('detected_barangay')->orWhereNotNull('citizen_reported_barangay')->orWhereNotNull('manually_assigned_barangay');
             })
-            ->groupByRaw('COALESCE(detected_barangay, manually_assigned_barangay)')
+            ->groupByRaw('COALESCE(manually_assigned_barangay, citizen_reported_barangay, detected_barangay)')
             ->orderBy('total_reports', 'desc')
             ->get();
 

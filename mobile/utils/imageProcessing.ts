@@ -1,4 +1,5 @@
 import type { ImagePickerAsset } from 'expo-image-picker';
+import { randomUUID } from 'expo-crypto';
 
 import type { ImageSource } from '@/types/report';
 
@@ -26,6 +27,10 @@ function resizeActionFor(width: number, height: number) {
 
 const LOCAL_DRAFT_ID_PATTERN = /^[0-9a-f-]{36}$/i;
 
+export function createDraftPhotoFileName(): string {
+  return `evidence-${randomUUID()}.jpg`;
+}
+
 async function persistDraftPhoto(localDraftId: string, sourceUri: string): Promise<string> {
   if (!LOCAL_DRAFT_ID_PATTERN.test(localDraftId)) {
     throw new Error('The local draft identifier is invalid.');
@@ -37,12 +42,19 @@ async function persistDraftPhoto(localDraftId: string, sourceUri: string): Promi
   }
 
   const directory = `${FileSystem.documentDirectory}civiclear/drafts/${localDraftId}/`;
-  const destination = `${directory}evidence.jpg`;
-  const temporaryDestination = `${directory}evidence.next.jpg`;
+  const fileName = createDraftPhotoFileName();
+  const destination = `${directory}${fileName}`;
   await FileSystem.makeDirectoryAsync(directory, { intermediates: true });
-  await FileSystem.copyAsync({ from: sourceUri, to: temporaryDestination });
-  await FileSystem.deleteAsync(destination, { idempotent: true });
-  await FileSystem.moveAsync({ from: temporaryDestination, to: destination });
+  await FileSystem.copyAsync({ from: sourceUri, to: destination });
+
+  // A unique URI prevents React Native and Android's image cache from showing
+  // evidence selected for an earlier report. Keep only the newest draft photo.
+  const files = await FileSystem.readDirectoryAsync(directory);
+  await Promise.all(
+    files
+      .filter((candidate) => candidate !== fileName)
+      .map((candidate) => FileSystem.deleteAsync(`${directory}${candidate}`, { idempotent: true })),
+  );
   return destination;
 }
 

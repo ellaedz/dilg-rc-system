@@ -1,4 +1,5 @@
 import type { ReportDraft } from '@/types/report';
+import { SANTA_CRUZ_BARANGAYS } from '@/constants/config';
 
 const trackingTokenPattern = /^[A-Za-z0-9_-]{43}$/;
 const legacyReportNumberPattern = /^RCV-\d{4}-\d{4}$/;
@@ -84,6 +85,12 @@ export function validateSubmissionDraft(
     errors.detectedBarangay = 'Reports can only be submitted for locations inside Santa Cruz.';
   } else if (draft.municipalityValidated !== true) {
     errors.detectedBarangay = 'Validate the GPS location before submitting.';
+  }
+
+  if (!draft.selectedBarangay) {
+    errors.selectedBarangay = 'Select the barangay where the violation is located.';
+  } else if (!SANTA_CRUZ_BARANGAYS.includes(draft.selectedBarangay as (typeof SANTA_CRUZ_BARANGAYS)[number])) {
+    errors.selectedBarangay = 'Select a valid Santa Cruz barangay.';
   }
 
   return errors;

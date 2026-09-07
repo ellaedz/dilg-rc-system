@@ -88,6 +88,7 @@ class ViolationReport extends Model
         'longitude',
         'gps_accuracy',
         'timestamp',
+        'citizen_reported_barangay',
         'selected_violation_type',
         'predicted_violation_category',
         'confidence_score',
@@ -285,11 +286,14 @@ class ViolationReport extends Model
     }
 
     /**
-     * A polygon detection takes precedence over the temporary DILG route.
+     * Staff corrections take precedence, followed by the citizen's required
+     * barangay selection. Polygon detection remains the fallback for older reports.
      */
     public function getEffectiveBarangayAttribute(): ?string
     {
-        return $this->detected_barangay ?: $this->manually_assigned_barangay;
+        return $this->manually_assigned_barangay
+            ?: $this->citizen_reported_barangay
+            ?: $this->detected_barangay;
     }
 
     public function getCitizenSelectedViolationTypeAttribute(): ?string
@@ -319,10 +323,15 @@ class ViolationReport extends Model
     public function scopeForEffectiveBarangay($query, string $barangay)
     {
         return $query->where(function ($builder) use ($barangay) {
-            $builder->where('detected_barangay', $barangay)
+            $builder->where('manually_assigned_barangay', $barangay)
                 ->orWhere(function ($fallback) use ($barangay) {
-                    $fallback->whereNull('detected_barangay')
-                        ->where('manually_assigned_barangay', $barangay);
+                    $fallback->whereNull('manually_assigned_barangay')
+                        ->where('citizen_reported_barangay', $barangay);
+                })
+                ->orWhere(function ($fallback) use ($barangay) {
+                    $fallback->whereNull('manually_assigned_barangay')
+                        ->whereNull('citizen_reported_barangay')
+                        ->where('detected_barangay', $barangay);
                 });
         });
     }

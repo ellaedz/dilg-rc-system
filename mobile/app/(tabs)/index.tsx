@@ -1,132 +1,73 @@
 import { router } from 'expo-router';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Linking, StyleSheet, Text, View } from 'react-native';
 
-import { AppCard } from '@/components/AppCard';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Screen } from '@/components/Screen';
-import { StatusBadge } from '@/components/StatusBadge';
 import { colors } from '@/constants/colors';
-import { MUNICIPALITY } from '@/constants/config';
-import { useTrackingIds } from '@/hooks/useTrackingIds';
 
 export default function HomeScreen() {
-  const { trackingRecords, isLoading } = useTrackingIds();
+  async function openNearbyServices() {
+    const mapUrl = 'https://www.google.com/maps/search/?api=1&query=emergency+services+Santa+Cruz+Laguna';
+    try {
+      await Linking.openURL(mapUrl);
+    } catch {
+      Alert.alert('Map unavailable', 'The nearby-services map could not be opened on this device.');
+    }
+  }
 
   return (
     <Screen>
-      <View style={styles.hero}>
-        <View style={styles.heroTop}>
-          <Image source={require('../../assets/images/dilg-logo.png')} style={styles.logo} />
-          <View style={styles.heroCopy}>
-            <Text style={styles.kicker}>DILG-RC Citizen</Text>
-            <Text style={styles.title}>Road Clearing Reports</Text>
-            <Text style={styles.subtitle}>{MUNICIPALITY}</Text>
-          </View>
-        </View>
-        <StatusBadge label="Phase 8F Stage B - Server AI reporting" tone="info" />
+      <View style={styles.communityCard}>
+        <Image
+          accessibilityLabel="CIVICLEAR location and clear-road logo"
+          source={require('../../assets/images/civiclear-home-logo-v2.png')}
+          style={styles.logo}
+        />
+        <Text style={styles.title}>Help Keep Our Community Safe</Text>
+        <Text style={styles.subtitle}>See it. Report it. Clear the way.</Text>
       </View>
 
       <View style={styles.actions}>
-        <PrimaryButton title="Submit Report" onPress={() => router.push('/submit-report')} />
-        <PrimaryButton title="Track Report" variant="outline" onPress={() => router.push('/track-report')} />
-      </View>
-
-      <AppCard
-        icon="ID"
-        title="Saved Report Credentials"
-        description={
-          isLoading
-            ? 'Loading securely saved report credentials...'
-            : `${trackingRecords.length} report credential${trackingRecords.length === 1 ? '' : 's'} saved on this device.`
-        }
-      >
-        <PrimaryButton title="Open Report History" variant="secondary" onPress={() => router.push('/report-history')} />
-      </AppCard>
-
-      <AppCard
-        icon="FLOW"
-        title="Report process"
-        description="Step 1: photo and details. Step 2: GPS validation. Step 3: secure Laravel submission and server AI processing."
-      />
-
-      <View style={styles.badgeGrid}>
-        <AppCard icon="ANON" title="Anonymous" description="No name, email, home address, login, or registration required." tone="success" />
-        <AppCard icon="AI" title="Server AI" description="The server suggests a possible violation after submission. Authorized staff verification is still required." tone="success" />
-        <AppCard icon="GPS" title="Incident GPS" description="Foreground location validates the incident point. No fake coordinates." tone="success" />
-        <AppCard icon="GIS" title="GIS Routing" description="Laravel keeps municipal validation and barangay review logic." tone="info" />
-      </View>
-
-      <View style={styles.links}>
-        <Text style={styles.link} onPress={() => router.push('/privacy')}>
-          Privacy
-        </Text>
-        <Text style={styles.separator}>-</Text>
-        <Text style={styles.link} onPress={() => router.push('/about')}>
-          About
-        </Text>
+        <PrimaryButton title="ⓘ  Report Violation" onPress={() => router.push('/submit-report')} />
+        <PrimaryButton title="➤  Nearby Services & Map" variant="success" onPress={openNearbyServices} />
+        <PrimaryButton title="▣  View My Reports" variant="outline" onPress={() => router.push('/report-history')} />
       </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  hero: {
-    backgroundColor: colors.dark,
-    borderRadius: 22,
-    gap: 16,
-    padding: 18,
-  },
-  heroTop: {
+  communityCard: {
     alignItems: 'center',
-    flexDirection: 'row',
-    gap: 14,
-  },
-  logo: {
     backgroundColor: colors.card,
-    borderRadius: 18,
-    height: 74,
-    width: 74,
+    borderColor: colors.border,
+    borderRadius: 10,
+    borderWidth: 1,
+    gap: 10,
+    marginTop: 4,
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+    shadowColor: '#102A5C',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 5,
+    elevation: 2,
   },
-  heroCopy: {
-    flex: 1,
-    gap: 3,
-  },
-  kicker: {
-    color: colors.accentYellow,
-    fontSize: 12,
-    fontWeight: '900',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-  },
+  logo: { height: 78, resizeMode: 'contain', width: 78 },
   title: {
-    color: colors.card,
-    fontSize: 25,
+    color: '#000000',
+    fontSize: 17,
     fontWeight: '900',
+    textAlign: 'center',
   },
   subtitle: {
-    color: '#D1D5DB',
-    fontSize: 14,
-    fontWeight: '700',
+    color: '#27364F',
+    fontSize: 12,
+    lineHeight: 17,
+    maxWidth: 250,
+    textAlign: 'center',
   },
   actions: {
-    gap: 10,
-  },
-  badgeGrid: {
-    gap: 12,
-  },
-  links: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 10,
-    paddingVertical: 8,
-  },
-  link: {
-    color: colors.primaryGold,
-    fontSize: 15,
-    fontWeight: '900',
-  },
-  separator: {
-    color: colors.muted,
+    gap: 11,
   },
 });

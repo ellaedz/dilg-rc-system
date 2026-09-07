@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { randomUUID } from 'expo-crypto';
+import * as FileSystem from 'expo-file-system/legacy';
 import { createContext, PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
@@ -8,7 +9,7 @@ import {
   storeTrackingToken,
 } from '@/services/trackingCredentials';
 import { classifyLegacyCredential } from '@/services/trackingMigration';
-import type { ReportStatus, SubmittedReport, TrackingRecord } from '@/types/report';
+import type { ReportStatus, SubmissionSnapshot, SubmittedReport, TrackingRecord } from '@/types/report';
 import { isValidTrackingToken } from '@/utils/validators';
 
 const STORAGE_KEY = 'civiclear.tracking-records.v2';
@@ -17,7 +18,7 @@ const LEGACY_STORAGE_KEY = 'dilg_rc_tracking_ids';
 type TrackingContextValue = {
   trackingRecords: TrackingRecord[];
   isLoading: boolean;
-  saveSubmittedReport: (submitted: SubmittedReport, localRecordId: string) => Promise<TrackingRecord>;
+  saveSubmittedReport: (submitted: SubmittedReport, localRecordId: string, snapshot: SubmissionSnapshot) => Promise<TrackingRecord>;
   saveEnteredTrackingToken: (trackingToken: string, status?: ReportStatus) => Promise<TrackingRecord>;
   updateTrackingRecordFromStatus: (localRecordId: string, status: ReportStatus) => Promise<void>;
   getTrackingToken: (localRecordId: string) => Promise<string | null>;
@@ -27,6 +28,27 @@ type TrackingContextValue = {
 };
 
 export const TrackingContext = createContext<TrackingContextValue | null>(null);
+
+function historyDirectory(localRecordId: string): string | null {
+  if (!FileSystem.documentDirectory || !/^[0-9a-f-]{36}$/i.test(localRecordId)) return null;
+  return `${FileSystem.documentDirectory}civiclear/history/${localRecordId}/`;
+}
+
+async function preserveSubmittedPhoto(localRecordId: string, sourceUri: string): Promise<string | null> {
+  const directory = historyDirectory(localRecordId);
+  if (!directory) return null;
+  const photoUri = `${directory}evidence.jpg`;
+  await FileSystem.makeDirectoryAsync(directory, { intermediates: true });
+  await FileSystem.deleteAsync(photoUri, { idempotent: true });
+  await FileSystem.copyAsync({ from: sourceUri, to: photoUri });
+  return photoUri;
+}
+
+async function deleteSubmittedPhoto(localRecordId: string): Promise<void> {
+  const directory = historyDirectory(localRecordId);
+  if (!directory) return;
+  await FileSystem.deleteAsync(directory, { idempotent: true });
+}
 
 function safeRecord(candidate: Partial<TrackingRecord>): TrackingRecord | null {
   if (
@@ -44,12 +66,22 @@ function safeRecord(candidate: Partial<TrackingRecord>): TrackingRecord | null {
     legacySequentialId: typeof candidate.legacySequentialId === 'string' ? candidate.legacySequentialId : null,
     submissionDate: candidate.submissionDate ?? new Date().toISOString(),
     violationType: candidate.violationType ?? null,
+    textPrediction: candidate.textPrediction ?? null,
+    textConfidence: typeof candidate.textConfidence === 'number' ? candidate.textConfidence : null,
+    imagePrediction: candidate.imagePrediction ?? null,
+    imageConfidence: typeof candidate.imageConfidence === 'number' ? candidate.imageConfidence : null,
+    finalAiConfidence: typeof candidate.finalAiConfidence === 'number' ? candidate.finalAiConfidence : null,
     currentStatus: candidate.currentStatus ?? 'Saved Locally',
     verificationStatus: candidate.verificationStatus ?? null,
     municipalityName: candidate.municipalityName ?? null,
     assignedBarangay: candidate.assignedBarangay ?? null,
+    selectedBarangay: candidate.selectedBarangay ?? null,
     latestAction: candidate.latestAction ?? null,
     lastSync: candidate.lastSync ?? null,
+    description: candidate.description ?? null,
+    photoUri: candidate.photoUri ?? null,
+    latitude: typeof candidate.latitude === 'number' ? candidate.latitude : null,
+    longitude: typeof candidate.longitude === 'number' ? candidate.longitude : null,
   };
 }
 
@@ -58,12 +90,22 @@ function metadataFromLegacy(candidate: unknown, credential: string): Omit<Tracki
   return {
     submissionDate: typeof record.submissionDate === 'string' ? record.submissionDate : new Date().toISOString(),
     violationType: typeof record.violationType === 'string' ? record.violationType : null,
+    textPrediction: null,
+    textConfidence: null,
+    imagePrediction: null,
+    imageConfidence: null,
+    finalAiConfidence: null,
     currentStatus: typeof record.currentStatus === 'string' ? record.currentStatus : 'Saved Locally',
     verificationStatus: typeof record.verificationStatus === 'string' ? record.verificationStatus : null,
     municipalityName: typeof record.municipalityName === 'string' ? record.municipalityName : null,
     assignedBarangay: typeof record.assignedBarangay === 'string' ? record.assignedBarangay : null,
+    selectedBarangay: null,
     latestAction: typeof record.latestAction === 'string' ? record.latestAction : null,
     lastSync: typeof record.lastSync === 'string' ? record.lastSync : null,
+    description: null,
+    photoUri: null,
+    latitude: null,
+    longitude: null,
   };
 }
 
@@ -159,8 +201,9 @@ export function TrackingProvider({ children }: PropsWithChildren) {
   );
 
   const saveSubmittedReport = useCallback(
-    async (submitted: SubmittedReport, localRecordId: string) => {
+    async (submitted: SubmittedReport, localRecordId: string, snapshot: SubmissionSnapshot) => {
       await storeTrackingToken(localRecordId, submitted.trackingToken);
+      const photoUri = await preserveSubmittedPhoto(localRecordId, snapshot.photoUri);
       return saveRecord({
         localRecordId,
         reportNumber: submitted.reportNumber,
@@ -168,12 +211,22 @@ export function TrackingProvider({ children }: PropsWithChildren) {
         legacySequentialId: null,
         submissionDate: new Date().toISOString(),
         violationType: submitted.finalAiCategory,
+        textPrediction: submitted.textPrediction,
+        textConfidence: submitted.textConfidence,
+        imagePrediction: submitted.imagePrediction,
+        imageConfidence: submitted.imageConfidence,
+        finalAiConfidence: submitted.finalAiConfidence,
         currentStatus: submitted.status,
         verificationStatus: submitted.verificationStatus,
         municipalityName: submitted.municipalityName,
         assignedBarangay: submitted.detectedBarangay,
+        selectedBarangay: snapshot.selectedBarangay ?? null,
         latestAction: null,
         lastSync: new Date().toISOString(),
+        description: snapshot.description,
+        photoUri,
+        latitude: snapshot.latitude,
+        longitude: snapshot.longitude,
       });
     },
     [saveRecord],
@@ -191,12 +244,22 @@ export function TrackingProvider({ children }: PropsWithChildren) {
         legacySequentialId: null,
         submissionDate: status?.dateSubmitted ?? new Date().toISOString(),
         violationType: status?.finalAiCategory ?? null,
+        textPrediction: status?.textPrediction ?? null,
+        textConfidence: status?.textConfidence ?? null,
+        imagePrediction: status?.imagePrediction ?? null,
+        imageConfidence: status?.imageConfidence ?? null,
+        finalAiConfidence: status?.finalAiConfidence ?? null,
         currentStatus: status?.currentStatus ?? 'Saved Locally',
         verificationStatus: status?.verificationStatus ?? null,
         municipalityName: status?.municipalityName ?? null,
         assignedBarangay: status?.assignedBarangay ?? null,
+        selectedBarangay: null,
         latestAction: status?.latestAction ?? null,
         lastSync: status ? new Date().toISOString() : null,
+        description: null,
+        photoUri: null,
+        latitude: null,
+        longitude: null,
       });
     },
     [saveRecord],
@@ -210,11 +273,17 @@ export function TrackingProvider({ children }: PropsWithChildren) {
         ...existing,
         reportNumber: status.reportNumber,
         violationType: status.finalAiCategory ?? existing.violationType,
+        textPrediction: status.textPrediction ?? existing.textPrediction,
+        textConfidence: status.textConfidence ?? existing.textConfidence,
+        imagePrediction: status.imagePrediction ?? existing.imagePrediction,
+        imageConfidence: status.imageConfidence ?? existing.imageConfidence,
+        finalAiConfidence: status.finalAiConfidence ?? existing.finalAiConfidence,
         currentStatus: status.currentStatus,
         verificationStatus: status.verificationStatus,
         municipalityName: status.municipalityName,
         assignedBarangay: status.assignedBarangay,
         latestAction: status.latestAction,
+        description: status.description ?? existing.description,
         lastSync: new Date().toISOString(),
       });
     },
@@ -230,13 +299,17 @@ export function TrackingProvider({ children }: PropsWithChildren) {
   const removeTrackingRecord = useCallback(
     async (localRecordId: string) => {
       await deleteTrackingToken(localRecordId);
+      await deleteSubmittedPhoto(localRecordId);
       await persist(recordsRef.current.filter((record) => record.localRecordId !== localRecordId));
     },
     [persist],
   );
 
   const clearTrackingRecords = useCallback(async () => {
-    await Promise.all(recordsRef.current.map((record) => deleteTrackingToken(record.localRecordId)));
+    await Promise.all(recordsRef.current.flatMap((record) => [
+      deleteTrackingToken(record.localRecordId),
+      deleteSubmittedPhoto(record.localRecordId),
+    ]));
     recordsRef.current = [];
     setTrackingRecords([]);
     await AsyncStorage.removeItem(STORAGE_KEY);

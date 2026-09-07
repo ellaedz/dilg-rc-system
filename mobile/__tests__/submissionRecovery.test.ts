@@ -72,6 +72,7 @@ function draft(): ReportDraft {
     needsManualBarangayReview: true,
     assignedBarangayOffice: null,
     detectedBarangay: null,
+    selectedBarangay: 'Calios',
   };
 }
 

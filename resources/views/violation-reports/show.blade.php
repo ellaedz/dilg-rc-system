@@ -324,13 +324,13 @@
                     </span>
                 </div>
 
-                <div class="detail-row"><div class="detail-label">Suggested From Photo:</div><div class="detail-value">{{ $plainCategory($violationReport->predicted_violation_category) }}</div></div>
-                <div class="detail-row"><div class="detail-label">Photo Match Score:</div><div class="detail-value">{{ $violationReport->confidence_score !== null ? number_format((float) $violationReport->confidence_score * 100, 2).'%' : 'Not available' }}</div></div>
+                <div class="detail-row"><div class="detail-label">Suggested From Photo:</div><div class="detail-value">{{ $plainCategory($violationReport->ai_image_prediction ?: $violationReport->predicted_violation_category) }}</div></div>
+                <div class="detail-row"><div class="detail-label">Photo Match Score:</div><div class="detail-value">{{ ($violationReport->ai_image_confidence ?? $violationReport->confidence_score) !== null ? number_format((float) ($violationReport->ai_image_confidence ?? $violationReport->confidence_score) * 100, 2).'%' : (in_array($violationReport->ai_processing_status, ['pending', 'processing'], true) ? 'Processing' : 'Not available') }}</div></div>
                 <div class="detail-row"><div class="detail-label">Suggested From Description:</div><div class="detail-value">{{ $plainCategory($violationReport->text_prediction) }}</div></div>
-                <div class="detail-row"><div class="detail-label">Description Match Score:</div><div class="detail-value">{{ $violationReport->text_confidence !== null ? number_format((float) $violationReport->text_confidence * 100, 2).'%' : 'Not available' }}</div></div>
+                <div class="detail-row"><div class="detail-label">Text Report Match Score:</div><div class="detail-value">{{ $violationReport->text_confidence !== null ? number_format((float) $violationReport->text_confidence * 100, 2).'%' : (in_array($violationReport->ai_processing_status, ['pending', 'processing'], true) ? 'Processing' : 'Not available') }}</div></div>
                 <div class="detail-row"><div class="detail-label">Location Check:</div><div class="detail-value">{{ $locationCheck }}</div></div>
                 <div class="detail-row"><div class="detail-label">AI Suggested Violation:</div><div class="detail-value"><strong>{{ $plainCategory($violationReport->final_ai_prediction, 'Waiting for AI analysis') }}</strong></div></div>
-                <div class="detail-row"><div class="detail-label">Overall Match Score:</div><div class="detail-value">{{ $violationReport->final_ai_confidence !== null ? number_format((float) $violationReport->final_ai_confidence * 100, 2).'%' : 'Not available' }}</div></div>
+                <div class="detail-row"><div class="detail-label">Combined Confidence:</div><div class="detail-value">{{ $violationReport->final_ai_confidence !== null ? number_format((float) $violationReport->final_ai_confidence * 100, 2).'%' : (in_array($violationReport->ai_processing_status, ['pending', 'processing'], true) ? 'Processing' : 'Not available') }}</div></div>
                 <div class="detail-row"><div class="detail-label">Reason for Suggestion:</div><div class="detail-value">{{ $decisionSourceLabels[$violationReport->ai_decision_source] ?? 'Not available' }}</div></div>
                 <div class="detail-row"><div class="detail-label">Staff Review Needed:</div><div class="detail-value">{{ $violationReport->ai_needs_manual_review ? 'Yes' : 'No' }}</div></div>
 

@@ -7,7 +7,7 @@ type PrimaryButtonProps = {
   onPress?: () => void;
   disabled?: boolean;
   loading?: boolean;
-  variant?: 'primary' | 'secondary' | 'outline' | 'danger';
+  variant?: 'primary' | 'secondary' | 'success' | 'outline' | 'danger';
   style?: ViewStyle;
   accessibilityLabel?: string;
 };
@@ -60,6 +60,9 @@ const styles = StyleSheet.create({
   },
   secondary: {
     backgroundColor: colors.primaryBlueDark,
+  },
+  success: {
+    backgroundColor: colors.success,
   },
   outline: {
     backgroundColor: colors.card,

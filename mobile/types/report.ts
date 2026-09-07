@@ -27,6 +27,7 @@ export type ReportDraft = {
   needsManualBarangayReview: boolean;
   assignedBarangayOffice: string | null;
   detectedBarangay: string | null;
+  selectedBarangay: string | null;
 };
 
 export type SubmittedReport = {
@@ -43,6 +44,10 @@ export type SubmittedReport = {
   needsManualBarangayReview: boolean;
   needsManualReview: boolean;
   aiProcessingStatus: string | null;
+  textPrediction: string | null;
+  textConfidence: number | null;
+  imagePrediction: string | null;
+  imageConfidence: number | null;
   finalAiCategory: string | null;
   finalAiConfidence: number | null;
   aiNeedsManualReview: boolean;
@@ -60,6 +65,9 @@ export type ReportStatus = {
   needsManualBarangayReview: boolean;
   imagePrediction: string | null;
   aiProcessingStatus: string | null;
+  textPrediction: string | null;
+  textConfidence: number | null;
+  imageConfidence: number | null;
   finalAiCategory: string | null;
   finalAiConfidence: number | null;
   aiNeedsManualReview: boolean;
@@ -67,6 +75,7 @@ export type ReportStatus = {
   latestAction: string | null;
   lastUpdated: string | null;
   dateSubmitted: string | null;
+  description: string | null;
   timeline: StatusTimelineItem[];
 };
 
@@ -79,12 +88,22 @@ export type TrackingRecord = {
   legacySequentialId: string | null;
   submissionDate: string;
   violationType: string | null;
+  textPrediction: string | null;
+  textConfidence: number | null;
+  imagePrediction: string | null;
+  imageConfidence: number | null;
+  finalAiConfidence: number | null;
   currentStatus: string;
   verificationStatus: string | null;
   municipalityName: string | null;
   assignedBarangay: string | null;
+  selectedBarangay: string | null;
   latestAction: string | null;
   lastSync: string | null;
+  description: string | null;
+  photoUri: string | null;
+  latitude: number | null;
+  longitude: number | null;
 };
 
 export type SubmissionState =
@@ -109,6 +128,7 @@ export type SubmissionSnapshot = {
   gpsAccuracy: number;
   timestamp: string;
   preparedAt: string;
+  selectedBarangay?: string | null;
 };
 
 export type SubmissionJournalRecord = {

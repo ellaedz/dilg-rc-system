@@ -1,27 +1,25 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AppCard } from '@/components/AppCard';
 import { AppHeader } from '@/components/AppHeader';
-import { FormFieldError } from '@/components/FormFieldError';
+import { LoadingState } from '@/components/LoadingState';
 import { PrimaryButton } from '@/components/PrimaryButton';
-import { PrivacyNotice } from '@/components/PrivacyNotice';
 import { Screen } from '@/components/Screen';
 import { StatusBadge } from '@/components/StatusBadge';
 import { colors } from '@/constants/colors';
-import { TRACKING_TOKEN_EXAMPLE } from '@/constants/config';
 import { useTrackingIds } from '@/hooks/useTrackingIds';
 import { getReportStatus, toApiError } from '@/services/api';
 import { startReportPolling } from '@/services/reportPolling';
 import type { ReportStatus, TrackingRecord } from '@/types/report';
-import { getTrackingTokenValidationMessage, normalizeTrackingToken } from '@/utils/validators';
+import { humanizeLabel } from '@/utils/formatters';
 
 const ACTIVE_STATUSES = ['Submitted', 'For Verification', 'Verified', 'Assigned', 'In Progress', 'Action Taken', 'Resolved', 'Closed'];
 const REJECTED_STATUSES = ['Submitted', 'For Verification', 'Rejected'];
 
 function formatManila(value: string | null): string {
-  if (!value) return 'Not available';
+  if (!value) return 'Pending';
   return new Intl.DateTimeFormat('en-PH', {
     dateStyle: 'medium',
     timeStyle: 'short',
@@ -29,266 +27,240 @@ function formatManila(value: string | null): string {
   }).format(new Date(value));
 }
 
-function formatConfidence(value: number | null): string {
-  if (value === null || !Number.isFinite(value)) return 'Not available';
+function formatConfidence(value: number | null): string | null {
+  if (value === null || !Number.isFinite(value)) return null;
   return `${Math.max(0, Math.min(100, Math.round(value <= 1 ? value * 100 : value)))}% confidence`;
 }
 
 export default function TrackReportScreen() {
   const params = useLocalSearchParams<{ localRecordId?: string }>();
-  const [trackingToken, setTrackingToken] = useState('');
   const [activeLocalRecordId, setActiveLocalRecordId] = useState<string | null>(null);
+  const [activeCredential, setActiveCredential] = useState<string | null>(null);
   const [result, setResult] = useState<ReportStatus | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingStatus, setIsLoadingStatus] = useState(false);
   const {
     trackingRecords,
+    isLoading,
     getTrackingRecord,
     getTrackingToken,
-    saveEnteredTrackingToken,
     updateTrackingRecordFromStatus,
   } = useTrackingIds();
 
-  async function selectSavedRecord(record: TrackingRecord) {
-    if (record.credentialStatus !== 'available') {
-      setTrackingToken('');
-      setActiveLocalRecordId(record.localRecordId);
-      setMessage(
-        'This older history item contains only a sequential Report Number. It cannot perform anonymous tracking without the original opaque Tracking Token.',
-      );
-      return;
-    }
-    const token = await getTrackingToken(record.localRecordId);
-    if (!token) {
-      setMessage('The secure Tracking Token is missing from this device.');
-      return;
-    }
-    setTrackingToken(token);
+  async function openSavedRecord(record: TrackingRecord) {
+    setIsLoadingStatus(true);
+    setMessage(null);
+    setResult(null);
     setActiveLocalRecordId(record.localRecordId);
-    setMessage(`Loaded the private token for ${record.reportNumber ?? 'the saved report'}.`);
+
+    try {
+      const credential = await getTrackingToken(record.localRecordId);
+      if (!credential) {
+        setActiveCredential(null);
+        setMessage('This older report can no longer refresh on this device.');
+        return;
+      }
+      const status = await getReportStatus(credential);
+      setActiveCredential(credential);
+      setResult(status);
+      await updateTrackingRecordFromStatus(record.localRecordId, status);
+    } catch (error) {
+      setMessage(toApiError(error).status === 404 ? 'This report could not be found.' : 'The report could not refresh. Please try again.');
+    } finally {
+      setIsLoadingStatus(false);
+    }
   }
 
   useEffect(() => {
     if (!params.localRecordId) return;
     const record = getTrackingRecord(params.localRecordId);
-    if (record) void selectSavedRecord(record);
-    // Loading a local navigation identifier is intentionally a one-time action.
+    if (record) void openSavedRecord(record);
+    // Local navigation identifiers are intentionally loaded once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.localRecordId]);
 
   useEffect(() => {
-    if (!activeLocalRecordId || getTrackingTokenValidationMessage(trackingToken)) return;
+    if (!activeLocalRecordId || !activeCredential) return;
     const polling = startReportPolling({
-      fetchStatus: () => getReportStatus(trackingToken),
+      fetchStatus: () => getReportStatus(activeCredential),
       onStatus: async (status) => {
         setResult(status);
         await updateTrackingRecordFromStatus(activeLocalRecordId, status);
       },
-      onError: () => setMessage('Automatic refresh is waiting for a stable connection.'),
+      onError: () => setMessage('Updates will resume when the connection is stable.'),
     });
     return polling.stop;
-  }, [activeLocalRecordId, trackingToken, updateTrackingRecordFromStatus]);
+  }, [activeCredential, activeLocalRecordId, updateTrackingRecordFromStatus]);
 
-  const validationMessage = getTrackingTokenValidationMessage(trackingToken);
-  const normalizedTrackingToken = normalizeTrackingToken(trackingToken);
   const timelineStatuses = useMemo(
     () => (result?.currentStatus === 'Rejected' ? REJECTED_STATUSES : ACTIVE_STATUSES),
     [result?.currentStatus],
   );
+  const localRecord = activeLocalRecordId ? getTrackingRecord(activeLocalRecordId) : null;
+  const confidence = formatConfidence(result?.finalAiConfidence ?? localRecord?.finalAiConfidence ?? null);
+  const textConfidence = formatConfidence(result?.textConfidence ?? localRecord?.textConfidence ?? null);
+  const imageConfidence = formatConfidence(result?.imageConfidence ?? localRecord?.imageConfidence ?? null);
+  const selectedBarangay = localRecord?.selectedBarangay ?? result?.assignedBarangay ?? localRecord?.assignedBarangay;
 
-  async function handleTrack() {
-    if (validationMessage) {
-      setMessage(validationMessage);
-      return;
-    }
-
-    setIsLoading(true);
+  function closeDetails() {
+    setActiveLocalRecordId(null);
+    setActiveCredential(null);
+    setResult(null);
     setMessage(null);
-    try {
-      const status = await getReportStatus(normalizedTrackingToken);
-      let localRecordId = activeLocalRecordId;
-      if (localRecordId) {
-        await updateTrackingRecordFromStatus(localRecordId, status);
-      } else {
-        const saved = await saveEnteredTrackingToken(normalizedTrackingToken, status);
-        localRecordId = saved.localRecordId;
-        setActiveLocalRecordId(localRecordId);
-      }
-      setResult(status);
-      setMessage('Public report status refreshed. Automatic polling is active while this screen remains open.');
-    } catch (error) {
-      setMessage(toApiError(error).status === 404 ? 'Tracking Token was not found.' : toApiError(error).message);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function handleSaveToken() {
-    if (validationMessage) {
-      setMessage(validationMessage);
-      return;
-    }
-    if (activeLocalRecordId) {
-      setMessage('This Tracking Token is already stored securely on this device.');
-      return;
-    }
-    const saved = await saveEnteredTrackingToken(normalizedTrackingToken, result ?? undefined);
-    setActiveLocalRecordId(saved.localRecordId);
-    setMessage('Tracking Token saved in the device secure store.');
   }
 
   return (
     <Screen>
-      <AppHeader
-        title={result ? 'Report Details' : 'Track Report'}
-        subtitle={result ? result.reportNumber : 'Use the private, case-sensitive token issued by Laravel'}
-      />
+      <AppHeader title={activeLocalRecordId ? 'Report Details' : 'Track My Reports'} />
 
-      <AppCard
-        icon="ID"
-        title="Tracking Token"
-        description="Paste the exact 43-character opaque token. A Report Number such as RCV-2026-0001 is not a public tracking credential."
-      >
-        <TextInput
-          accessibilityLabel="Tracking Token"
-          autoCapitalize="none"
-          autoCorrect={false}
-          onChangeText={(value) => {
-            setTrackingToken(value);
-            setActiveLocalRecordId(null);
-          }}
-          placeholder={TRACKING_TOKEN_EXAMPLE}
-          placeholderTextColor={colors.muted}
-          secureTextEntry
-          style={[styles.input, validationMessage && trackingToken ? styles.inputError : null]}
-          value={trackingToken}
-        />
-        <FormFieldError message={trackingToken ? validationMessage : null} />
-      </AppCard>
+      {isLoading || isLoadingStatus ? <LoadingState message="Loading report..." /> : null}
 
-      {trackingRecords.length > 0 ? (
-        <AppCard icon="SAVED" title="Saved report shortcuts" description="Tokens remain in SecureStore and are not displayed in this list.">
-          <View style={styles.shortcutList}>
-            {trackingRecords.slice(0, 5).map((record) => (
-              <Pressable key={record.localRecordId} onPress={() => selectSavedRecord(record)} style={styles.shortcut}>
-                <Text style={styles.shortcutText}>{record.reportNumber ?? 'Saved private token'}</Text>
-              </Pressable>
-            ))}
+      {!activeLocalRecordId && !isLoading ? (
+        <>
+          {trackingRecords.length === 0 ? (
+            <AppCard title="No reports yet" />
+          ) : (
+            <View style={styles.reportList}>
+              {trackingRecords.map((record) => (
+                <Pressable key={record.localRecordId} onPress={() => openSavedRecord(record)} style={styles.reportCard}>
+                  <View style={styles.cardTop}>
+                    <StatusBadge
+                      label={record.currentStatus === 'For Verification' ? 'Pending Review' : record.currentStatus}
+                      tone={['Resolved', 'Closed'].includes(record.currentStatus) ? 'success' : 'warning'}
+                    />
+                    <Text style={styles.date}>{formatManila(record.submissionDate)}</Text>
+                  </View>
+                  <Text style={styles.violation}>{humanizeLabel(record.violationType, 'Road Clearing Report')}</Text>
+                  <Text style={styles.location}>⌖ {record.selectedBarangay ?? record.assignedBarangay ?? 'Santa Cruz'}</Text>
+                  <Text style={styles.details}>View Details ›</Text>
+                </Pressable>
+              ))}
+            </View>
+          )}
+        </>
+      ) : null}
+
+      {activeLocalRecordId && !isLoadingStatus ? (
+        <>
+          <AppCard>
+            <View style={styles.cardTop}>
+              <StatusBadge
+                label={(result?.currentStatus ?? localRecord?.currentStatus) === 'For Verification' ? 'Pending Review' : (result?.currentStatus ?? localRecord?.currentStatus ?? 'Submitted')}
+                tone={result?.currentStatus === 'Rejected' ? 'error' : 'warning'}
+              />
+              <Text style={styles.priority}>Report Status</Text>
+            </View>
+            <Text style={styles.reportNumber}>{result?.reportNumber ?? localRecord?.reportNumber ?? 'Saved Report'}</Text>
+            <Text style={styles.violation}>{humanizeLabel(result?.finalAiCategory ?? localRecord?.violationType, 'Analysis in progress')}</Text>
+            <View style={styles.scoreRow}>
+              <View style={styles.scoreItem}>
+                <Text style={styles.scoreLabel}>Text Report Match</Text>
+                <Text style={styles.scoreValue}>{textConfidence ?? 'Processing'}</Text>
+              </View>
+              <View style={styles.scoreItem}>
+                <Text style={styles.scoreLabel}>Photo Match</Text>
+                <Text style={styles.scoreValue}>{imageConfidence ?? 'Processing'}</Text>
+              </View>
+            </View>
+            {confidence ? <Text style={styles.confidence}>Combined: {confidence}</Text> : null}
+            <Text style={styles.location}>⌖ {selectedBarangay ?? 'Santa Cruz'}</Text>
+          </AppCard>
+
+          <AppCard title="Report Summary">
+            <Text style={styles.description}>{result?.description ?? localRecord?.description ?? 'Description unavailable.'}</Text>
+            {localRecord?.photoUri ? (
+              <Image source={{ uri: localRecord.photoUri }} resizeMode="cover" style={styles.evidence} />
+            ) : (
+              <Text style={styles.photoUnavailable}>Photo unavailable on this device.</Text>
+            )}
+          </AppCard>
+
+          {result ? (
+            <AppCard title="Status Timeline">
+              <View style={styles.timeline}>
+                {timelineStatuses.map((status) => {
+                  const isCurrent = status === result.currentStatus;
+                  const existing = result.timeline.find((item) => item.status === status);
+                  return (
+                    <View key={status} style={styles.timelineItem}>
+                      <View style={[styles.timelineDot, isCurrent && styles.timelineDotActive]} />
+                      <View style={styles.timelineCopy}>
+                        <Text style={[styles.timelineStatus, isCurrent && styles.timelineStatusActive]}>{status}</Text>
+                        <Text style={styles.timelineMeta}>{existing ? formatManila(existing.updatedAt) : 'Pending'}</Text>
+                        {existing?.action ? <Text style={styles.timelineAction}>{existing.action}</Text> : null}
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            </AppCard>
+          ) : null}
+
+          <View style={styles.nextCard}>
+            <Text style={styles.nextTitle}>ⓘ  What’s Next?</Text>
+            <Text style={styles.nextText}>
+              {result && ['Resolved', 'Closed'].includes(result.currentStatus)
+                ? 'This report has been completed.'
+                : `${selectedBarangay ? `Barangay ${selectedBarangay}` : 'The selected barangay'} is reviewing your report. You will be notified once action is taken.`}
+            </Text>
           </View>
-        </AppCard>
+
+          {message ? <Text style={styles.message}>{message}</Text> : null}
+          <PrimaryButton onPress={closeDetails} title="Back to My Reports" variant="outline" />
+        </>
       ) : null}
-
-      <View style={styles.actions}>
-        <PrimaryButton loading={isLoading} title="Track Report" onPress={handleTrack} />
-        <PrimaryButton disabled={isLoading} title="Save Token Securely" variant="outline" onPress={handleSaveToken} />
-      </View>
-
-      {message ? (
-        <AppCard icon="STATUS" title="Tracking status" description={message} tone={message.includes('refreshed') || message.includes('secure') ? 'success' : 'warning'} />
-      ) : null}
-
-      {result ? (
-        <AppCard icon="STATUS" title={result.reportNumber} description="Public status details. Internal remarks and staff identity are hidden.">
-          <View style={styles.grid}>
-            <Text style={styles.label}>Report Status</Text>
-            <StatusBadge label={result.currentStatus} tone={result.currentStatus === 'Rejected' ? 'error' : 'info'} />
-            <Text style={styles.label}>Verification Status</Text>
-            <Text style={styles.value}>{result.verificationStatus ?? 'Pending staff verification'}</Text>
-            <Text style={styles.label}>Server AI Status</Text>
-            <Text style={styles.value}>{result.aiProcessingStatus ?? 'Pending'}</Text>
-            <Text style={styles.label}>Possible Violation</Text>
-            <Text style={styles.value}>{result.finalAiCategory ?? 'Awaiting server analysis'}</Text>
-            <Text style={styles.confidence}>{formatConfidence(result.finalAiConfidence)}</Text>
-            {result.aiNeedsManualReview ? (
-              <Text style={styles.manualReview}>Staff review is required before any AI suggestion can be confirmed.</Text>
-            ) : null}
-            <Text style={styles.label}>Municipality</Text>
-            <Text style={styles.value}>{result.municipalityName ?? 'Not available'}</Text>
-            <Text style={styles.label}>Barangay Routing</Text>
-            <Text style={styles.value}>{result.assignedBarangay ?? 'Awaiting GIS or authorized staff assignment'}</Text>
-            <Text style={styles.label}>Latest Action</Text>
-            <Text style={styles.value}>{result.latestAction ?? 'No public action yet.'}</Text>
-            <Text style={styles.label}>Last Updated</Text>
-            <Text style={styles.value}>{formatManila(result.lastUpdated)}</Text>
-          </View>
-        </AppCard>
-      ) : null}
-
-      {result ? (
-        <AppCard icon="TIME" title="Timeline" description="Current report status is highlighted.">
-          <View style={styles.timeline}>
-            {timelineStatuses.map((status) => {
-              const isCurrent = status === result.currentStatus;
-              const existing = result.timeline.find((item) => item.status === status);
-              return (
-                <View key={status} style={[styles.timelineItem, isCurrent && styles.timelineItemActive]}>
-                  <Text style={[styles.timelineStatus, isCurrent && styles.timelineStatusActive]}>{status}</Text>
-                  <Text style={styles.timelineMeta}>{existing ? formatManila(existing.updatedAt) : 'Pending'}</Text>
-                </View>
-              );
-            })}
-          </View>
-        </AppCard>
-      ) : null}
-
-      {result ? (
-        <AppCard
-          title="What's Next?"
-          description={
-            ['Resolved', 'Closed'].includes(result.currentStatus)
-              ? 'This report has completed its public workflow.'
-              : 'Your report remains under DILG review. Keep this app installed to receive refreshed public status.'
-          }
-          tone="info"
-        />
-      ) : null}
-
-      <PrivacyNotice />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  input: {
-    backgroundColor: '#F9FAFB',
+  reportList: { gap: 11 },
+  reportCard: {
+    backgroundColor: colors.card,
     borderColor: colors.border,
-    borderRadius: 14,
-    borderWidth: 1,
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: '900',
-    letterSpacing: 0.5,
-    padding: 15,
-  },
-  inputError: { borderColor: colors.error },
-  shortcutList: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  shortcut: {
-    backgroundColor: colors.softBlue,
-    borderColor: colors.primaryBlue,
-    borderRadius: 999,
-    borderWidth: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-  },
-  shortcutText: { color: colors.text, fontSize: 13, fontWeight: '900' },
-  actions: { gap: 10 },
-  grid: { gap: 8 },
-  label: { color: colors.muted, fontSize: 12, fontWeight: '800', textTransform: 'uppercase' },
-  value: { color: colors.text, fontSize: 15, fontWeight: '800', lineHeight: 22 },
-  confidence: { color: colors.muted, fontSize: 12, fontWeight: '700' },
-  manualReview: {
-    backgroundColor: '#FFF7ED',
     borderRadius: 10,
-    color: '#9A3412',
-    fontSize: 13,
-    fontWeight: '800',
-    lineHeight: 19,
-    padding: 10,
+    borderWidth: 1,
+    gap: 7,
+    padding: 14,
+    shadowColor: '#102A5C',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.07,
+    shadowRadius: 5,
+    elevation: 2,
   },
-  timeline: { gap: 8 },
-  timelineItem: { borderColor: colors.border, borderRadius: 12, borderWidth: 1, padding: 12 },
-  timelineItemActive: { backgroundColor: colors.softBlue, borderColor: colors.primaryBlue },
-  timelineStatus: { color: colors.text, fontSize: 15, fontWeight: '800' },
-  timelineStatusActive: { color: colors.primaryBlue },
-  timelineMeta: { color: colors.muted, fontSize: 12, marginTop: 4 },
+  cardTop: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
+  date: { color: colors.muted, fontSize: 10 },
+  violation: { color: colors.text, fontSize: 14, fontWeight: '900' },
+  location: { color: colors.muted, fontSize: 11 },
+  details: { alignSelf: 'flex-end', color: colors.primaryBlue, fontSize: 11, fontWeight: '800' },
+  priority: { color: '#F97316', fontSize: 10, fontWeight: '700' },
+  reportNumber: { color: colors.text, fontSize: 16, fontWeight: '900' },
+  confidence: { color: colors.muted, fontSize: 11 },
+  scoreRow: { flexDirection: 'row', gap: 8 },
+  scoreItem: { backgroundColor: colors.softBlue, borderRadius: 8, flex: 1, gap: 3, padding: 9 },
+  scoreLabel: { color: colors.muted, fontSize: 9, fontWeight: '700' },
+  scoreValue: { color: colors.primaryBlue, fontSize: 12, fontWeight: '900' },
+  description: { backgroundColor: '#F8FAFC', borderRadius: 8, color: colors.text, fontSize: 12, lineHeight: 17, padding: 10 },
+  evidence: { backgroundColor: '#E5E7EB', borderRadius: 9, height: 180, width: '100%' },
+  photoUnavailable: { color: colors.muted, fontSize: 11, textAlign: 'center' },
+  timeline: { gap: 12 },
+  timelineItem: { alignItems: 'flex-start', flexDirection: 'row', gap: 10 },
+  timelineDot: { backgroundColor: '#CBD5E1', borderRadius: 999, height: 9, marginTop: 5, width: 9 },
+  timelineDotActive: { backgroundColor: colors.primaryBlue },
+  timelineCopy: { flex: 1, gap: 2 },
+  timelineStatus: { color: colors.text, fontSize: 12, fontWeight: '700' },
+  timelineStatusActive: { color: colors.primaryBlue, fontWeight: '900' },
+  timelineMeta: { color: colors.muted, fontSize: 10 },
+  timelineAction: { color: colors.muted, fontSize: 10, lineHeight: 14 },
+  nextCard: {
+    backgroundColor: colors.softBlue,
+    borderColor: '#AFCBFF',
+    borderRadius: 9,
+    borderWidth: 1,
+    gap: 4,
+    padding: 12,
+  },
+  nextTitle: { color: colors.primaryBlue, fontSize: 12, fontWeight: '900' },
+  nextText: { color: colors.primaryBlueDark, fontSize: 10, lineHeight: 15 },
+  message: { color: colors.muted, fontSize: 10, textAlign: 'center' },
 });

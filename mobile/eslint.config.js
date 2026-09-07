@@ -5,7 +5,7 @@ const globals = require('globals');
 module.exports = defineConfig([
   expoConfig,
   {
-    ignores: ['.expo/**', '.expo-export-check/**', 'android/**', 'ios/**', 'dist/**'],
+    ignores: ['.expo/**', '.expo-export-check/**', 'android/**', 'ios/**', 'dist/**', 'preview-web/**'],
   },
   {
     files: ['scripts/**/*.js', 'metro.config.js', 'eslint.config.js'],

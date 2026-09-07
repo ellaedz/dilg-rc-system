@@ -40,7 +40,7 @@ function RootLayoutNav() {
           }}
         >
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="submission-success" options={{ title: 'Submitted' }} />
+          <Stack.Screen name="submission-success" options={{ headerShown: false }} />
           <Stack.Screen name="privacy" options={{ title: 'Privacy' }} />
           <Stack.Screen name="about" options={{ title: 'About DILG-RC' }} />
           <Stack.Screen name="+not-found" options={{ title: 'Not found' }} />

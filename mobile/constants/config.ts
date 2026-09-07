@@ -31,6 +31,33 @@ export function validateApiBaseUrl(value: string, developmentMode: boolean): str
 
 export const API_BASE_URL = validateApiBaseUrl(configuredApiBaseUrl, __DEV__);
 
-export const APP_PHASE = 'Phase 8F Stage B';
 export const MUNICIPALITY = 'Santa Cruz, Laguna';
-export const TRACKING_TOKEN_EXAMPLE = 'Paste the 43-character Tracking Token';
+
+export const SANTA_CRUZ_BARANGAYS = [
+  'Alipit',
+  'Bagumbayan',
+  'Bubukal',
+  'Calios',
+  'Duhat',
+  'Gatid',
+  'Jasaan',
+  'Labuin',
+  'Malinao',
+  'Oogong',
+  'Pagsawitan',
+  'Palasan',
+  'Patimbao',
+  'Poblacion I',
+  'Poblacion II',
+  'Poblacion III',
+  'Poblacion IV',
+  'Poblacion V',
+  'San Jose',
+  'San Juan',
+  'San Pablo Norte',
+  'San Pablo Sur',
+  'Santisima Cruz',
+  'Santo Angel Central',
+  'Santo Angel Norte',
+  'Santo Angel Sur',
+] as const;

@@ -75,6 +75,48 @@ class Phase8F0MobileUnclassifiedContractTest extends TestCase
         $this->assertDatabaseCount('violation_reports', 0);
     }
 
+    public function test_mobile_submission_routes_to_the_barangay_selected_by_the_citizen(): void
+    {
+        $response = $this->submit('phase-10c-citizen-barangay-00001', [
+            'reported_barangay' => 'Calios',
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('data.reported_barangay', 'Calios')
+            ->assertJsonPath('data.assigned_barangay_office', 'Barangay Hall - Calios')
+            ->assertJsonPath('data.barangay_assignment_status', 'citizen_selected')
+            ->assertJsonPath('data.needs_manual_barangay_review', false);
+
+        $report = ViolationReport::where(
+            'report_number',
+            $response->json('data.report_number')
+        )->firstOrFail();
+
+        $this->assertSame('Calios', $report->citizen_reported_barangay);
+        $this->assertSame('Calios', $report->effective_barangay);
+        $this->assertSame('Barangay Hall - Calios', $report->assigned_barangay_office);
+        $this->assertSame('citizen_selected', $report->barangay_assignment_status);
+        $this->assertFalse($report->needs_manual_barangay_review);
+        $this->assertNull($report->manually_assigned_barangay);
+
+        $this->withToken($response->json('data.tracking_token'))
+            ->getJson('/api/mobile/reports/status')
+            ->assertOk()
+            ->assertJsonPath('data.reported_barangay', 'Calios')
+            ->assertJsonPath('data.barangay', 'Calios')
+            ->assertJsonPath('data.assigned_barangay_office', 'Barangay Hall - Calios');
+    }
+
+    public function test_mobile_submission_rejects_a_barangay_outside_the_santa_cruz_list(): void
+    {
+        $this->submit('phase-10c-invalid-barangay-000001', [
+            'reported_barangay' => 'Not a Santa Cruz barangay',
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors('reported_barangay');
+
+        $this->assertDatabaseCount('violation_reports', 0);
+    }
+
     public function test_legacy_clients_keep_genuine_categories_and_the_category_list_excludes_the_sentinel(): void
     {
         $response = $this->submit('phase-8f0-legacy-category-00001', [
@@ -141,7 +183,12 @@ class Phase8F0MobileUnclassifiedContractTest extends TestCase
             ->assertJsonPath('data.selected_violation_type', null)
             ->assertJsonPath('data.has_citizen_classification', false)
             ->assertJsonPath('data.ai_processing_status', 'completed')
+            ->assertJsonPath('data.text_prediction', 'illegal_parking')
+            ->assertJsonPath('data.text_confidence', 0.76)
+            ->assertJsonPath('data.image_prediction', 'illegal_parking')
+            ->assertJsonPath('data.image_confidence', 0.82)
             ->assertJsonPath('data.final_ai_category', 'illegal_parking')
+            ->assertJsonPath('data.final_ai_confidence', 0.79)
             ->assertJsonPath('data.verification_status', 'Pending');
 
         $report = ViolationReport::where(
@@ -154,6 +201,17 @@ class Phase8F0MobileUnclassifiedContractTest extends TestCase
         $this->assertNull($report->official_violation_type);
         $this->assertNull($report->verified_by);
         $this->assertNull($report->verified_at);
+
+        $this->withToken($response->json('data.tracking_token'))
+            ->getJson('/api/mobile/reports/status')
+            ->assertOk()
+            ->assertJsonPath('data.description', 'A vehicle is blocking the public road.')
+            ->assertJsonPath('data.text_prediction', 'illegal_parking')
+            ->assertJsonPath('data.text_confidence', 0.76)
+            ->assertJsonPath('data.image_prediction', 'illegal_parking')
+            ->assertJsonPath('data.image_confidence', 0.82)
+            ->assertJsonPath('data.final_ai_category', 'illegal_parking')
+            ->assertJsonPath('data.final_ai_confidence', 0.79);
     }
 
     public function test_citizen_category_analytics_exclude_the_internal_unclassified_state(): void
@@ -202,6 +260,9 @@ class Phase8F0MobileUnclassifiedContractTest extends TestCase
             ->get(route('violation-reports.show', $report))
             ->assertOk()
             ->assertSee(CitizenViolationType::STAFF_LABEL)
+            ->assertSee('Photo Match Score')
+            ->assertSee('Text Report Match Score')
+            ->assertSee('Combined Confidence')
             ->assertDontSee(CitizenViolationType::UNCLASSIFIED);
     }
 

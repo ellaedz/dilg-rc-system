@@ -49,6 +49,12 @@ class MobileReportApiController extends Controller
             'longitude' => ['required', 'numeric', 'between:-180,180'],
             'gps_accuracy' => ['nullable', 'numeric', 'min:0'],
             'timestamp' => ['required', 'date'],
+            'reported_barangay' => [
+                'sometimes',
+                'required',
+                'string',
+                Rule::in(BarangayAssignmentService::getAllBarangays()),
+            ],
             'contact_number' => ['nullable', 'string', 'max:20'],
             'image_result' => ['nullable', 'string', 'max:100'],
             'image_confidence' => ['nullable', 'numeric', 'between:0,1'],
@@ -108,6 +114,10 @@ class MobileReportApiController extends Controller
             (float) $validated['latitude'],
             (float) $validated['longitude']
         );
+        $reportedBarangay = $validated['reported_barangay'] ?? null;
+        $reportedBarangayOffice = $reportedBarangay
+            ? BarangayAssignmentService::getBarangayByName($reportedBarangay)['office'] ?? null
+            : null;
 
         try {
             $report = DB::transaction(function () use (
@@ -118,6 +128,8 @@ class MobileReportApiController extends Controller
                 $payloadHash,
                 $reportNumberService,
                 $photoWasSupplied,
+                $reportedBarangay,
+                $reportedBarangayOffice,
             ) {
                 $reportNumber = $reportNumberService->next();
                 $report = ViolationReport::create([
@@ -148,18 +160,22 @@ class MobileReportApiController extends Controller
                     'longitude' => $validated['longitude'],
                     'gps_accuracy' => $validated['gps_accuracy'] ?? null,
                     'timestamp' => $validated['timestamp'],
+                    'citizen_reported_barangay' => $reportedBarangay,
                     'image_path' => null,
                     'status' => 'Submitted',
                     'report_status' => 'Submitted',
                     'verification_status' => 'Pending',
                     'detected_barangay' => $location['detected_barangay'],
-                    'assigned_barangay_office' => $location['assigned_barangay_office'],
+                    'assigned_barangay_office' => $reportedBarangayOffice
+                        ?: $location['assigned_barangay_office'],
                     'location_context' => $location['location_context'],
                     'municipality_validated' => $location['municipality_validated'],
                     'municipality_name' => $location['municipality_name'],
                     'barangay_detection_status' => $location['barangay_detection_status'],
-                    'barangay_assignment_status' => $this->barangayAssignmentStatus($location),
-                    'needs_manual_barangay_review' => $location['needs_manual_barangay_review'],
+                    'barangay_assignment_status' => $this->barangayAssignmentStatus($location, $reportedBarangay),
+                    'needs_manual_barangay_review' => $reportedBarangay
+                        ? false
+                        : $location['needs_manual_barangay_review'],
                     'is_duplicate' => false,
                     'is_test_data' => false,
                     'date_submitted' => now()->toDateString(),
@@ -169,9 +185,11 @@ class MobileReportApiController extends Controller
                 ReportTimeline::create([
                     'report_id' => $report->id,
                     'status' => 'Submitted',
-                    'remarks' => $report->needs_manual_barangay_review
-                        ? 'Anonymous report submitted; barangay routing requires DILG review.'
-                        : 'Anonymous report submitted via mobile API.',
+                    'remarks' => $reportedBarangay
+                        ? 'Anonymous report submitted directly to Barangay '.$reportedBarangay.'.'
+                        : ($report->needs_manual_barangay_review
+                            ? 'Anonymous report submitted; barangay routing requires staff review.'
+                            : 'Anonymous report submitted via mobile API.'),
                     'updated_by' => null,
                 ]);
 
@@ -413,8 +431,12 @@ class MobileReportApiController extends Controller
         return $photo instanceof UploadedFile ? $photo : null;
     }
 
-    private function barangayAssignmentStatus(array $location): string
+    private function barangayAssignmentStatus(array $location, ?string $reportedBarangay = null): string
     {
+        if ($reportedBarangay) {
+            return 'citizen_selected';
+        }
+
         if (! empty($location['detected_barangay'])) {
             return 'auto_detected';
         }

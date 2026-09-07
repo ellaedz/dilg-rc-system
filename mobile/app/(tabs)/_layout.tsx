@@ -1,11 +1,7 @@
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Tabs } from 'expo-router';
-import { Text } from 'react-native';
 
 import { colors } from '@/constants/colors';
-
-function TabIcon({ label, color }: { label: string; color: string }) {
-  return <Text style={{ color, fontSize: 16, fontWeight: '900' }}>{label}</Text>;
-}
 
 export default function TabLayout() {
   return (
@@ -14,13 +10,24 @@ export default function TabLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.primaryGold,
         tabBarInactiveTintColor: colors.muted,
-        tabBarLabelStyle: { fontSize: 12, fontWeight: '800' },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '800',
+          lineHeight: 17,
+          marginTop: 2,
+        },
+        tabBarIconStyle: {
+          marginTop: 2,
+        },
+        tabBarItemStyle: {
+          paddingVertical: 4,
+        },
         tabBarStyle: {
           backgroundColor: colors.card,
           borderTopColor: colors.border,
-          minHeight: 68,
-          paddingBottom: 9,
-          paddingTop: 9,
+          height: 78,
+          paddingBottom: 8,
+          paddingTop: 7,
         },
       }}
     >
@@ -28,28 +35,36 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }: { color: string }) => <TabIcon color={color} label="H" />,
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <MaterialCommunityIcons color={color} name="home" size={size + 3} />
+          ),
         }}
       />
       <Tabs.Screen
         name="submit-report"
         options={{
           title: 'Submit',
-          tabBarIcon: ({ color }: { color: string }) => <TabIcon color={color} label="+" />,
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <MaterialCommunityIcons color={color} name="plus-circle" size={size + 5} />
+          ),
         }}
       />
       <Tabs.Screen
         name="track-report"
         options={{
           title: 'Track',
-          tabBarIcon: ({ color }: { color: string }) => <TabIcon color={color} label="T" />,
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <MaterialCommunityIcons color={color} name="format-list-checks" size={size + 3} />
+          ),
         }}
       />
       <Tabs.Screen
         name="report-history"
         options={{
           title: 'History',
-          tabBarIcon: ({ color }: { color: string }) => <TabIcon color={color} label="ID" />,
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <MaterialCommunityIcons color={color} name="history" size={size + 3} />
+          ),
         }}
       />
     </Tabs>

@@ -101,11 +101,13 @@ class GISApiController extends Controller
             ->where('longitude', '!=', 0);
 
         $barangayCounts = (clone $base)
-            ->selectRaw('COALESCE(detected_barangay, manually_assigned_barangay) as effective_barangay, COUNT(*) as aggregate')
+            ->selectRaw('COALESCE(manually_assigned_barangay, citizen_reported_barangay, detected_barangay) as effective_barangay, COUNT(*) as aggregate')
             ->where(function ($query) {
-                $query->whereNotNull('detected_barangay')->orWhereNotNull('manually_assigned_barangay');
+                $query->whereNotNull('detected_barangay')
+                    ->orWhereNotNull('citizen_reported_barangay')
+                    ->orWhereNotNull('manually_assigned_barangay');
             })
-            ->groupByRaw('COALESCE(detected_barangay, manually_assigned_barangay)')
+            ->groupByRaw('COALESCE(manually_assigned_barangay, citizen_reported_barangay, detected_barangay)')
             ->orderByDesc('aggregate')
             ->pluck('aggregate', 'effective_barangay')
             ->toArray();

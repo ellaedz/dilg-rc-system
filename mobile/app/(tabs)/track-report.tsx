@@ -13,7 +13,7 @@ import { useTrackingIds } from '@/hooks/useTrackingIds';
 import { getReportStatus, toApiError } from '@/services/api';
 import { startReportPolling } from '@/services/reportPolling';
 import type { ReportStatus, TrackingRecord } from '@/types/report';
-import { humanizeLabel } from '@/utils/formatters';
+import { humanizeLabel, missingAnalysisScoreLabel } from '@/utils/formatters';
 
 const ACTIVE_STATUSES = ['Submitted', 'For Verification', 'Verified', 'Assigned', 'In Progress', 'Action Taken', 'Resolved', 'Closed'];
 const REJECTED_STATUSES = ['Submitted', 'For Verification', 'Rejected'];
@@ -100,6 +100,10 @@ export default function TrackReportScreen() {
   const confidence = formatConfidence(result?.finalAiConfidence ?? localRecord?.finalAiConfidence ?? null);
   const textConfidence = formatConfidence(result?.textConfidence ?? localRecord?.textConfidence ?? null);
   const imageConfidence = formatConfidence(result?.imageConfidence ?? localRecord?.imageConfidence ?? null);
+  const aiProcessingStatus = result?.aiProcessingStatus ?? localRecord?.aiProcessingStatus ?? 'pending';
+  const emptyScoreLabel = missingAnalysisScoreLabel(aiProcessingStatus);
+  const textPrediction = result?.textPrediction ?? localRecord?.textPrediction ?? null;
+  const imagePrediction = result?.imagePrediction ?? localRecord?.imagePrediction ?? null;
   const selectedBarangay = localRecord?.selectedBarangay ?? result?.assignedBarangay ?? localRecord?.assignedBarangay;
 
   function closeDetails() {
@@ -155,11 +159,11 @@ export default function TrackReportScreen() {
             <View style={styles.scoreRow}>
               <View style={styles.scoreItem}>
                 <Text style={styles.scoreLabel}>Text Report Match</Text>
-                <Text style={styles.scoreValue}>{textConfidence ?? 'Processing'}</Text>
+                <Text style={styles.scoreValue}>{textPrediction ? (textConfidence ?? emptyScoreLabel) : emptyScoreLabel}</Text>
               </View>
               <View style={styles.scoreItem}>
                 <Text style={styles.scoreLabel}>Photo Match</Text>
-                <Text style={styles.scoreValue}>{imageConfidence ?? 'Processing'}</Text>
+                <Text style={styles.scoreValue}>{imagePrediction ? (imageConfidence ?? emptyScoreLabel) : emptyScoreLabel}</Text>
               </View>
             </View>
             {confidence ? <Text style={styles.confidence}>Combined: {confidence}</Text> : null}

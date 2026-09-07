@@ -12,7 +12,7 @@ import { createIdempotencyKey, transitionSubmissionState } from '@/services/subm
 import { maskTrackingToken } from '@/services/trackingCredentials';
 import { classifyLegacyCredential } from '@/services/trackingMigration';
 import type { ReportStatus, SubmissionSnapshot } from '@/types/report';
-import { humanizeLabel } from '@/utils/formatters';
+import { analysisMatchLabel, humanizeLabel, missingAnalysisScoreLabel } from '@/utils/formatters';
 import { createDraftPhotoFileName } from '@/utils/imageProcessing';
 import {
   getTrackingTokenValidationMessage,
@@ -116,6 +116,14 @@ describe('Phase 8F server-AI contract', () => {
     expect(humanizeLabel('illegal_parking')).toBe('Illegal Parking');
     expect(humanizeLabel('construction_materials')).toBe('Construction Materials');
     expect(humanizeLabel('')).toBe('Pending classification');
+  });
+
+  test('a completed analysis never leaves an empty model result labeled as Processing', () => {
+    expect(analysisMatchLabel(null, 'pending', 'photo')).toBe('Processing');
+    expect(analysisMatchLabel(null, 'completed', 'photo')).toBe('No photo match found');
+    expect(analysisMatchLabel(null, 'completed', 'text')).toBe('No text match found');
+    expect(analysisMatchLabel('illegal_parking', 'completed', 'photo')).toBe('Illegal Parking');
+    expect(missingAnalysisScoreLabel('completed')).toBe('No match');
   });
 
   test('each selected report photo receives a fresh cache-safe file name', () => {

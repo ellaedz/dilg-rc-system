@@ -17,3 +17,20 @@ export function humanizeLabel(value: string | null | undefined, fallback = 'Pend
     .replaceAll('-', ' ')
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
+
+export function analysisMatchLabel(
+  prediction: string | null | undefined,
+  processingStatus: string | null | undefined,
+  source: 'text' | 'photo',
+): string {
+  if (prediction) return humanizeLabel(prediction);
+  if (processingStatus === 'completed') return `No ${source} match found`;
+  if (processingStatus === 'failed') return 'Analysis unavailable';
+  return 'Processing';
+}
+
+export function missingAnalysisScoreLabel(processingStatus: string | null | undefined): string {
+  if (processingStatus === 'completed') return 'No match';
+  if (processingStatus === 'failed') return 'Unavailable';
+  return 'Processing';
+}

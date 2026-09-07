@@ -11,7 +11,7 @@ import { useTrackingIds } from '@/hooks/useTrackingIds';
 import { getReportStatus } from '@/services/api';
 import { startReportPolling } from '@/services/reportPolling';
 import type { ReportStatus } from '@/types/report';
-import { humanizeLabel } from '@/utils/formatters';
+import { analysisMatchLabel, humanizeLabel, missingAnalysisScoreLabel } from '@/utils/formatters';
 
 const WORKFLOW_STEPS = [
   { status: 'Submitted', description: 'Your report was received and classified.' },
@@ -55,6 +55,17 @@ export default function SubmissionSuccessScreen() {
   const textConfidence = confidencePercentage(status?.textConfidence ?? record?.textConfidence);
   const imageConfidence = confidencePercentage(status?.imageConfidence ?? record?.imageConfidence);
   const confidence = confidencePercentage(status?.finalAiConfidence ?? record?.finalAiConfidence);
+  const aiProcessingStatus = status?.aiProcessingStatus ?? record?.aiProcessingStatus ?? 'pending';
+  const aiCompleted = aiProcessingStatus === 'completed';
+  const aiFailed = aiProcessingStatus === 'failed';
+  const textResultLabel = analysisMatchLabel(textPrediction, aiProcessingStatus, 'text');
+  const photoResultLabel = analysisMatchLabel(imagePrediction, aiProcessingStatus, 'photo');
+  const textScoreLabel = textPrediction && textConfidence !== null
+    ? `${textConfidence}%`
+    : missingAnalysisScoreLabel(aiProcessingStatus);
+  const photoScoreLabel = imagePrediction && imageConfidence !== null
+    ? `${imageConfidence}%`
+    : missingAnalysisScoreLabel(aiProcessingStatus);
   const currentStepIndex = workflowIndex(currentStatus);
   const barangay = status?.assignedBarangay ?? record?.selectedBarangay ?? record?.assignedBarangay;
 
@@ -111,17 +122,19 @@ export default function SubmissionSuccessScreen() {
       </AppCard>
 
       <AppCard icon="AI" title="Classification Result">
-        <Text style={styles.possibleViolation}>{humanizeLabel(possibleViolation, 'Analysis in progress')}</Text>
+        <Text style={styles.possibleViolation}>
+          {humanizeLabel(possibleViolation, aiCompleted ? 'No clear violation detected' : aiFailed ? 'Analysis unavailable' : 'Analysis in progress')}
+        </Text>
         <View style={styles.scoreRow}>
           <View style={styles.textScoreCard}>
             <Text style={styles.scoreLabel}>Text Report Match</Text>
-            <Text style={styles.textScoreValue}>{textConfidence === null ? '—' : `${textConfidence}%`}</Text>
-            <Text numberOfLines={1} style={styles.scoreCategory}>{humanizeLabel(textPrediction, 'Processing')}</Text>
+            <Text style={styles.textScoreValue}>{textScoreLabel}</Text>
+            <Text numberOfLines={1} style={styles.scoreCategory}>{textResultLabel}</Text>
           </View>
           <View style={styles.photoScoreCard}>
             <Text style={styles.scoreLabel}>Photo Match</Text>
-            <Text style={styles.photoScoreValue}>{imageConfidence === null ? '—' : `${imageConfidence}%`}</Text>
-            <Text numberOfLines={1} style={styles.scoreCategory}>{humanizeLabel(imagePrediction, 'Processing')}</Text>
+            <Text style={styles.photoScoreValue}>{photoScoreLabel}</Text>
+            <Text numberOfLines={1} style={styles.scoreCategory}>{photoResultLabel}</Text>
           </View>
         </View>
         {confidence !== null ? (
@@ -135,7 +148,9 @@ export default function SubmissionSuccessScreen() {
             </View>
           </>
         ) : (
-          <Text style={styles.pendingText}>The result will update automatically.</Text>
+          <Text style={styles.pendingText}>
+            {aiCompleted ? 'No combined score is available.' : aiFailed ? 'Analysis could not be completed.' : 'The result will update automatically.'}
+          </Text>
         )}
       </AppCard>
 

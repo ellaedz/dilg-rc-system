@@ -93,6 +93,7 @@ export type TrackingRecord = {
   imagePrediction: string | null;
   imageConfidence: number | null;
   finalAiConfidence: number | null;
+  aiProcessingStatus: string | null;
   currentStatus: string;
   verificationStatus: string | null;
   municipalityName: string | null;

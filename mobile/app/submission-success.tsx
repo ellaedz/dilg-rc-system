@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Image, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { AppCard } from '@/components/AppCard';
 import { PrimaryButton } from '@/components/PrimaryButton';
@@ -19,13 +19,6 @@ const WORKFLOW_STEPS = [
   { status: 'Assigned', description: 'The appropriate response unit is assigned.' },
   { status: 'In Progress', description: 'The response unit is acting on the report.' },
   { status: 'Resolved', description: 'The action is complete and the report is closed.' },
-];
-
-const RESPONSE_UNITS = [
-  { icon: '◉', name: 'Santa Cruz PNP Station', tone: 'blue' as const },
-  { icon: '✚', name: 'Santa Cruz District Hospital', tone: 'red' as const },
-  { icon: '♨', name: 'BFP – Santa Cruz Station', tone: 'orange' as const },
-  { icon: '➤', name: 'MDRRMO Santa Cruz', tone: 'purple' as const },
 ];
 
 function confidencePercentage(value: number | null | undefined): number | null {
@@ -100,10 +93,6 @@ export default function SubmissionSuccessScreen() {
     };
   }, [getTrackingToken, localRecordId, updateTrackingRecordFromStatus]);
 
-  async function openNearbyServices() {
-    await Linking.openURL('https://www.google.com/maps/search/?api=1&query=emergency+services+Santa+Cruz+Laguna');
-  }
-
   return (
     <Screen>
       <View style={styles.successHero}>
@@ -166,19 +155,6 @@ export default function SubmissionSuccessScreen() {
           {barangay ? `Barangay ${barangay} will review your report.` : 'The selected barangay will review your report.'}
         </Text>
       </View>
-
-      <AppCard title="Nearest Response Units">
-        <View style={styles.responseList}>
-          {RESPONSE_UNITS.map((unit) => (
-            <Pressable key={unit.name} onPress={openNearbyServices} style={styles.responseUnit}>
-              <Text style={[styles.responseIcon, styles[`${unit.tone}Icon`]]}>{unit.icon}</Text>
-              <Text style={styles.responseName}>{unit.name}</Text>
-              <Text style={styles.callIcon}>⌕</Text>
-            </Pressable>
-          ))}
-        </View>
-        <PrimaryButton onPress={openNearbyServices} title="➤  View All Nearby Services on Map" variant="outline" />
-      </AppCard>
 
       <AppCard title="What Happens Next">
         <View style={styles.timeline}>
@@ -265,23 +241,6 @@ const styles = StyleSheet.create({
   },
   pendingTitle: { color: '#B45309', fontSize: 12, fontWeight: '800' },
   pendingSubtitle: { color: '#B45309', fontSize: 10, lineHeight: 14 },
-  responseList: { gap: 8 },
-  responseUnit: {
-    alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    borderRadius: 10,
-    flexDirection: 'row',
-    gap: 10,
-    minHeight: 44,
-    paddingHorizontal: 10,
-  },
-  responseIcon: { borderRadius: 999, fontSize: 13, overflow: 'hidden', padding: 7 },
-  blueIcon: { backgroundColor: '#DBEAFE', color: '#2563EB' },
-  redIcon: { backgroundColor: '#FEE2E2', color: '#EF4444' },
-  orangeIcon: { backgroundColor: '#FFEDD5', color: '#EA580C' },
-  purpleIcon: { backgroundColor: '#EDE9FE', color: '#7C3AED' },
-  responseName: { color: colors.text, flex: 1, fontSize: 11, fontWeight: '700' },
-  callIcon: { color: colors.primaryBlue, fontSize: 16 },
   timeline: { gap: 14 },
   timelineItem: { alignItems: 'flex-start', flexDirection: 'row', gap: 11 },
   timelineCircle: {

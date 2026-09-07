@@ -1,26 +1,18 @@
 import { router } from 'expo-router';
-import { Alert, Image, Linking, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Screen } from '@/components/Screen';
 import { colors } from '@/constants/colors';
 
 export default function HomeScreen() {
-  async function openNearbyServices() {
-    const mapUrl = 'https://www.google.com/maps/search/?api=1&query=emergency+services+Santa+Cruz+Laguna';
-    try {
-      await Linking.openURL(mapUrl);
-    } catch {
-      Alert.alert('Map unavailable', 'The nearby-services map could not be opened on this device.');
-    }
-  }
-
   return (
     <Screen>
       <View style={styles.communityCard}>
         <Image
           accessibilityLabel="CIVICLEAR location and clear-road logo"
-          source={require('../../assets/images/civiclear-home-logo-v2.png')}
+          resizeMode="contain"
+          source={require('../../assets/images/civiclear-logo.png')}
           style={styles.logo}
         />
         <Text style={styles.title}>Help Keep Our Community Safe</Text>
@@ -29,7 +21,6 @@ export default function HomeScreen() {
 
       <View style={styles.actions}>
         <PrimaryButton title="ⓘ  Report Violation" onPress={() => router.push('/submit-report')} />
-        <PrimaryButton title="➤  Nearby Services & Map" variant="success" onPress={openNearbyServices} />
         <PrimaryButton title="▣  View My Reports" variant="outline" onPress={() => router.push('/report-history')} />
       </View>
     </Screen>
@@ -53,7 +44,7 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 2,
   },
-  logo: { height: 78, resizeMode: 'contain', width: 78 },
+  logo: { height: 150, width: 150 },
   title: {
     color: '#000000',
     fontSize: 17,

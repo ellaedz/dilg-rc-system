@@ -48,16 +48,16 @@ export function PhotoEvidencePicker({
         >
           <Text style={styles.cameraIcon}>▣</Text>
           <Text style={styles.emptyTitle}>Click to upload photo evidence</Text>
-          <Text style={styles.cropHint}>Move and crop the photo to make the violation clear</Text>
+          <Text style={styles.cropHint}>Move, zoom, crop, or rotate to show the violation clearly</Text>
           <Text style={styles.emptyCopy}>JPG, PNG, HEIC accepted</Text>
         </Pressable>
       ) : (
         <Pressable accessibilityLabel="Replace selected photo" onPress={chooseSource} style={styles.previewWrap}>
-          <Image source={{ uri: imageUri ?? undefined }} resizeMode="cover" style={styles.preview} />
+          <Image source={{ uri: imageUri ?? undefined }} resizeMode="contain" style={styles.preview} />
           <Pressable accessibilityLabel="Remove selected photo" onPress={onRemovePhoto} style={styles.removePhoto}>
             <Text style={styles.removePhotoText}>×</Text>
           </Pressable>
-          <Text style={styles.selectedText}>Photo cropped and selected ✓</Text>
+          <Text style={styles.selectedText}>Photo adjusted and ready</Text>
         </Pressable>
       )}
 
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     padding: 12,
   },
-  preview: { backgroundColor: '#E5E7EB', borderRadius: 7, height: 175, width: '100%' },
+  preview: { backgroundColor: '#111827', borderRadius: 7, height: 220, width: '100%' },
   removePhoto: {
     alignItems: 'center',
     backgroundColor: colors.error,

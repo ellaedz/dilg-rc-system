@@ -6,7 +6,12 @@ import {
   parseSubmittedReport,
 } from '@/services/api';
 import { validateApiBaseUrl } from '@/constants/config';
-import { nextPollingDelay, startReportPolling } from '@/services/reportPolling';
+import {
+  isAiResultReady,
+  nextPollingDelay,
+  startReportPolling,
+  waitForAiResult,
+} from '@/services/reportPolling';
 import { runSingleSubmission } from '@/services/submissionCoordinator';
 import { createIdempotencyKey, transitionSubmissionState } from '@/services/submissionState';
 import { maskTrackingToken } from '@/services/trackingCredentials';
@@ -266,5 +271,35 @@ describe('Phase 8F server-AI contract', () => {
     expect(observed).toEqual(['Submitted', 'Resolved']);
     expect(sleeps).toEqual([nextPollingDelay(0)]);
     expect(nextPollingDelay(99)).toBe(30_000);
+  });
+
+  test('submission waits until the automatic AI result is ready', async () => {
+    const pending = { ...status('Submitted'), aiProcessingStatus: 'pending' };
+    const completed = {
+      ...status('Submitted'),
+      aiProcessingStatus: 'completed',
+      finalAiCategory: 'illegal_parking',
+      finalAiConfidence: 0.86,
+    };
+    const statuses = [pending, completed];
+    const attempts: number[] = [];
+    const sleeps: number[] = [];
+
+    const result = await waitForAiResult({
+      fetchStatus: async () => statuses.shift()!,
+      onStatus: (_nextStatus, attempt) => {
+        attempts.push(attempt);
+      },
+      sleep: async (milliseconds) => {
+        sleeps.push(milliseconds);
+      },
+    });
+
+    expect(result).toBe(completed);
+    expect(attempts).toEqual([1, 2]);
+    expect(sleeps).toEqual([3_000]);
+    expect(isAiResultReady(pending)).toBe(false);
+    expect(isAiResultReady(completed)).toBe(true);
+    expect(isAiResultReady({ ...pending, aiProcessingStatus: 'failed' })).toBe(true);
   });
 });

@@ -16,6 +16,39 @@ export type PollingController = {
   done: Promise<void>;
 };
 
+export function isAiResultReady(status: ReportStatus): boolean {
+  return status.aiProcessingStatus === 'completed' || status.aiProcessingStatus === 'failed';
+}
+
+export async function waitForAiResult(options: {
+  fetchStatus: () => Promise<ReportStatus>;
+  onStatus?: (status: ReportStatus, attempt: number) => void | Promise<void>;
+  onError?: (error: unknown) => void;
+  sleep?: (milliseconds: number) => Promise<void>;
+  intervalMs?: number;
+  maxAttempts?: number;
+}): Promise<ReportStatus> {
+  const sleep = options.sleep ?? ((milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds)));
+  const intervalMs = options.intervalMs ?? 3_000;
+  const maxAttempts = options.maxAttempts ?? 40;
+  let latestStatus: ReportStatus | null = null;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      latestStatus = await options.fetchStatus();
+      await options.onStatus?.(latestStatus, attempt);
+      if (isAiResultReady(latestStatus)) return latestStatus;
+    } catch (error) {
+      options.onError?.(error);
+    }
+
+    if (attempt < maxAttempts) await sleep(intervalMs);
+  }
+
+  if (latestStatus) return latestStatus;
+  throw new Error('The AI result could not be checked.');
+}
+
 export function startReportPolling(options: {
   fetchStatus: () => Promise<ReportStatus>;
   onStatus: (status: ReportStatus) => void | Promise<void>;

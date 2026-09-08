@@ -146,7 +146,7 @@ export default function SubmissionSuccessScreen() {
       <AppCard title="Report Summary">
         <Text style={styles.summaryText}>{record?.description ?? 'Report details saved.'}</Text>
         <Text style={styles.locationText}>⌖ {barangay ?? 'Santa Cruz'} — Current location (GPS)</Text>
-        {record?.photoUri ? <Image source={{ uri: record.photoUri }} resizeMode="cover" style={styles.evidence} /> : null}
+        {record?.photoUri ? <Image source={{ uri: record.photoUri }} resizeMode="contain" style={styles.evidence} /> : null}
       </AppCard>
 
       <View style={styles.pendingCard}>
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   pendingText: { color: colors.muted, fontSize: 11 },
   summaryText: { backgroundColor: '#F8FAFC', borderRadius: 8, color: colors.text, fontSize: 13, padding: 10 },
   locationText: { color: colors.muted, fontSize: 11 },
-  evidence: { backgroundColor: '#E5E7EB', borderRadius: 9, height: 180, width: '100%' },
+  evidence: { backgroundColor: '#111827', borderRadius: 9, height: 220, width: '100%' },
   pendingCard: {
     backgroundColor: '#FFFBEB',
     borderColor: '#FCD34D',

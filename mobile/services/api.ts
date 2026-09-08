@@ -292,7 +292,9 @@ export async function submitMobileReport(
   });
 
   const submitted = parseSubmittedReport(requireEnvelopeData(response.data));
-  onUploadProgress?.(100);
+  // Uploading is complete, but server-side AI may still be running. The UI
+  // reaches 100% only after the result endpoint confirms completion.
+  onUploadProgress?.(82);
 
   return submitted;
 }

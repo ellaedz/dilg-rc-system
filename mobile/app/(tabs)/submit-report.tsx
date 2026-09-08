@@ -17,10 +17,12 @@ import { colors } from '@/constants/colors';
 import { useReportDraft } from '@/hooks/useReportDraft';
 import { useTrackingIds } from '@/hooks/useTrackingIds';
 import {
+  getReportStatus,
   submitMobileReport,
   toApiError,
   validateMunicipality,
 } from '@/services/api';
+import { waitForAiResult } from '@/services/reportPolling';
 import { runSingleSubmission } from '@/services/submissionCoordinator';
 import {
   discardSubmissionRecovery,
@@ -64,7 +66,7 @@ export default function SubmitReportScreen() {
     continueStoredDraft,
     discardStoredDraft,
   } = useReportDraft();
-  const { saveSubmittedReport } = useTrackingIds();
+  const { saveSubmittedReport, updateTrackingRecordFromStatus } = useTrackingIds();
   const [errors, setErrors] = useState<ReportDraftValidationErrors>({});
   const [feedback, setFeedback] = useState<string | null>(null);
   const [permissionMessage, setPermissionMessage] = useState<string | null>(null);
@@ -162,7 +164,7 @@ export default function SubmitReportScreen() {
       updateDraft(nextDraft);
       setGpsStatus('idle');
       setErrors((current) => ({ ...current, photo: undefined, timestamp: undefined }));
-      setFeedback('Cropped photo prepared for the report draft.');
+      setFeedback('Photo adjusted and ready for the report.');
     } catch {
       setErrors((current) => ({
         ...current,
@@ -190,11 +192,11 @@ export default function SubmitReportScreen() {
 
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
-      aspect: [4, 3],
       cameraType: ImagePicker.CameraType.back,
       exif: false,
       mediaTypes: ['images'],
       quality: 1,
+      shape: 'rectangle',
     });
 
     if (result.canceled || !result.assets?.[0]) return;
@@ -219,11 +221,11 @@ export default function SubmitReportScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       allowsMultipleSelection: false,
-      aspect: [4, 3],
       exif: false,
       mediaTypes: ['images'],
       quality: 1,
       selectionLimit: 1,
+      shape: 'rectangle',
     });
 
     if (result.canceled || !result.assets?.[0]) return;
@@ -334,7 +336,6 @@ export default function SubmitReportScreen() {
         lastErrorCode: null,
         lastErrorMessage: null,
       });
-      await new Promise((resolve) => setTimeout(resolve, 450));
     } catch (error) {
       const apiError = toApiError(error);
       const nextState =
@@ -350,6 +351,25 @@ export default function SubmitReportScreen() {
       });
       throw error;
     }
+
+    setUploadProgress(84);
+    try {
+      const aiResult = await waitForAiResult({
+        fetchStatus: () => getReportStatus(submitted.trackingToken),
+        onStatus: async (nextStatus, attempt) => {
+          await updateTrackingRecordFromStatus(localRecordId, nextStatus);
+          setUploadProgress(Math.min(98, 84 + attempt));
+        },
+      });
+      if (aiResult.aiProcessingStatus === 'completed' || aiResult.aiProcessingStatus === 'failed') {
+        setUploadProgress(100);
+        await new Promise((resolve) => setTimeout(resolve, 350));
+      }
+    } catch {
+      // The report is already safely submitted. The result screen continues
+      // automatic polling if a temporary connection problem occurs here.
+    }
+
     try {
       await discardSubmissionRecovery(record.localDraftId);
       if (draftRef.current.localDraftId === record.localDraftId) await clearDraft();
@@ -461,7 +481,7 @@ export default function SubmitReportScreen() {
 
       <Pressable
         accessibilityHint="This permission is optional and does not affect report submission"
-        accessibilityLabel="Allow my photo and report description to help improve CIVICLEAR AI"
+        accessibilityLabel="Use this report to improve CIVICLEAR AI"
         accessibilityRole="checkbox"
         accessibilityState={{ checked: draft.aiTrainingConsent, disabled: isSubmitting }}
         disabled={isSubmitting}
@@ -472,7 +492,7 @@ export default function SubmitReportScreen() {
           {draft.aiTrainingConsent ? <Text style={styles.consentCheckmark}>✓</Text> : null}
         </View>
         <Text style={styles.consentText}>
-          Allow my photo and report description to help improve CIVICLEAR AI.
+          Use this report to improve CIVICLEAR AI.
         </Text>
       </Pressable>
 

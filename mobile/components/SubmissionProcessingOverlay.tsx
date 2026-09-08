@@ -22,7 +22,7 @@ export function SubmissionProcessingOverlay({ visible, progress }: SubmissionPro
       return;
     }
 
-    const target = progress >= 80 ? 92 : Math.max(12, progress);
+    const target = progress >= 80 ? Math.min(98, Math.max(84, progress)) : Math.max(12, progress);
     const timer = setInterval(() => {
       setDisplayedProgress((current) => current >= target ? current : Math.min(target, current + 1));
     }, 90);
@@ -41,7 +41,11 @@ export function SubmissionProcessingOverlay({ visible, progress }: SubmissionPro
               <Text style={styles.aiBadgeText}>AI</Text>
             </View>
             <Text style={styles.title}>Processing Your Report</Text>
-            <Text style={styles.subtitle}>Please wait while we securely save your submission.</Text>
+            <Text style={styles.subtitle}>
+              {progress >= 80
+                ? 'AI is checking the photo and report description.'
+                : 'Please wait while we securely save your submission.'}
+            </Text>
           </View>
 
           <View style={styles.body}>
@@ -53,7 +57,7 @@ export function SubmissionProcessingOverlay({ visible, progress }: SubmissionPro
             <View style={styles.steps}>
               <Text style={styles.activeStep}>• Preparing report details</Text>
               <Text style={boundedProgress >= 20 ? styles.activeStep : styles.pendingStep}>• Uploading photo evidence</Text>
-              <Text style={boundedProgress >= 80 ? styles.activeStep : styles.pendingStep}>• Processing your report</Text>
+              <Text style={boundedProgress >= 80 ? styles.activeStep : styles.pendingStep}>• Analyzing photo and description</Text>
             </View>
             <ActivityIndicator color={colors.primaryBlue} size="small" />
             <Text style={styles.powered}>Powered by CIVICLEAR secure server processing</Text>

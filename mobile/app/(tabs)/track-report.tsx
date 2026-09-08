@@ -173,7 +173,7 @@ export default function TrackReportScreen() {
           <AppCard title="Report Summary">
             <Text style={styles.description}>{result?.description ?? localRecord?.description ?? 'Description unavailable.'}</Text>
             {localRecord?.photoUri ? (
-              <Image source={{ uri: localRecord.photoUri }} resizeMode="cover" style={styles.evidence} />
+              <Image source={{ uri: localRecord.photoUri }} resizeMode="contain" style={styles.evidence} />
             ) : (
               <Text style={styles.photoUnavailable}>Photo unavailable on this device.</Text>
             )}
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
   scoreLabel: { color: colors.muted, fontSize: 9, fontWeight: '700' },
   scoreValue: { color: colors.primaryBlue, fontSize: 12, fontWeight: '900' },
   description: { backgroundColor: '#F8FAFC', borderRadius: 8, color: colors.text, fontSize: 12, lineHeight: 17, padding: 10 },
-  evidence: { backgroundColor: '#E5E7EB', borderRadius: 9, height: 180, width: '100%' },
+  evidence: { backgroundColor: '#111827', borderRadius: 9, height: 220, width: '100%' },
   photoUnavailable: { color: colors.muted, fontSize: 11, textAlign: 'center' },
   timeline: { gap: 12 },
   timelineItem: { alignItems: 'flex-start', flexDirection: 'row', gap: 10 },

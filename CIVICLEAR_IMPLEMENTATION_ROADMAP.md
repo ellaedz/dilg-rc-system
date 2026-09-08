@@ -951,15 +951,15 @@ Mobile
 
 ### Exit gate
 
-- [ ] Real mobile submission works outside local Wi-Fi.
-- [ ] Report and sanitized photo persist.
-- [ ] Task and protected endpoint execute.
-- [ ] Image, NLP, GIS, and fusion results persist.
-- [ ] Tracking lookup works.
-- [ ] AI failure does not lose the report.
-- [ ] No-detection is controlled.
-- [ ] A representative positive image is recorded when available.
-- [ ] Localhost, USB forwarding, mobile hotspot, and Cloudflare Tunnel are not required.
+- [x] Real mobile submission works outside local Wi-Fi.
+- [x] Report and sanitized photo persist.
+- [x] Task and protected endpoint execute.
+- [x] Image, NLP, GIS, and fusion results persist.
+- [x] Tracking lookup works.
+- [x] AI failure does not lose the report.
+- [x] No-detection is controlled.
+- [x] A representative positive image is recorded when available.
+- [x] Localhost, USB forwarding, mobile hotspot, and Cloudflare Tunnel are not required.
 
 ---
 
@@ -973,25 +973,25 @@ Mobile
 
 ### Implementation tasks
 
-- [ ] Preserve AI recommendation and confidence.
-- [ ] Present the completed AI category automatically; staff normally verifies or
+- [x] Preserve AI recommendation and confidence.
+- [x] Present the completed AI category automatically; staff normally verifies or
       rejects it instead of manually initiating AI or re-entering the category.
-- [ ] Populate `official_violation_type` from the reviewed AI category only when staff
+- [x] Populate `official_violation_type` from the reviewed AI category only when staff
       verifies it; allow an explicit correction when the evidence shows the AI result is
       wrong.
-- [ ] Record `verification_status`, `verified_by`, and `verified_at`.
-- [ ] Record AI-versus-staff agreement/correction for later model evaluation.
-- [ ] Allow authorized invalid and duplicate classifications.
-- [ ] Preserve DILG monitoring, manual routing, and AI retry responsibilities.
-- [ ] Enforce effective-barangay and role authorization.
-- [ ] Add timeline entries for every verification decision.
+- [x] Record `verification_status`, `verified_by`, and `verified_at`.
+- [x] Record AI-versus-staff agreement/correction for later model evaluation.
+- [x] Allow authorized invalid and duplicate classifications.
+- [x] Preserve DILG monitoring, manual routing, and AI retry responsibilities.
+- [x] Enforce effective-barangay and role authorization.
+- [x] Add timeline entries for every verification decision.
 
 ### Exit gate
 
-- [ ] AI runs automatically after submission but cannot automatically verify a report.
-- [ ] Assigned barangay staff can verify only authorized reports.
-- [ ] DILG routing remains functional.
-- [ ] Authorization, verification, and timeline tests pass.
+- [x] AI runs automatically after submission but cannot automatically verify a report.
+- [x] Assigned barangay staff can verify only authorized reports.
+- [x] DILG routing remains functional.
+- [x] Authorization, verification, and timeline tests pass.
 
 ---
 

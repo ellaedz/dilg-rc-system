@@ -29,8 +29,21 @@
     <span><strong>Before verifying:</strong> confirm the photo evidence, GPS location, description, and that the incident belongs to {{ $barangay }}.</span>
 </div>
 
+@if($errors->any())
+    <div role="alert" class="alert alert-error mb-5 text-white">
+        <i class="fas fa-circle-exclamation" aria-hidden="true"></i>
+        <span>{{ $errors->first() }}</span>
+    </div>
+@endif
+
 <div class="grid gap-4">
     @forelse($reports as $report)
+        @php
+            $aiPrediction = $report->final_ai_prediction ?: $report->ai_possible_violation;
+            $aiOfficialType = \App\Support\OfficialViolationType::fromAi($aiPrediction);
+            $aiLabel = \App\Support\OfficialViolationType::label($aiPrediction, 'Waiting for AI analysis');
+            $aiConfidence = $report->final_ai_confidence ?? $report->ai_possible_violation_confidence;
+        @endphp
         <article class="dashboard-panel">
             <header class="flex flex-col gap-3 border-b border-slate-200 bg-slate-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                 <div>
@@ -83,16 +96,62 @@
                 </div>
             </div>
 
-            <footer class="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50 px-4 py-4 sm:flex-row sm:justify-end sm:px-5">
-                <form action="{{ route('barangay.incoming-reports.reject', [$barangay, $report]) }}" method="POST" onsubmit="return confirm('Reject report {{ $report->report_id }}? This action will update its status.');">
-                    @csrf
-                    <button type="submit" class="btn btn-outline btn-error w-full sm:w-auto"><i class="fas fa-xmark" aria-hidden="true"></i> Reject</button>
-                </form>
-                <form action="{{ route('barangay.incoming-reports.verify', [$barangay, $report]) }}" method="POST">
-                    @csrf
-                    <button type="submit" class="btn btn-success w-full text-white sm:w-auto"><i class="fas fa-circle-check" aria-hidden="true"></i> Verify report</button>
-                </form>
-            </footer>
+            <section class="border-t border-slate-200 bg-blue-50/60 px-4 py-4 sm:px-5" aria-label="AI recommendation">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <div class="text-xs font-bold uppercase tracking-wide text-blue-700">AI suggestion</div>
+                        <div class="mt-1 text-lg font-extrabold text-slate-900">{{ $aiLabel }}</div>
+                    </div>
+                    <div class="flex flex-wrap gap-2 text-xs">
+                        <span class="badge {{ $report->ai_processing_status === 'completed' ? 'badge-success' : 'badge-warning' }} h-auto py-2 text-white">
+                            {{ $report->ai_processing_status === 'completed' ? 'Analysis complete' : 'Analysis '.$report->ai_processing_status }}
+                        </span>
+                        @if($aiConfidence !== null)
+                            <span class="badge badge-info h-auto py-2 text-white">{{ number_format((float) $aiConfidence * 100, 1) }}% confidence</span>
+                        @endif
+                    </div>
+                </div>
+                <p class="mt-2 text-xs text-slate-600">This is a suggestion only. Barangay staff makes the official decision.</p>
+            </section>
+
+            @if(auth()->user()->role === 'barangay_staff')
+                <footer class="grid gap-4 border-t border-slate-200 bg-slate-50 px-4 py-4 sm:px-5 lg:grid-cols-2">
+                    <form action="{{ route('barangay.incoming-reports.verify', [$barangay, $report]) }}" method="POST" class="rounded-xl border border-emerald-200 bg-white p-4">
+                        @csrf
+                        <h3 class="font-bold text-emerald-800"><i class="fas fa-circle-check mr-1" aria-hidden="true"></i> Verify as a valid violation</h3>
+                        <label for="official-type-{{ $report->id }}" class="mt-3 block text-xs font-bold text-slate-600">Official violation type</label>
+                        <select id="official-type-{{ $report->id }}" name="official_violation_type" required class="select select-bordered mt-1 w-full bg-white">
+                            <option value="">Select official type</option>
+                            @foreach($officialViolationTypes as $type)
+                                <option value="{{ $type }}" @selected(old('official_violation_type', $aiOfficialType) === $type)>{{ $type }}</option>
+                            @endforeach
+                        </select>
+                        <label for="correction-{{ $report->id }}" class="mt-3 block text-xs font-bold text-slate-600">Why is it different? <span class="font-normal">Only needed when correcting AI</span></label>
+                        <textarea id="correction-{{ $report->id }}" name="correction_reason" rows="2" maxlength="1000" class="textarea textarea-bordered mt-1 w-full bg-white" placeholder="Brief correction reason">{{ old('correction_reason') }}</textarea>
+                        <button type="submit" class="btn btn-success mt-3 w-full text-white"><i class="fas fa-check" aria-hidden="true"></i> Confirm official class</button>
+                    </form>
+
+                    <form action="{{ route('barangay.incoming-reports.reject', [$barangay, $report]) }}" method="POST" class="rounded-xl border border-rose-200 bg-white p-4" onsubmit="return confirm('Submit this rejection decision for {{ $report->report_id }}?');">
+                        @csrf
+                        <h3 class="font-bold text-rose-800"><i class="fas fa-circle-xmark mr-1" aria-hidden="true"></i> Do not accept this report</h3>
+                        <label for="rejection-{{ $report->id }}" class="mt-3 block text-xs font-bold text-slate-600">Decision</label>
+                        <select id="rejection-{{ $report->id }}" name="verification_status" required class="select select-bordered mt-1 w-full bg-white">
+                            <option value="">Select decision</option>
+                            <option value="Invalid Report">Invalid report</option>
+                            <option value="Duplicate">Duplicate report</option>
+                            <option value="Outside Jurisdiction">Outside jurisdiction</option>
+                            <option value="Insufficient Evidence">Insufficient evidence</option>
+                        </select>
+                        <label for="reason-{{ $report->id }}" class="mt-3 block text-xs font-bold text-slate-600">Reason</label>
+                        <textarea id="reason-{{ $report->id }}" name="reason" rows="2" required maxlength="1000" class="textarea textarea-bordered mt-1 w-full bg-white" placeholder="Brief reason"></textarea>
+                        <button type="submit" class="btn btn-outline btn-error mt-3 w-full"><i class="fas fa-xmark" aria-hidden="true"></i> Submit decision</button>
+                    </form>
+                </footer>
+            @else
+                <footer class="border-t border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600 sm:px-5">
+                    DILG monitoring view. Only the assigned barangay staff can submit a verification decision.
+                </footer>
+            @endif
         </article>
     @empty
         <div class="dashboard-panel dashboard-empty">

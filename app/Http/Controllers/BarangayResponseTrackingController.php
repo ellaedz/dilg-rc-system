@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ReportTimeline;
 use App\Models\ViolationReport;
 use App\Services\BarangayAssignmentService;
+use App\Services\RoleService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -92,6 +93,11 @@ class BarangayResponseTrackingController extends Controller
      */
     public function update(Request $request, $barangay, ViolationReport $report)
     {
+        if (! RoleService::isBarangayStaff($request->user())
+            || ! RoleService::canAccessBarangay($request->user(), $barangay)) {
+            abort(403, 'Only assigned barangay staff may update a report.');
+        }
+
         // Ensure report belongs to this barangay (case-insensitive)
         if (strcasecmp((string) $report->effective_barangay, $barangay) !== 0) {
             if ($request->wantsJson()) {
@@ -103,8 +109,19 @@ class BarangayResponseTrackingController extends Controller
             abort(403, 'Unauthorized action');
         }
 
+        if ($report->verification_status !== 'Valid Violation' || ! $report->official_violation_type) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'The report must be officially verified before response updates.',
+                ], 422);
+            }
+
+            abort(422, 'The report must be officially verified before response updates.');
+        }
+
         $validated = $request->validate([
-            'status' => 'required|in:Submitted,For Verification,Verified,Assigned,In Progress,Action Taken,Resolved,Rejected,Closed',
+            'status' => 'required|in:Assigned,In Progress,Action Taken,Resolved,Closed',
             'assigned_personnel' => 'nullable|string|max:255',
             'action_taken' => 'nullable|string',
             'remarks' => 'nullable|string',
@@ -129,20 +146,6 @@ class BarangayResponseTrackingController extends Controller
         // If status changed to Assigned and response hasn't started, mark response start
         if ($request->status === 'Assigned' && ! $report->response_started_at) {
             $validated['response_started_at'] = now();
-        }
-
-        // If status changed to Verified, update verification_status
-        if ($request->status === 'Verified' && $report->status !== 'Verified') {
-            $validated['verification_status'] = 'Valid Violation';
-            $validated['verified_by'] = Auth::id();
-            $validated['verified_at'] = now();
-        }
-
-        // If status changed to Rejected, update verification_status
-        if ($request->status === 'Rejected' && $report->status !== 'Rejected') {
-            $validated['verification_status'] = 'Invalid Report';
-            $validated['verified_by'] = Auth::id();
-            $validated['verified_at'] = now();
         }
 
         $report->update($validated);

@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\ViolationReport;
 use App\Services\BarangayAssignmentService;
+use App\Services\StaffReportVerificationService;
+use App\Support\OfficialViolationType;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class BarangayIncomingReportController extends Controller
 {
@@ -21,6 +24,7 @@ class BarangayIncomingReportController extends Controller
 
         // Query only reports for this barangay
         $query = ViolationReport::forEffectiveBarangay($barangay)
+            ->where('verification_status', 'Pending')
             ->whereIn('status', ['Submitted', 'For Verification']);
 
         // Search
@@ -40,27 +44,34 @@ class BarangayIncomingReportController extends Controller
 
         $reports = $query->orderBy('created_at', 'desc')->paginate(15);
 
-        return view('barangay.incoming-reports', compact('reports', 'barangay'));
+        $officialViolationTypes = OfficialViolationType::all();
+
+        return view('barangay.incoming-reports', compact('reports', 'barangay', 'officialViolationTypes'));
     }
 
     /**
      * Verify report (change status to Verified, verification_status to Valid Violation)
      */
-    public function verify(Request $request, $barangay, ViolationReport $report)
-    {
-        // Ensure report belongs to this barangay
-        if (strcasecmp((string) $report->effective_barangay, $barangay) !== 0) {
-            abort(403, 'Unauthorized action');
-        }
-
-        $report->update([
-            'status' => 'Verified',
-            'verification_status' => 'Valid Violation',
-            'verified_by' => $request->user()?->id,
-            'verified_at' => now(),
-            'remarks' => $request->remarks,
-            'date_updated' => now(),
+    public function verify(
+        Request $request,
+        $barangay,
+        ViolationReport $report,
+        StaffReportVerificationService $verificationService,
+    ) {
+        $validated = $request->validate([
+            'official_violation_type' => ['required', 'string', Rule::in(OfficialViolationType::all())],
+            'correction_reason' => ['nullable', 'string', 'max:1000'],
+            'remarks' => ['nullable', 'string', 'max:1000'],
         ]);
+
+        $verificationService->verify(
+            $request->user(),
+            $barangay,
+            $report,
+            $validated['official_violation_type'],
+            $validated['remarks'] ?? null,
+            $validated['correction_reason'] ?? null,
+        );
 
         return redirect()->route('barangay.incoming-reports', $barangay)
             ->with('success', 'Report verified successfully!');
@@ -69,21 +80,24 @@ class BarangayIncomingReportController extends Controller
     /**
      * Reject report
      */
-    public function reject(Request $request, $barangay, ViolationReport $report)
-    {
-        // Ensure report belongs to this barangay
-        if (strcasecmp((string) $report->effective_barangay, $barangay) !== 0) {
-            abort(403, 'Unauthorized action');
-        }
-
-        $report->update([
-            'status' => 'Rejected',
-            'verification_status' => 'Invalid Report',
-            'verified_by' => $request->user()?->id,
-            'verified_at' => now(),
-            'remarks' => $request->remarks ?? 'Report rejected by barangay staff',
-            'date_updated' => now(),
+    public function reject(
+        Request $request,
+        $barangay,
+        ViolationReport $report,
+        StaffReportVerificationService $verificationService,
+    ) {
+        $validated = $request->validate([
+            'verification_status' => ['required', 'string', Rule::in(StaffReportVerificationService::REJECTION_OUTCOMES)],
+            'reason' => ['required', 'string', 'max:1000'],
         ]);
+
+        $verificationService->reject(
+            $request->user(),
+            $barangay,
+            $report,
+            $validated['verification_status'],
+            $validated['reason'],
+        );
 
         return redirect()->route('barangay.incoming-reports', $barangay)
             ->with('success', 'Report rejected.');
@@ -95,6 +109,7 @@ class BarangayIncomingReportController extends Controller
     public function getUpdates($barangay)
     {
         $reports = ViolationReport::forEffectiveBarangay($barangay)
+            ->where('verification_status', 'Pending')
             ->whereIn('status', ['Submitted', 'For Verification'])
             ->select('id', 'report_id', 'status', 'selected_violation_type', 'submitted_by', 'created_at')
             ->orderBy('created_at', 'desc')

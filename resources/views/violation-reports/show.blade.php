@@ -245,6 +245,16 @@
                 </div>
 
                 <div class="detail-row">
+                    <div class="detail-label">Official Classification:</div>
+                    <div class="detail-value"><strong>{{ $violationReport->official_violation_type ?: 'Pending staff verification' }}</strong></div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">Staff Decision:</div>
+                    <div class="detail-value">{{ $violationReport->verification_status ?: 'Pending' }}</div>
+                </div>
+
+                <div class="detail-row">
                     <div class="detail-label">Description:</div>
                     <div class="detail-value">{{ $violationReport->description }}</div>
                 </div>
@@ -331,6 +341,12 @@
                 <div class="detail-row"><div class="detail-label">Location Check:</div><div class="detail-value">{{ $locationCheck }}</div></div>
                 <div class="detail-row"><div class="detail-label">AI Suggested Violation:</div><div class="detail-value"><strong>{{ $plainCategory($violationReport->final_ai_prediction, 'Waiting for AI analysis') }}</strong></div></div>
                 <div class="detail-row"><div class="detail-label">Combined Confidence:</div><div class="detail-value">{{ $violationReport->final_ai_confidence !== null ? number_format((float) $violationReport->final_ai_confidence * 100, 2).'%' : (in_array($violationReport->ai_processing_status, ['pending', 'processing'], true) ? 'Processing' : 'Not available') }}</div></div>
+                @if($violationReport->verified_at)
+                    <div class="detail-row"><div class="detail-label">AI and Staff:</div><div class="detail-value">{{ $violationReport->staff_agreed_with_ai === null ? 'Not comparable' : ($violationReport->staff_agreed_with_ai ? 'Same classification' : 'Staff corrected the AI suggestion') }}</div></div>
+                    @if($violationReport->staff_verification_reason)
+                        <div class="detail-row"><div class="detail-label">Staff Reason:</div><div class="detail-value">{{ $violationReport->staff_verification_reason }}</div></div>
+                    @endif
+                @endif
                 <div class="detail-row"><div class="detail-label">Reason for Suggestion:</div><div class="detail-value">{{ $decisionSourceLabels[$violationReport->ai_decision_source] ?? 'Not available' }}</div></div>
                 <div class="detail-row"><div class="detail-label">Staff Review Needed:</div><div class="detail-value">{{ $violationReport->ai_needs_manual_review ? 'Yes' : 'No' }}</div></div>
 
@@ -582,10 +598,12 @@
                class="btn btn-neutral btn-md text-white font-semibold">
                 <i class="fas fa-arrow-left"></i> Back to Dashboard
             </a>
-            <button type="button" onclick="toggleUpdateForm()" 
-                    class="btn btn-warning btn-md text-gray-800 font-semibold" id="updateReportBtn">
-                <i class="fas fa-edit"></i> Update Report
-            </button>
+            @if($violationReport->verification_status === 'Valid Violation' && $violationReport->official_violation_type)
+                <button type="button" onclick="toggleUpdateForm()"
+                        class="btn btn-warning btn-md text-gray-800 font-semibold" id="updateReportBtn">
+                    <i class="fas fa-edit"></i> Update Response
+                </button>
+            @endif
         @else
             <a href="{{ route('violation-reports.index') }}" 
                class="btn btn-neutral btn-md text-white font-semibold">
@@ -596,12 +614,12 @@
     </div>
 
     <!-- Barangay Update Form (Hidden by default) -->
-    @if($isBarangayView)
+    @if($isBarangayView && $violationReport->verification_status === 'Valid Violation' && $violationReport->official_violation_type)
     <div id="updateForm" class="detail-card full-width-card" style="display: none; margin-top: 1.5rem;">
         <div class="detail-header">
             <h3 class="detail-title">✏️ Update Report Status</h3>
             <p style="color: #6b7280; font-size: 0.875rem; margin-top: 0.5rem;">
-                You can update the status at any time, even after marking as Resolved or Rejected.
+                Update the response after the report has been officially verified.
             </p>
         </div>
 
@@ -616,40 +634,19 @@
                         Status <span style="color: red;">*</span>
                     </label>
                     
-                    <input type="hidden" name="status" id="statusInput" value="{{ $violationReport->status }}" required>
+                    <input type="hidden" name="status" id="statusInput" value="{{ $violationReport->status === 'Verified' ? 'Assigned' : $violationReport->status }}" required>
                     
                     <!-- Custom Status Dropdown -->
                     <div class="status-dropdown-wrapper">
                         <button type="button" class="status-dropdown-trigger" id="statusDropdownTrigger">
                             <div class="status-dropdown-selected">
                                 <i class="fas fa-circle" id="selectedIcon"></i>
-                                <span id="selectedText">{{ $violationReport->status }}</span>
+                                <span id="selectedText">{{ $violationReport->status === 'Verified' ? 'Assigned' : $violationReport->status }}</span>
                             </div>
                             <i class="fas fa-chevron-down"></i>
                         </button>
                         
                         <div class="status-dropdown-menu" id="statusDropdownMenu">
-                            <div class="status-dropdown-option" data-status="Submitted" data-color="#dbeafe" data-text-color="#1e40af" data-icon="fa-upload">
-                                <div class="status-badge-inner">
-                                    <i class="fas fa-upload"></i>
-                                    <span>Submitted</span>
-                                </div>
-                            </div>
-                            
-                            <div class="status-dropdown-option" data-status="For Verification" data-color="#fef3c7" data-text-color="#92400e" data-icon="fa-search">
-                                <div class="status-badge-inner">
-                                    <i class="fas fa-search"></i>
-                                    <span>For Verification</span>
-                                </div>
-                            </div>
-                            
-                            <div class="status-dropdown-option" data-status="Verified" data-color="#dbeafe" data-text-color="#1e40af" data-icon="fa-shield-alt">
-                                <div class="status-badge-inner">
-                                    <i class="fas fa-shield-alt"></i>
-                                    <span>Verified</span>
-                                </div>
-                            </div>
-                            
                             <div class="status-dropdown-option" data-status="Assigned" data-color="#e0e7ff" data-text-color="#3730a3" data-icon="fa-user-plus">
                                 <div class="status-badge-inner">
                                     <i class="fas fa-user-plus"></i>
@@ -675,13 +672,6 @@
                                 <div class="status-badge-inner">
                                     <i class="fas fa-check-circle"></i>
                                     <span>Resolved</span>
-                                </div>
-                            </div>
-                            
-                            <div class="status-dropdown-option" data-status="Rejected" data-color="#fee2e2" data-text-color="#991b1b" data-icon="fa-times-circle">
-                                <div class="status-badge-inner">
-                                    <i class="fas fa-times-circle"></i>
-                                    <span>Rejected</span>
                                 </div>
                             </div>
                             
@@ -840,7 +830,7 @@
                             const selectedText = document.getElementById('selectedText');
                             const selectedIcon = document.getElementById('selectedIcon');
                             const options = document.querySelectorAll('.status-dropdown-option');
-                            const currentStatus = '{{ $violationReport->status }}';
+                            const currentStatus = '{{ $violationReport->status === 'Verified' ? 'Assigned' : $violationReport->status }}';
                             
                             // Set initial colors for all options
                             options.forEach(option => {

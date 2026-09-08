@@ -105,6 +105,12 @@ class Phase7DefenseWorkflowTest extends TestCase
             ->assertSee($reportNumber);
 
         $this->actingAs($staff)
+            ->post(route('barangay.incoming-reports.verify', ['barangay' => 'Alipit', 'report' => $report]), [
+                'official_violation_type' => 'Illegal Parking',
+            ])
+            ->assertRedirect(route('barangay.incoming-reports', 'Alipit'));
+
+        $this->actingAs($staff)
             ->put(route('barangay.report.update', ['barangay' => 'Alipit', 'report' => $report]), [
                 'status' => 'In Progress',
                 'assigned_personnel' => 'Defense Validation Team',

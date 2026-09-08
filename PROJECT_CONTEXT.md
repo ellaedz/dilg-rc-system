@@ -1,5 +1,18 @@
 # DILG-RC Project Context
 
+## Phase 10C cloud end-to-end verification — complete
+
+The project owner accepted the physical Android-to-Azure flow on 2026-09-09.
+Citizen submissions, private photo storage, Azure Queue dispatch, the worker,
+internal FastAPI inference, result persistence, and mobile polling were exercised
+without localhost or a development tunnel. The accepted mobile build keeps the
+progress indicator below 100% while AI is pending and shows the completed server
+result after processing. See
+`docs/phase-records/PHASE_10C_CLOUD_END_TO_END_VERIFICATION.md`.
+
+Phase 11A staff verification is now active. AI recommendations remain advisory;
+only authorized staff may create the official classification.
+
 ## Phase 8F Stage B mobile native cleanup
 
 Stage B is implemented for verification on

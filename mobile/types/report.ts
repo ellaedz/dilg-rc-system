@@ -28,6 +28,7 @@ export type ReportDraft = {
   assignedBarangayOffice: string | null;
   detectedBarangay: string | null;
   selectedBarangay: string | null;
+  aiTrainingConsent: boolean;
 };
 
 export type SubmittedReport = {
@@ -130,6 +131,7 @@ export type SubmissionSnapshot = {
   timestamp: string;
   preparedAt: string;
   selectedBarangay?: string | null;
+  aiTrainingConsent?: boolean;
 };
 
 export type SubmissionJournalRecord = {

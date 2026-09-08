@@ -23,6 +23,7 @@ class ReportSubmissionFingerprint
                     : null,
             'timestamp' => $this->timestamp($validated['timestamp']),
             'reported_barangay' => $validated['reported_barangay'] ?? null,
+            'ai_training_consent' => (bool) ($validated['ai_training_consent'] ?? false),
             'contact_number' => $validated['contact_number'] ?? null,
         ]);
     }
@@ -39,6 +40,7 @@ class ReportSubmissionFingerprint
                 : null,
             'timestamp' => $this->timestamp($report->timestamp),
             'reported_barangay' => $report->citizen_reported_barangay,
+            'ai_training_consent' => (bool) $report->ai_training_consent,
             'contact_number' => $report->contact_number,
         ]);
     }

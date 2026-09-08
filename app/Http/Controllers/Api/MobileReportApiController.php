@@ -55,6 +55,7 @@ class MobileReportApiController extends Controller
                 'string',
                 Rule::in(BarangayAssignmentService::getAllBarangays()),
             ],
+            'ai_training_consent' => ['sometimes', 'boolean'],
             'contact_number' => ['nullable', 'string', 'max:20'],
             'image_result' => ['nullable', 'string', 'max:100'],
             'image_confidence' => ['nullable', 'numeric', 'between:0,1'],
@@ -161,6 +162,11 @@ class MobileReportApiController extends Controller
                     'gps_accuracy' => $validated['gps_accuracy'] ?? null,
                     'timestamp' => $validated['timestamp'],
                     'citizen_reported_barangay' => $reportedBarangay,
+                    'ai_training_consent' => (bool) ($validated['ai_training_consent'] ?? false),
+                    'ai_training_consent_at' => ($validated['ai_training_consent'] ?? false) ? now() : null,
+                    'ai_training_notice_version' => ($validated['ai_training_consent'] ?? false)
+                        ? '2026-09-08'
+                        : null,
                     'image_path' => null,
                     'status' => 'Submitted',
                     'report_status' => 'Submitted',

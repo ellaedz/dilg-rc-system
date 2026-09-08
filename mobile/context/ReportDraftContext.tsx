@@ -27,6 +27,7 @@ export const createEmptyReportDraft = (): ReportDraft => ({
   assignedBarangayOffice: null,
   detectedBarangay: null,
   selectedBarangay: null,
+  aiTrainingConsent: false,
 });
 
 type ReportDraftContextValue = {
@@ -90,6 +91,7 @@ function normalizeDraft(candidate: Partial<ReportDraft>): ReportDraft {
     assignedBarangayOffice: typeof candidate.assignedBarangayOffice === 'string' ? candidate.assignedBarangayOffice : null,
     detectedBarangay: typeof candidate.detectedBarangay === 'string' ? candidate.detectedBarangay : null,
     selectedBarangay: typeof candidate.selectedBarangay === 'string' ? candidate.selectedBarangay : null,
+    aiTrainingConsent: candidate.aiTrainingConsent === true,
   };
 }
 

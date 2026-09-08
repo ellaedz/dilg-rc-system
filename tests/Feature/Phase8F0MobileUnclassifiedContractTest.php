@@ -117,6 +117,33 @@ class Phase8F0MobileUnclassifiedContractTest extends TestCase
         $this->assertDatabaseCount('violation_reports', 0);
     }
 
+    public function test_ai_training_consent_is_optional_and_recorded_only_when_selected(): void
+    {
+        $withoutConsent = $this->submit('phase-data-consent-default-00001');
+        $withoutConsent->assertCreated();
+        $defaultReport = ViolationReport::where(
+            'report_number',
+            $withoutConsent->json('data.report_number')
+        )->firstOrFail();
+
+        $this->assertFalse($defaultReport->ai_training_consent);
+        $this->assertNull($defaultReport->ai_training_consent_at);
+        $this->assertNull($defaultReport->ai_training_notice_version);
+
+        $withConsent = $this->submit('phase-data-consent-selected-0001', [
+            'ai_training_consent' => true,
+        ]);
+        $withConsent->assertCreated();
+        $consentedReport = ViolationReport::where(
+            'report_number',
+            $withConsent->json('data.report_number')
+        )->firstOrFail();
+
+        $this->assertTrue($consentedReport->ai_training_consent);
+        $this->assertNotNull($consentedReport->ai_training_consent_at);
+        $this->assertSame('2026-09-08', $consentedReport->ai_training_notice_version);
+    }
+
     public function test_legacy_clients_keep_genuine_categories_and_the_category_list_excludes_the_sentinel(): void
     {
         $response = $this->submit('phase-8f0-legacy-category-00001', [
@@ -149,6 +176,11 @@ class Phase8F0MobileUnclassifiedContractTest extends TestCase
 
         $this->submit($key, [
             'selected_violation_type' => 'Illegal Parking',
+        ])->assertConflict()
+            ->assertJsonPath('error.code', 'IDEMPOTENCY_PAYLOAD_CONFLICT');
+
+        $this->submit($key, [
+            'ai_training_consent' => true,
         ])->assertConflict()
             ->assertJsonPath('error.code', 'IDEMPOTENCY_PAYLOAD_CONFLICT');
 

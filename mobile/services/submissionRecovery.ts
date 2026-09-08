@@ -124,6 +124,7 @@ export async function prepareSubmissionSnapshot(draft: ReportDraft): Promise<{
     timestamp: draft.gpsTimestamp ?? draft.timestamp,
     preparedAt: now,
     selectedBarangay: draft.selectedBarangay,
+    aiTrainingConsent: draft.aiTrainingConsent,
   };
   await FileSystem.writeAsStringAsync(snapshotUri, JSON.stringify(snapshot));
 

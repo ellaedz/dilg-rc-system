@@ -162,7 +162,7 @@ export default function SubmitReportScreen() {
       updateDraft(nextDraft);
       setGpsStatus('idle');
       setErrors((current) => ({ ...current, photo: undefined, timestamp: undefined }));
-      setFeedback('Photo prepared locally for the report draft.');
+      setFeedback('Cropped photo prepared for the report draft.');
     } catch {
       setErrors((current) => ({
         ...current,
@@ -189,7 +189,8 @@ export default function SubmitReportScreen() {
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: false,
+      allowsEditing: true,
+      aspect: [4, 3],
       cameraType: ImagePicker.CameraType.back,
       exif: false,
       mediaTypes: ['images'],
@@ -216,8 +217,9 @@ export default function SubmitReportScreen() {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: false,
+      allowsEditing: true,
       allowsMultipleSelection: false,
+      aspect: [4, 3],
       exif: false,
       mediaTypes: ['images'],
       quality: 1,
@@ -457,6 +459,23 @@ export default function SubmitReportScreen() {
         />
       </View>
 
+      <Pressable
+        accessibilityHint="This permission is optional and does not affect report submission"
+        accessibilityLabel="Allow my photo and report description to help improve CIVICLEAR AI"
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked: draft.aiTrainingConsent, disabled: isSubmitting }}
+        disabled={isSubmitting}
+        onPress={() => applyDraft({ aiTrainingConsent: !draft.aiTrainingConsent })}
+        style={({ pressed }) => [styles.consentRow, pressed && styles.locationPressed]}
+      >
+        <View style={[styles.consentCheckbox, draft.aiTrainingConsent && styles.consentCheckboxChecked]}>
+          {draft.aiTrainingConsent ? <Text style={styles.consentCheckmark}>✓</Text> : null}
+        </View>
+        <Text style={styles.consentText}>
+          Allow my photo and report description to help improve CIVICLEAR AI.
+        </Text>
+      </Pressable>
+
       <View style={styles.section}>
         <Text style={styles.fieldLabel}>Location</Text>
         <Pressable
@@ -611,6 +630,29 @@ const styles = StyleSheet.create({
   },
   locationCheckboxChecked: { backgroundColor: colors.primaryBlue },
   locationCheckmark: { color: colors.card, fontSize: 16, fontWeight: '900', lineHeight: 18 },
+  consentRow: {
+    alignItems: 'center',
+    backgroundColor: colors.softBlue,
+    borderColor: '#B8D2FF',
+    borderRadius: 10,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: 11,
+    padding: 12,
+  },
+  consentCheckbox: {
+    alignItems: 'center',
+    backgroundColor: colors.card,
+    borderColor: colors.primaryBlue,
+    borderRadius: 4,
+    borderWidth: 2,
+    height: 22,
+    justifyContent: 'center',
+    width: 22,
+  },
+  consentCheckboxChecked: { backgroundColor: colors.primaryBlue },
+  consentCheckmark: { color: colors.card, fontSize: 14, fontWeight: '900', lineHeight: 16 },
+  consentText: { color: colors.text, flex: 1, fontSize: 11, fontWeight: '700', lineHeight: 16 },
   locationCopy: { flex: 1, gap: 3 },
   locationTitle: { color: '#111827', fontSize: 13, fontWeight: '800' },
   locationSubtitle: { color: '#334155', fontSize: 11, lineHeight: 15 },

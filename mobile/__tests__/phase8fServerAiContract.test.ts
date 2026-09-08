@@ -79,6 +79,7 @@ describe('Phase 8F server-AI contract', () => {
       longitude: '121.416',
       gps_accuracy: '8.5',
       timestamp: snapshot.timestamp,
+      ai_training_consent: '0',
     });
     expect(Object.keys(getMobileReportTextFields(snapshot))).not.toEqual(
       expect.arrayContaining([
@@ -107,9 +108,11 @@ describe('Phase 8F server-AI contract', () => {
       timestamp: '2026-07-29T10:00:00.000Z',
       preparedAt: '2026-07-29T10:00:01.000Z',
       selectedBarangay: 'Calios',
+      aiTrainingConsent: true,
     };
 
     expect(getMobileReportTextFields(snapshot).reported_barangay).toBe('Calios');
+    expect(getMobileReportTextFields(snapshot).ai_training_consent).toBe('1');
   });
 
   test('server class labels are displayed without underscores', () => {

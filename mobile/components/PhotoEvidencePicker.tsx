@@ -48,6 +48,7 @@ export function PhotoEvidencePicker({
         >
           <Text style={styles.cameraIcon}>▣</Text>
           <Text style={styles.emptyTitle}>Click to upload photo evidence</Text>
+          <Text style={styles.cropHint}>Move and crop the photo to make the violation clear</Text>
           <Text style={styles.emptyCopy}>JPG, PNG, HEIC accepted</Text>
         </Pressable>
       ) : (
@@ -56,7 +57,7 @@ export function PhotoEvidencePicker({
           <Pressable accessibilityLabel="Remove selected photo" onPress={onRemovePhoto} style={styles.removePhoto}>
             <Text style={styles.removePhotoText}>×</Text>
           </Pressable>
-          <Text style={styles.selectedText}>Photo selected ✓</Text>
+          <Text style={styles.selectedText}>Photo cropped and selected ✓</Text>
         </Pressable>
       )}
 
@@ -84,6 +85,7 @@ const styles = StyleSheet.create({
   disabled: { opacity: 0.55 },
   cameraIcon: { color: '#9AA4B5', fontSize: 38, lineHeight: 42 },
   emptyTitle: { color: '#111827', fontSize: 13, fontWeight: '700', textAlign: 'center' },
+  cropHint: { color: colors.primaryBlue, fontSize: 11, fontWeight: '700', textAlign: 'center' },
   emptyCopy: { color: colors.muted, fontSize: 11, lineHeight: 16, textAlign: 'center' },
   previewWrap: {
     alignItems: 'center',

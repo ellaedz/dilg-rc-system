@@ -240,6 +240,7 @@ export function getMobileReportTextFields(snapshot: SubmissionSnapshot): Record<
     longitude: String(snapshot.longitude),
     gps_accuracy: String(snapshot.gpsAccuracy),
     timestamp: snapshot.timestamp,
+    ai_training_consent: snapshot.aiTrainingConsent ? '1' : '0',
   };
 
   return snapshot.selectedBarangay

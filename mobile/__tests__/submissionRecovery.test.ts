@@ -73,6 +73,7 @@ function draft(): ReportDraft {
     assignedBarangayOffice: null,
     detectedBarangay: null,
     selectedBarangay: 'Calios',
+    aiTrainingConsent: true,
   };
 }
 
@@ -91,6 +92,7 @@ describe('submission recovery journal', () => {
     expect(replay.record.idempotencyKey).toBe(first.record.idempotencyKey);
     expect(replay.snapshot).toEqual(first.snapshot);
     expect(first.snapshot.description).toBe('A vehicle blocks the public road.');
+    expect(first.snapshot.aiTrainingConsent).toBe(true);
   });
 
   test('marks an interrupted upload uncertain without automatically retrying it', async () => {

@@ -79,9 +79,9 @@ class Phase7DefenseWorkflowTest extends TestCase
             ->assertSee('Suggested From Photo')
             ->assertSee('Photo Match Score')
             ->assertSee('Suggested From Description')
-            ->assertSee('Description Match Score')
+            ->assertSee('Text Report Match Score')
             ->assertSee('AI Suggested Violation')
-            ->assertSee('Overall Match Score')
+            ->assertSee('Combined Confidence')
             ->assertSee('Reason for Suggestion')
             ->assertSee('Staff Review Needed')
             ->assertSee('Analysis Complete');

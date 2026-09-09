@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 250" role="img" aria-labelledby="title description">
+  <title id="title">Santa Cruz, Laguna</title>
+  <desc id="description">Santa Cruz wordmark with a green progress line and golden sun.</desc>
+  <defs>
+    <linearGradient id="word-blue" x1="80" y1="32" x2="620" y2="220" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0b2c78"/>
+      <stop offset="0.68" stop-color="#176fc0"/>
+      <stop offset="1" stop-color="#159fd0"/>
+    </linearGradient>
+    <linearGradient id="word-green" x1="150" y1="110" x2="650" y2="145" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#159447"/>
+      <stop offset="1" stop-color="#23b66b"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(52 12)">
+    <text x="0" y="30" fill="#0b2c78" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="800" letter-spacing="9">BAYAN NG</text>
+    <text x="-5" y="116" fill="url(#word-blue)" font-family="Arial, Helvetica, sans-serif" font-size="91" font-weight="900" letter-spacing="-5">SANTA</text>
+    <path d="M8 129c98-24 185 25 279 1 85-22 161 16 290-7" fill="none" stroke="url(#word-green)" stroke-width="12" stroke-linecap="round"/>
+    <text x="-5" y="206" fill="url(#word-blue)" font-family="Arial, Helvetica, sans-serif" font-size="96" font-weight="900" letter-spacing="-7">CRUZ</text>
+    <path d="M517 100c13-22 31-34 54-35-8 10-14 21-16 33l-38 2Z" fill="#23a95f"/>
+    <circle cx="574" cy="87" r="18" fill="#f6d447"/>
+    <text x="3" y="237" fill="#0b2c78" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="800" letter-spacing="8">SENTRO NG PAG-UNLAD</text>
+  </g>
+</svg>

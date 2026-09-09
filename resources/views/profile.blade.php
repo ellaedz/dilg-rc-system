@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Profile - DILG-RC System')
+@section('title', 'Profile - CIVICLEAR')
 
 @section('content')
 <style>

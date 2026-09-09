@@ -1,6 +1,6 @@
 @extends('layouts.dilg-app')
 
-@section('title', 'Analytics & Reports - DILG-RC')
+@section('title', 'Analytics & Reports - CIVICLEAR')
 
 @section('content')
 <?php
@@ -43,7 +43,7 @@ $responseTimeByBarangay = $responseTimeByBarangay ?? collect();
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #D4A017, #F4C542);
+        background: linear-gradient(135deg, #174EA6, #2F80ED);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -415,12 +415,6 @@ $responseTimeByBarangay = $responseTimeByBarangay ?? collect();
     }
 </style>
 
-<script>
-function showExportPlaceholder(format) {
-    alert(format + ' export will be implemented in Phase 17.');
-}
-</script>
-
 <!-- Modern Page Header -->
 <div class="page-header-analytics">
     <h1 class="page-title-analytics">Analytics & Reports</h1>
@@ -520,12 +514,12 @@ function showExportPlaceholder(format) {
             <a href="{{ route('analytics-reports.print') }}" target="_blank" class="export-btn">
                 <i class="fas fa-print"></i> Print
             </a>
-            <button onclick="showExportPlaceholder('CSV')" class="export-btn">
+            <a href="{{ route('analytics-reports.export', ['format' => 'csv']) }}" class="export-btn">
                 <i class="fas fa-file-csv"></i> CSV
-            </button>
-            <button onclick="showExportPlaceholder('PDF')" class="export-btn">
+            </a>
+            <a href="{{ route('analytics-reports.export', ['format' => 'pdf']) }}" class="export-btn">
                 <i class="fas fa-file-pdf"></i> PDF
-            </button>
+            </a>
         </div>
     </div>
     <div class="pill-chart">

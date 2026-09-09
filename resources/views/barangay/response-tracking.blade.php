@@ -1,10 +1,10 @@
 @extends('layouts.barangay-app')
 
-@section('title', 'Response Tracking - DILG-RC')
+@section('title', 'Response Tracking - CIVICLEAR')
 
 @section('content')
 <div class="page-header">
-    <div class="dashboard-eyebrow text-[#9a720d]">Barangay transparency</div>
+    <div class="dashboard-eyebrow text-[#174ea6]">Barangay transparency</div>
     <h1 class="page-title">Response Tracking</h1>
     <p class="page-subtitle">Monitor response progress and accountability for {{ $barangay }}.</p>
 </div>
@@ -76,7 +76,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="text-center p-4 bg-gray-50 rounded-lg">
                 <div class="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Average Response Time</div>
-                <div class="text-3xl font-bold text-[#D4A017]">{{ $avgResponseTime }}</div>
+                <div class="text-3xl font-bold text-[#174EA6]">{{ $avgResponseTime }}</div>
                 <div class="text-sm text-gray-600">hours</div>
             </div>
             <div class="text-center p-4 bg-gray-50 rounded-lg">
@@ -115,7 +115,7 @@
                 </select>
             </div>
             <div class="flex items-end">
-                <button type="submit" class="btn btn-sm btn-primary bg-[#D4A017] hover:bg-[#F4C542] border-none text-white font-semibold h-8">
+                <button type="submit" class="btn btn-sm btn-primary bg-[#174EA6] hover:bg-[#2F80ED] border-none text-white font-semibold h-8">
                     <i class="fas fa-search"></i> Apply Filters
                 </button>
             </div>

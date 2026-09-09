@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Concern - DILG-RC')
+@section('title', 'Edit Concern - CIVICLEAR')
 
 @section('content')
 <style>
@@ -30,7 +30,7 @@
 
     .record-id-badge {
         display: inline-block;
-        background: linear-gradient(135deg, #F4C542 0%, #D4A017 100%);
+        background: linear-gradient(135deg, #2F80ED 0%, #174EA6 100%);
         color: #333;
         padding: 0.5rem 1rem;
         border-radius: 0.5rem;
@@ -48,7 +48,7 @@
         color: #333;
         margin-bottom: 1rem;
         padding-bottom: 0.75rem;
-        border-bottom: 2px solid #F4C542;
+        border-bottom: 2px solid #2F80ED;
     }
 
     .form-grid {
@@ -88,8 +88,8 @@
 
     .form-input:focus, .form-select:focus, .form-textarea:focus {
         outline: none;
-        border-color: #F4C542;
-        box-shadow: 0 0 0 3px rgba(244, 197, 66, 0.1);
+        border-color: #2F80ED;
+        box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.1);
     }
 
     .form-textarea {
@@ -113,7 +113,7 @@
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, #F4C542 0%, #D4A017 100%);
+        background: linear-gradient(135deg, #2F80ED 0%, #174EA6 100%);
         color: #333;
         padding: 0.875rem 2rem;
         border: none;
@@ -126,7 +126,7 @@
 
     .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(212, 160, 23, 0.4);
+        box-shadow: 0 4px 12px rgba(23, 78, 166, 0.4);
     }
 
     .btn-secondary {

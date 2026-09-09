@@ -1,6 +1,6 @@
 @extends('layouts.dilg-app')
 
-@section('title', 'Dataset Manager - DILG-RC')
+@section('title', 'Dataset Manager - CIVICLEAR')
 
 @section('content')
 <style>

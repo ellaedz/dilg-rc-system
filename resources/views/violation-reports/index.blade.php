@@ -1,6 +1,6 @@
 @extends('layouts.dilg-app')
 
-@section('title', 'Violation Reports - DILG-RC')
+@section('title', 'Violation Reports - CIVICLEAR')
 
 @section('content')
 <style>
@@ -56,7 +56,7 @@
         background: var(--dilg-yellow);
         color: var(--dilg-dark-gray);
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(212, 160, 23, 0.3);
+        box-shadow: 0 4px 12px rgba(23, 78, 166, 0.3);
     }
 
     .btn-filter {

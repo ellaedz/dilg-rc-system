@@ -1,6 +1,6 @@
 @extends('layouts.dilg-app')
 
-@section('title', 'Barangay Performance - DILG-RC')
+@section('title', 'Barangay Performance - CIVICLEAR')
 
 @section('content')
 <!-- Font Awesome Icons -->
@@ -8,12 +8,12 @@
 
 <style>
     .page-header {
-        background: linear-gradient(135deg, #F4C542 0%, #D4A017 100%);
+        background: linear-gradient(135deg, #2F80ED 0%, #174EA6 100%);
         color: var(--dilg-dark-gray);
         padding: 2rem;
         border-radius: 0.5rem;
         margin-bottom: 2rem;
-        box-shadow: 0 4px 12px rgba(212, 160, 23, 0.3);
+        box-shadow: 0 4px 12px rgba(23, 78, 166, 0.3);
     }
 
     .page-title {

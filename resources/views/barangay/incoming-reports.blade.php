@@ -1,11 +1,11 @@
 @extends('layouts.barangay-app')
 
-@section('title', 'Incoming Reports - DILG-RC')
+@section('title', 'Incoming Reports - CIVICLEAR')
 
 @section('content')
 <div class="page-header flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
     <div>
-        <div class="dashboard-eyebrow text-[#9a720d]">Verification queue</div>
+        <div class="dashboard-eyebrow text-[#174ea6]">Verification queue</div>
         <h1 class="page-title">Incoming Reports</h1>
         <p class="page-subtitle">Review new road clearing reports assigned to {{ $barangay }}.</p>
     </div>

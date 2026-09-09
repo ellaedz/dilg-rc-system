@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Requests - DILG-RC System')
+@section('title', 'Requests - CIVICLEAR')
 
 @section('content')
 <style>
@@ -18,7 +18,7 @@
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, #F4C542 0%, #D4A017 100%);
+        background: linear-gradient(135deg, #2F80ED 0%, #174EA6 100%);
         color: #333;
         padding: 0.75rem 1.5rem;
         border: none;
@@ -32,7 +32,7 @@
 
     .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(212, 160, 23, 0.4);
+        box-shadow: 0 4px 12px rgba(23, 78, 166, 0.4);
     }
 
     .search-filter-section {
@@ -72,8 +72,8 @@
 
     .form-input:focus, .form-select:focus {
         outline: none;
-        border-color: #F4C542;
-        box-shadow: 0 0 0 3px rgba(244, 197, 66, 0.1);
+        border-color: #2F80ED;
+        box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.1);
     }
 
     .btn-filter {
@@ -112,7 +112,7 @@
         font-size: 0.875rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        border-bottom: 2px solid #F4C542;
+        border-bottom: 2px solid #2F80ED;
     }
 
     .data-table td {
@@ -130,7 +130,7 @@
 
     .request-id {
         font-weight: 600;
-        color: #D4A017;
+        color: #174EA6;
     }
 
     .badge {
@@ -251,7 +251,7 @@
     </table>
 </div>
 
-<div style="margin-top: 1.5rem; padding: 1rem; background: #fef3c7; border-radius: 0.5rem; border-left: 4px solid #F4C542; color: #78350f;">
+<div style="margin-top: 1.5rem; padding: 1rem; background: #fef3c7; border-radius: 0.5rem; border-left: 4px solid #2F80ED; color: #78350f;">
     <strong>📝 Note:</strong> This is dummy data for Phase 2 demonstration. Full database integration will be added in future phases.
 </div>
 @endsection

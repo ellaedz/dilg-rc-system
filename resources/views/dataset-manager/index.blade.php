@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dataset Manager - DILG-RC')
+@section('title', 'Dataset Manager - CIVICLEAR')
 
 @section('content')
 <style>
@@ -62,7 +62,7 @@
         background: #f9fafb;
         border-radius: 0.75rem;
         padding: 1.5rem;
-        border-left: 4px solid #F4C542;
+        border-left: 4px solid #2F80ED;
     }
 
     .feature-icon {
@@ -146,7 +146,7 @@
     </div>
 </div>
 
-<div style="margin-top: 1.5rem; padding: 1rem; background: #fef3c7; border-radius: 0.5rem; border-left: 4px solid #F4C542; color: #78350f;">
+<div style="margin-top: 1.5rem; padding: 1rem; background: #fef3c7; border-radius: 0.5rem; border-left: 4px solid #2F80ED; color: #78350f;">
     <strong>🚀 Coming in Phase 4:</strong> Dataset Manager will be fully functional after AI/ML integration in Phase 3 and will provide tools for managing training data for the NLP and prediction models.
 </div>
 @endsection

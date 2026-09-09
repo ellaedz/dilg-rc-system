@@ -1,6 +1,6 @@
 @extends('layouts.barangay-app')
 
-@section('title', 'Barangay Dashboard - DILG-RC')
+@section('title', 'Barangay Dashboard - CIVICLEAR')
 
 @section('content')
 <section class="dashboard-hero" aria-labelledby="barangay-dashboard-title">
@@ -10,7 +10,7 @@
         <p>Review incoming road clearing reports, coordinate action, and keep response records current.</p>
     </div>
     <div class="dashboard-hero-actions">
-        <a href="{{ route('barangay.incoming-reports', $barangay) }}" class="btn bg-[#F4C542] hover:bg-[#f8d968] border-none text-slate-900">
+        <a href="{{ route('barangay.incoming-reports', $barangay) }}" class="btn bg-[#2F80ED] hover:bg-[#4aa3f0] border-none text-white">
             <i class="fas fa-inbox" aria-hidden="true"></i> Review incoming
             @if($stats['new_reports'] > 0)<span class="badge badge-neutral badge-sm" data-stat="new_reports">{{ $stats['new_reports'] }}</span>@endif
         </a>
@@ -49,7 +49,7 @@
                 <h2 id="recent-reports-title" class="dashboard-panel-title">Recent reports</h2>
                 <p class="dashboard-panel-subtitle">Latest activity assigned to {{ $barangay }}</p>
             </div>
-            <a href="{{ route('barangay.incoming-reports', $barangay) }}" class="btn btn-sm btn-ghost text-[#9a720d]">Open inbox <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+            <a href="{{ route('barangay.incoming-reports', $barangay) }}" class="btn btn-sm btn-ghost text-[#174ea6]">Open inbox <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
         </div>
         @if($recentReports->isEmpty())
             <div class="dashboard-empty"><i class="far fa-folder-open" aria-hidden="true"></i>No reports have been assigned to this barangay yet.</div>

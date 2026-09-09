@@ -231,12 +231,6 @@ $recentReports = $recentReports ?? collect();
     }
 </style>
 
-<script>
-function showExportPlaceholder(format) {
-    alert(format + ' export will be implemented in Phase 17.');
-}
-</script>
-
 <!-- Modern Page Header -->
 <div class="page-header-analytics">
     <div>
@@ -304,12 +298,12 @@ function showExportPlaceholder(format) {
             <a href="{{ route('barangay.analytics-reports.print', $barangay) }}" target="_blank" class="export-btn">
                 <i class="fas fa-print"></i> Print
             </a>
-            <button onclick="showExportPlaceholder('CSV')" class="export-btn">
+            <a href="{{ route('barangay.analytics-reports.export', ['barangay' => $barangay, 'format' => 'csv']) }}" class="export-btn">
                 <i class="fas fa-file-csv"></i> CSV
-            </button>
-            <button onclick="showExportPlaceholder('PDF')" class="export-btn">
+            </a>
+            <a href="{{ route('barangay.analytics-reports.export', ['barangay' => $barangay, 'format' => 'pdf']) }}" class="export-btn">
                 <i class="fas fa-file-pdf"></i> PDF
-            </button>
+            </a>
         </div>
     </div>
 </div>

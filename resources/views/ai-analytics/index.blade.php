@@ -1,6 +1,6 @@
 @extends('layouts.dilg-app')
 
-@section('title', 'AI Analytics - DILG-RC')
+@section('title', 'AI Analytics - CIVICLEAR')
 
 @section('content')
 <style>

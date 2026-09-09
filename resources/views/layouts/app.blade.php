@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'DILG-RC System')</title>
+    <title>@yield('title', 'CIVICLEAR')</title>
     <style>
         * {
             margin: 0;
@@ -13,15 +13,15 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f5f5;
+            background-color: #eff6ff;
         }
 
-        /* DILG Color Palette */
+        /* CIVICLEAR / Santa Cruz Color Palette */
         :root {
-            --dilg-yellow: #F4C542;
-            --dilg-dark-gold: #D4A017;
-            --dilg-dark-gray: #333333;
-            --dilg-light-gray: #f5f5f5;
+            --dilg-yellow: #38bdf8;
+            --dilg-dark-gold: #174ea6;
+            --dilg-dark-gray: #102c76;
+            --dilg-light-gray: #eff6ff;
             --dilg-white: #ffffff;
             --dilg-success: #10b981;
             --dilg-warning: #f59e0b;
@@ -31,7 +31,7 @@
         /* Topbar */
         .topbar {
             background: var(--dilg-white);
-            border-bottom: 4px solid var(--dilg-yellow);
+            border-bottom: 4px solid #2f80ed;
             color: var(--dilg-dark-gray);
             padding: 1rem 2rem;
             display: flex;
@@ -52,7 +52,9 @@
         }
 
         .dilg-logo {
-            font-size: 2rem;
+            width: 44px;
+            height: 44px;
+            object-fit: contain;
         }
 
         .topbar-title {
@@ -90,8 +92,8 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: var(--dilg-yellow);
-            color: var(--dilg-dark-gray);
+            background: linear-gradient(135deg, #123b91, #168fd2);
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -111,7 +113,7 @@
             top: 68px;
             width: 260px;
             height: calc(100vh - 68px);
-            background: var(--dilg-dark-gray);
+            background: linear-gradient(180deg, #123b91, #071f55);
             box-shadow: 2px 0 8px rgba(0,0,0,0.1);
             overflow-y: auto;
         }
@@ -137,14 +139,14 @@
         }
 
         .sidebar-menu a:hover {
-            background: rgba(244, 197, 66, 0.1);
-            color: var(--dilg-yellow);
+            background: rgba(56, 189, 248, 0.12);
+            color: #c7edff;
         }
 
         .sidebar-menu a.active {
-            background: rgba(244, 197, 66, 0.15);
-            color: var(--dilg-yellow);
-            border-left: 4px solid var(--dilg-yellow);
+            background: linear-gradient(90deg, rgba(37, 99, 235, 0.85), rgba(22, 143, 210, 0.55));
+            color: white;
+            border-left: 4px solid #38bdf8;
             font-weight: 600;
         }
 
@@ -181,7 +183,7 @@
 
         /* Logout Button */
         .btn-logout {
-            background: var(--dilg-dark-gold);
+            background: #174ea6;
             color: white;
             border: none;
             padding: 0.625rem 1.25rem;
@@ -193,10 +195,10 @@
         }
 
         .btn-logout:hover {
-            background: var(--dilg-yellow);
-            color: var(--dilg-dark-gray);
+            background: #0b2c78;
+            color: white;
             transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(212, 160, 23, 0.3);
+            box-shadow: 0 2px 8px rgba(23, 78, 166, 0.3);
         }
 
         /* Alert Messages */
@@ -234,9 +236,9 @@
     <!-- Topbar -->
     <div class="topbar">
         <div class="topbar-left">
-            <div class="dilg-logo">🏛️</div>
+            <img src="{{ asset('images/civiclear-logo.svg') }}" alt="CIVICLEAR logo" class="dilg-logo">
             <div class="topbar-title">
-                <div class="topbar-title-main">DILG-RC</div>
+                <div class="topbar-title-main">CIVICLEAR</div>
                 <div class="topbar-title-sub">Road Clearing Violation Reporting</div>
             </div>
         </div>

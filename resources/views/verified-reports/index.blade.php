@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Verified Reports - DILG-RC')
+@section('title', 'Verified Reports - CIVICLEAR')
 
 @section('content')
 <style>

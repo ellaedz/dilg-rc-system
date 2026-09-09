@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard - DILG-RC System')
+@section('title', 'Dashboard - CIVICLEAR')
 
 @section('content')
 <style>
@@ -42,7 +42,7 @@
     }
 
     .stat-card-yellow {
-        border-left-color: #F4C542;
+        border-left-color: #2F80ED;
     }
 
     .stat-card-orange {
@@ -58,7 +58,7 @@
     }
 
     .stat-card-gold {
-        border-left-color: #D4A017;
+        border-left-color: #174EA6;
     }
 
     .stat-card-dark-gold {
@@ -129,7 +129,7 @@
         align-items: center;
         margin-bottom: 1.5rem;
         padding-bottom: 1rem;
-        border-bottom: 2px solid #F4C542;
+        border-bottom: 2px solid #2F80ED;
     }
 
     .activity-title {
@@ -170,7 +170,7 @@
 
     .activity-id {
         font-weight: 600;
-        color: #D4A017;
+        color: #174EA6;
     }
 
     .activity-desc {
@@ -201,7 +201,7 @@
 
 <div class="dashboard-header">
     <h1 class="dashboard-title">📊 Dashboard</h1>
-    <p class="dashboard-subtitle">Welcome to DILG-RC Road Clearing Violation Reporting System - Santa Cruz, Laguna</p>
+    <p class="dashboard-subtitle">Welcome to CIVICLEAR Road Clearing Violation Reporting System - Santa Cruz, Laguna</p>
 </div>
 
 <!-- Statistics Cards -->

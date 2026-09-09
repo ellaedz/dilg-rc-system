@@ -1,11 +1,11 @@
 @extends('layouts.dilg-app')
 
-@section('title', 'Needs Barangay Review - DILG-RC')
+@section('title', 'Needs Barangay Review - CIVICLEAR')
 
 @section('content')
 <div class="space-y-5">
     <div class="page-header">
-        <div class="dashboard-eyebrow text-[#9a720d]">Municipal routing queue</div>
+        <div class="dashboard-eyebrow text-[#174ea6]">Municipal routing queue</div>
         <h1 class="page-title">Needs Barangay Review</h1>
         <p class="page-subtitle">Review and temporarily route reports that cannot be assigned without barangay polygons.</p>
     </div>

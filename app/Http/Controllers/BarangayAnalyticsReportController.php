@@ -3,12 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\ViolationReport;
+use App\Services\AnalyticsExportService;
 use App\Services\BarangayAssignmentService;
 use Illuminate\Database\Query\Expression;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class BarangayAnalyticsReportController extends Controller
 {
+    public function __construct(private readonly AnalyticsExportService $exporter)
+    {
+    }
+
     /**
      * Display barangay-specific analytics for transparency
      * Only shows reports for the selected barangay
@@ -136,6 +143,30 @@ class BarangayAnalyticsReportController extends Controller
             'monthlyTrend',
             'recentReports'
         ));
+    }
+
+    public function export(Request $request, $barangay)
+    {
+        $allBarangays = BarangayAssignmentService::getAllBarangays();
+        abort_unless(in_array($barangay, $allBarangays, true), 404, 'Barangay not found');
+
+        $format = strtolower((string) $request->query('format', 'csv'));
+        abort_unless(in_array($format, ['csv', 'pdf'], true), 422, 'Unsupported export format.');
+
+        $slug = Str::slug($barangay);
+        $date = now()->format('Y-m-d');
+
+        if ($format === 'pdf') {
+            return $this->exporter->downloadPdf(
+                $this->print($barangay),
+                "civiclear-{$slug}-analytics-{$date}.pdf"
+            );
+        }
+
+        return $this->exporter->downloadCsv(
+            ViolationReport::query()->forEffectiveBarangay($barangay),
+            "civiclear-{$slug}-reports-{$date}.csv"
+        );
     }
 
     /**

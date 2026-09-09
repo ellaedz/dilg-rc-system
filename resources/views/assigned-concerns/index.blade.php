@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Assigned Concerns - DILG-RC')
+@section('title', 'Assigned Concerns - CIVICLEAR')
 
 @section('content')
 <style>
@@ -87,8 +87,8 @@
 
     .form-input:focus, .form-select:focus {
         outline: none;
-        border-color: #F4C542;
-        box-shadow: 0 0 0 3px rgba(244, 197, 66, 0.1);
+        border-color: #2F80ED;
+        box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.1);
     }
 
     .btn-filter {
@@ -121,7 +121,7 @@
         border-left: 4px solid;
     }
 
-    .stat-card-yellow { border-left-color: #F4C542; }
+    .stat-card-yellow { border-left-color: #2F80ED; }
     .stat-card-blue { border-left-color: #3b82f6; }
     .stat-card-green { border-left-color: #10b981; }
 
@@ -159,7 +159,7 @@
         font-size: 0.875rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        border-bottom: 2px solid #F4C542;
+        border-bottom: 2px solid #2F80ED;
     }
 
     .data-table td {
@@ -177,7 +177,7 @@
 
     .concern-id {
         font-weight: 600;
-        color: #D4A017;
+        color: #174EA6;
     }
 
     .badge {

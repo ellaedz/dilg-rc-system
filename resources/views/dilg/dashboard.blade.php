@@ -1,6 +1,6 @@
 @extends('layouts.dilg-app')
 
-@section('title', 'DILG Admin Dashboard - DILG-RC')
+@section('title', 'DILG Admin Dashboard - CIVICLEAR')
 
 @section('content')
 <section class="dashboard-hero" aria-labelledby="dashboard-title">
@@ -10,7 +10,7 @@
         <p>Monitor reports across Santa Cruz, prioritize routing issues, and track barangay response from one workspace.</p>
     </div>
     <div class="dashboard-hero-actions">
-        <a href="{{ route('dilg.needs-barangay-review.index') }}" class="btn bg-[#F4C542] hover:bg-[#f8d968] border-none text-slate-900">
+        <a href="{{ route('dilg.needs-barangay-review.index') }}" class="btn bg-[#2F80ED] hover:bg-[#4aa3f0] border-none text-white">
             <i class="fas fa-map-location-dot" aria-hidden="true"></i>
             Review routing
             @if($stats['needs_barangay_review'] > 0)
@@ -50,7 +50,7 @@
                 <h2 id="recent-reports-title" class="dashboard-panel-title">Recent reports</h2>
                 <p class="dashboard-panel-subtitle">Latest submissions received across all barangays</p>
             </div>
-            <a href="{{ route('violation-reports.index') }}" class="btn btn-sm btn-ghost text-[#9a720d]">View all <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+            <a href="{{ route('violation-reports.index') }}" class="btn btn-sm btn-ghost text-[#174ea6]">View all <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
         </div>
         @if($recentReports->isEmpty())
             <div class="dashboard-empty"><i class="far fa-folder-open" aria-hidden="true"></i>No reports have been submitted yet.</div>
@@ -129,7 +129,7 @@
             <h2 id="barangay-summary-title" class="dashboard-panel-title">Barangay performance summary</h2>
             <p class="dashboard-panel-subtitle">Workload and resolution progress by barangay</p>
         </div>
-        <a href="{{ route('barangay-performance.index') }}" class="btn btn-sm btn-ghost text-[#9a720d]">Full performance</a>
+        <a href="{{ route('barangay-performance.index') }}" class="btn btn-sm btn-ghost text-[#174ea6]">Full performance</a>
     </div>
     @if($reportsByBarangay->isEmpty())
         <div class="dashboard-empty"><i class="far fa-chart-bar" aria-hidden="true"></i>No barangay report data is available.</div>

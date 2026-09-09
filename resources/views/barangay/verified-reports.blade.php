@@ -1,11 +1,11 @@
 @extends('layouts.barangay-app')
 
-@section('title', 'Verified Reports - DILG-RC')
+@section('title', 'Verified Reports - CIVICLEAR')
 
 @section('content')
 <div class="page-header flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
     <div>
-        <div class="dashboard-eyebrow text-[#9a720d]">Assignment queue</div>
+        <div class="dashboard-eyebrow text-[#174ea6]">Assignment queue</div>
         <h1 class="page-title">Verified Reports</h1>
         <p class="page-subtitle">Assign personnel and monitor confirmed violations for {{ $barangay }}.</p>
     </div>
@@ -36,7 +36,7 @@
 <section class="dashboard-panel" aria-labelledby="verified-list-title">
     <div class="dashboard-panel-header">
         <div><h2 id="verified-list-title" class="dashboard-panel-title">Reports ready for action</h2><p class="dashboard-panel-subtitle">Showing {{ $reports->firstItem() ?? 0 }}–{{ $reports->lastItem() ?? 0 }} of {{ number_format($reports->total()) }}</p></div>
-        <a href="{{ route('barangay.response-tracking', $barangay) }}" class="btn btn-sm btn-ghost text-[#9a720d]">Response tracking <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+        <a href="{{ route('barangay.response-tracking', $barangay) }}" class="btn btn-sm btn-ghost text-[#174ea6]">Response tracking <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
     </div>
     @if($reports->isEmpty())
         <div class="dashboard-empty">
@@ -103,7 +103,7 @@
             </label>
             <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 <button type="button" class="btn btn-ghost js-close-modal">Cancel</button>
-                <button type="submit" class="btn bg-[#D4A017] hover:bg-[#b88810] border-none text-white"><i class="fas fa-user-check" aria-hidden="true"></i> Confirm assignment</button>
+                <button type="submit" class="btn bg-[#174EA6] hover:bg-[#0b2c78] border-none text-white"><i class="fas fa-user-check" aria-hidden="true"></i> Confirm assignment</button>
             </div>
         </form>
     </div>

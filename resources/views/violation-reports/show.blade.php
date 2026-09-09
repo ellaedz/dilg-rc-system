@@ -1,6 +1,6 @@
 @extends($isBarangayView ? 'layouts.barangay-app' : 'layouts.dilg-app')
 
-@section('title', 'View Report - DILG-RC')
+@section('title', 'View Report - CIVICLEAR')
 
 @section('content')
 <style>
@@ -163,7 +163,7 @@
         background: var(--dilg-yellow);
         color: var(--dilg-dark-gray) !important;
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(212, 160, 23, 0.3);
+        box-shadow: 0 4px 12px rgba(23, 78, 166, 0.3);
     }
 
     .btn-secondary {
@@ -497,7 +497,7 @@
             
             <!-- Recommended Office Note -->
             @if($violationReport->assigned_barangay_office)
-            <div style="background: #fef3c7; padding: 1rem; border-radius: 0.5rem; border-left: 4px solid #F4C542; margin-top: 1rem;">
+            <div style="background: #fef3c7; padding: 1rem; border-radius: 0.5rem; border-left: 4px solid #2F80ED; margin-top: 1rem;">
                 <div style="font-size: 0.7rem; color: #92400e; text-transform: uppercase; margin-bottom: 0.5rem; font-weight: 600;">
                     📍 RECOMMENDED BARANGAY OFFICE FOR FOLLOW-UP
                 </div>
@@ -714,7 +714,7 @@
                         
                         .status-dropdown-trigger.active {
                             border-color: var(--dilg-dark-gold);
-                            box-shadow: 0 0 0 3px rgba(244, 197, 66, 0.1);
+                            box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.1);
                         }
                         
                         .status-dropdown-selected {

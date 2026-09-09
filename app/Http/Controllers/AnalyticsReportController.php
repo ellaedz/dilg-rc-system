@@ -3,12 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\ViolationReport;
+use App\Services\AnalyticsExportService;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class AnalyticsReportController extends Controller
 {
+    public function __construct(private readonly AnalyticsExportService $exporter)
+    {
+    }
+
     /**
      * Display DILG-wide road clearing analytics dashboard for Santa Cruz, Laguna
      */
@@ -197,12 +202,24 @@ class AnalyticsReportController extends Controller
         ));
     }
 
-    /**
-     * Export placeholder
-     */
     public function export(Request $request)
     {
-        return back()->with('info', 'Export functionality will be implemented in a later phase.');
+        $format = strtolower((string) $request->query('format', 'csv'));
+        abort_unless(in_array($format, ['csv', 'pdf'], true), 422, 'Unsupported export format.');
+
+        $date = now()->format('Y-m-d');
+
+        if ($format === 'pdf') {
+            return $this->exporter->downloadPdf(
+                $this->print(),
+                "civiclear-santa-cruz-analytics-{$date}.pdf"
+            );
+        }
+
+        return $this->exporter->downloadCsv(
+            ViolationReport::query(),
+            "civiclear-santa-cruz-reports-{$date}.csv"
+        );
     }
 
     /**

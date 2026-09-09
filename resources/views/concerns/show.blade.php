@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'View Concern - DILG-RC')
+@section('title', 'View Concern - CIVICLEAR')
 
 @section('content')
 <style>
@@ -35,7 +35,7 @@
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, #F4C542 0%, #D4A017 100%);
+        background: linear-gradient(135deg, #2F80ED 0%, #174EA6 100%);
         color: #333;
         padding: 0.75rem 1.5rem;
         border: none;
@@ -50,7 +50,7 @@
 
     .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(212, 160, 23, 0.4);
+        box-shadow: 0 4px 12px rgba(23, 78, 166, 0.4);
     }
 
     .content-grid {
@@ -72,7 +72,7 @@
         color: #333;
         margin-bottom: 1.5rem;
         padding-bottom: 1rem;
-        border-bottom: 2px solid #F4C542;
+        border-bottom: 2px solid #2F80ED;
     }
 
     .detail-row {
@@ -158,7 +158,7 @@
     }
 
     .timeline-icon.active {
-        background: #F4C542;
+        background: #2F80ED;
         border: 3px solid #FEF3C7;
     }
 
@@ -176,7 +176,7 @@
         background: #f9fafb;
         padding: 1rem;
         border-radius: 0.5rem;
-        border-left: 3px solid #F4C542;
+        border-left: 3px solid #2F80ED;
     }
 
     .timeline-title {
@@ -208,7 +208,7 @@
             
             <div class="detail-row">
                 <div class="detail-label">Concern ID:</div>
-                <div class="detail-value"><strong style="color: #D4A017;">{{ $concern->record_id }}</strong></div>
+                <div class="detail-value"><strong style="color: #174EA6;">{{ $concern->record_id }}</strong></div>
             </div>
 
             <div class="detail-row">

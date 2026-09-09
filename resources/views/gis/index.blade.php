@@ -1,12 +1,12 @@
 @extends($isDilgAdmin ? 'layouts.dilg-app' : 'layouts.barangay-app')
 
-@section('title', 'GIS Monitoring Map - DILG-RC')
+@section('title', 'GIS Monitoring Map - CIVICLEAR')
 
 @section('content')
 <style>
     :root {
-        --dilg-yellow: #F4C542;
-        --dilg-dark-gold: #D4A017;
+        --dilg-yellow: #2F80ED;
+        --dilg-dark-gold: #174EA6;
         --dilg-dark-gray: #333333;
         --dilg-white: #ffffff;
     }
@@ -140,7 +140,7 @@
     .filter-select:focus {
         outline: none;
         border-color: var(--dilg-yellow);
-        box-shadow: 0 0 0 2px rgba(244, 197, 66, 0.2);
+        box-shadow: 0 0 0 2px rgba(47, 128, 237, 0.2);
     }
 
     .filter-buttons {
@@ -263,7 +263,7 @@
 
     .legend-symbol.boundary {
         border: 3px solid var(--dilg-dark-gold);
-        background: rgba(244, 197, 66, 0.1);
+        background: rgba(47, 128, 237, 0.1);
         border-radius: 0.25rem;
     }
 
@@ -583,7 +583,7 @@
                 <div class="legend-label">Verified Barangay Office</div>
             </div>
             <div class="legend-item">
-                <div class="legend-symbol office" style="background:#F4C542;border-color:#D4A017"></div>
+                <div class="legend-symbol office" style="background:#2F80ED;border-color:#174EA6"></div>
                 <div class="legend-label">Provisional Office Coordinate</div>
             </div>
         </div>
@@ -625,7 +625,7 @@
 
 <script src="{{ asset('vendor/leaflet.markercluster/leaflet.markercluster.js') }}"></script>
 
-<!-- GIS Markers Script (Phase 4D) -->
+<!-- GIS markers -->
 <script src="{{ asset('js/gis-markers.js') }}"></script>
 
 <script>
@@ -656,10 +656,10 @@
     // Boundary style
     function boundaryStyle(feature) {
         return {
-            fillColor: 'rgba(244, 197, 66, 0.1)',
+            fillColor: 'rgba(47, 128, 237, 0.1)',
             weight: 3,
             opacity: 1,
-            color: '#D4A017',
+            color: '#174EA6',
             fillOpacity: 0.2
         };
     }
@@ -669,7 +669,7 @@
         const layer = e.target;
         layer.setStyle({
             weight: 5,
-            color: '#F4C542',
+            color: '#2F80ED',
             fillOpacity: 0.4
         });
         layer.bringToFront();

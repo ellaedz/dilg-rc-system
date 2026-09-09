@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="theme-color" content="#172033">
-    <title>@yield('title', 'DILG-RC System')</title>
+    <meta name="theme-color" content="#0b2c78">
+    <title>@yield('title', 'CIVICLEAR')</title>
     <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/all.min.css') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
@@ -17,8 +17,8 @@
 
     <aside class="app-sidebar" id="primary-navigation" aria-label="DILG administrator navigation">
         <div class="app-sidebar-brand">
-            <img src="{{ asset('images/dilg-logo.png') }}" alt="DILG logo">
-            <div><h2>DILG-RC Admin</h2><p>Santa Cruz, Laguna</p></div>
+            <img src="{{ asset('images/civiclear-logo.svg') }}" alt="CIVICLEAR logo">
+            <div><h2>CIVICLEAR</h2><p>Santa Cruz, Laguna</p></div>
         </div>
 
         <nav class="app-nav">
@@ -37,17 +37,18 @@
             <a href="{{ route('profile') }}" class="app-nav-link {{ request()->routeIs('profile') ? 'active' : '' }}"><i class="fas fa-user-gear"></i><span>Profile</span></a>
         </nav>
 
-        <div class="app-sidebar-footer"><strong class="text-slate-300">DILG-RC</strong><br>Government monitoring portal &middot; 2026</div>
+        <div class="app-sidebar-footer"><strong class="text-slate-300">CIVICLEAR</strong><br>Santa Cruz road-clearing portal &middot; 2026</div>
     </aside>
 
     <div class="app-main">
         <header class="app-topbar">
             <button type="button" class="btn btn-ghost btn-square app-menu-button" data-sidebar-toggle aria-controls="primary-navigation" aria-expanded="false" aria-label="Open navigation"><i class="fas fa-bars"></i></button>
             <div class="app-topbar-title"><h1>Road Clearing Operations</h1><p>Municipality-wide monitoring and response coordination</p></div>
-            <span class="badge badge-warning badge-outline gap-2"><i class="fas fa-shield-halved"></i><span class="role-label">DILG Administrator</span></span>
+            <span class="badge app-role-badge gap-2"><i class="fas fa-shield-halved"></i><span class="role-label">DILG Administrator</span></span>
             <div class="dropdown dropdown-end">
-                <button type="button" tabindex="0" class="btn btn-ghost btn-circle avatar" aria-label="Open account menu">
-                    <div class="w-10 rounded-full bg-[#172033] text-[#F4C542] grid place-items-center font-bold">{{ strtoupper(substr(auth()->user()->email, 0, 1)) }}</div>
+                <button type="button" tabindex="0" class="btn btn-ghost app-account-button" aria-label="Open Santa Cruz account menu">
+                    <span class="app-account-place">Santa Cruz</span>
+                    <span class="app-account-avatar">{{ strtoupper(substr(auth()->user()->email, 0, 1)) }}</span>
                 </button>
                 <ul tabindex="0" class="dropdown-content menu z-[100] mt-3 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
                     <li class="px-3 py-2"><span class="block truncate text-xs text-slate-500">{{ auth()->user()->email }}</span></li>

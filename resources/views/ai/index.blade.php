@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'AI Analytics - DILG-RC System')
+@section('title', 'AI Analytics - CIVICLEAR')
 
 @section('content')
 <style>
@@ -22,7 +22,7 @@
 
     .placeholder-notice {
         background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        border: 2px solid #F4C542;
+        border: 2px solid #2F80ED;
         border-radius: 0.75rem;
         padding: 1.5rem;
         margin-bottom: 2rem;
@@ -60,7 +60,7 @@
     .module-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 6px 20px rgba(0,0,0,0.12);
-        border-color: #F4C542;
+        border-color: #2F80ED;
     }
 
     .module-icon {

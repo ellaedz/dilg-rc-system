@@ -112,6 +112,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Barangay Analytics
         Route::get('/barangay/{barangay}/analytics-reports', [BarangayAnalyticsReportController::class, 'index'])->name('barangay.analytics-reports');
+        Route::get('/barangay/{barangay}/analytics-reports/export', [BarangayAnalyticsReportController::class, 'export'])->name('barangay.analytics-reports.export');
         Route::get('/barangay/{barangay}/analytics-reports/print', [BarangayAnalyticsReportController::class, 'print'])->name('barangay.analytics-reports.print');
 
         // Barangay Profile

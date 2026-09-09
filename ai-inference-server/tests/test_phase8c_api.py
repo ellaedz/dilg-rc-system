@@ -142,8 +142,8 @@ def test_multimodal_separates_ai_review_from_barangay_review(monkeypatch):
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["gis"]["barangay"] is None
-    assert payload["gis"]["barangay_assignment_status"] == "barangay_boundary_unavailable"
-    assert payload["gis"]["needs_manual_barangay_review"] is True
+    assert payload["gis"]["barangay"] == "Poblacion III"
+    assert payload["gis"]["barangay_assignment_status"] == "auto_detected"
+    assert payload["gis"]["needs_manual_barangay_review"] is False
     assert "no_image_detection" in payload["review"]["ai_manual_review_reasons"]
     assert "barangay_boundary_unavailable" not in payload["review"]["ai_manual_review_reasons"]

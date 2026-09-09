@@ -1,0 +1,33 @@
+{
+"type": "FeatureCollection",
+"name": "SELECT",
+"xy_coordinate_resolution": 1e-07,
+"features": [
+{ "type": "Feature", "properties": { "name": "Jasaan", "PSGC": "043426007" }, "geometry": { "type": "Point", "coordinates": [ 121.3910398, 14.2256956 ] } },
+{ "type": "Feature", "properties": { "name": "Oogong", "PSGC": "043426010" }, "geometry": { "type": "Point", "coordinates": [ 121.3998145, 14.227992 ] } },
+{ "type": "Feature", "properties": { "name": "Malinao", "PSGC": "043426009" }, "geometry": { "type": "Point", "coordinates": [ 121.3897625, 14.2356598 ] } },
+{ "type": "Feature", "properties": { "name": "San Juan", "PSGC": "043426020" }, "geometry": { "type": "Point", "coordinates": [ 121.4079806, 14.2460063 ] } },
+{ "type": "Feature", "properties": { "name": "Duhat", "PSGC": "043426005" }, "geometry": { "type": "Point", "coordinates": [ 121.3791495, 14.253116 ] } },
+{ "type": "Feature", "properties": { "name": "Gatid", "PSGC": "043426006" }, "geometry": { "type": "Point", "coordinates": [ 121.3800919, 14.2658763 ] } },
+{ "type": "Feature", "properties": { "name": "Poblacion I", "PSGC": "043426014" }, "geometry": { "type": "Point", "coordinates": [ 121.4178481, 14.2771503 ] } },
+{ "type": "Feature", "properties": { "name": "San Pablo Sur", "PSGC": "043426022" }, "geometry": { "type": "Point", "coordinates": [ 121.4223023, 14.2810011 ] } },
+{ "type": "Feature", "properties": { "name": "Poblacion II", "PSGC": "043426015" }, "geometry": { "type": "Point", "coordinates": [ 121.4162668, 14.2795565 ] } },
+{ "type": "Feature", "properties": { "name": "Poblacion III", "PSGC": "043426016" }, "geometry": { "type": "Point", "coordinates": [ 121.4155405, 14.2821198 ] } },
+{ "type": "Feature", "properties": { "name": "Poblacion IV", "PSGC": "043426017" }, "geometry": { "type": "Point", "coordinates": [ 121.4151858, 14.284304 ] } },
+{ "type": "Feature", "properties": { "name": "San Pablo Norte", "PSGC": "043426021" }, "geometry": { "type": "Point", "coordinates": [ 121.420025, 14.2875367 ] } },
+{ "type": "Feature", "properties": { "name": "Poblacion V", "PSGC": "043426018" }, "geometry": { "type": "Point", "coordinates": [ 121.4133295, 14.285737 ] } },
+{ "type": "Feature", "properties": { "name": "Santo Angel Norte", "PSGC": "043426025" }, "geometry": { "type": "Point", "coordinates": [ 121.4027789, 14.2936298 ] } },
+{ "type": "Feature", "properties": { "name": "Santo Angel Sur", "PSGC": "043426026" }, "geometry": { "type": "Point", "coordinates": [ 121.4125913, 14.2799786 ] } },
+{ "type": "Feature", "properties": { "name": "Santo Angel Central", "PSGC": "043426024" }, "geometry": { "type": "Point", "coordinates": [ 121.4083702, 14.2846498 ] } },
+{ "type": "Feature", "properties": { "name": "Calios", "PSGC": "043426004" }, "geometry": { "type": "Point", "coordinates": [ 121.4052455, 14.2779932 ] } },
+{ "type": "Feature", "properties": { "name": "Bagumbayan", "PSGC": "043426002" }, "geometry": { "type": "Point", "coordinates": [ 121.3939399, 14.2738524 ] } },
+{ "type": "Feature", "properties": { "name": "Santisima Cruz", "PSGC": "043426023" }, "geometry": { "type": "Point", "coordinates": [ 121.4080204, 14.2948555 ] } },
+{ "type": "Feature", "properties": { "name": "San Jose", "PSGC": "043426019" }, "geometry": { "type": "Point", "coordinates": [ 121.407802, 14.2373042 ] } },
+{ "type": "Feature", "properties": { "name": "Alipit", "PSGC": "043426001" }, "geometry": { "type": "Point", "coordinates": [ 121.4048511, 14.2237642 ] } },
+{ "type": "Feature", "properties": { "name": "Palasan", "PSGC": "043426012" }, "geometry": { "type": "Point", "coordinates": [ 121.4182504, 14.2486896 ] } },
+{ "type": "Feature", "properties": { "name": "Pagsawitan", "PSGC": "043426011" }, "geometry": { "type": "Point", "coordinates": [ 121.4257719, 14.2694681 ] } },
+{ "type": "Feature", "properties": { "name": "Patimbao", "PSGC": "043426013" }, "geometry": { "type": "Point", "coordinates": [ 121.41651, 14.2658499 ] } },
+{ "type": "Feature", "properties": { "name": "Bubukal", "PSGC": "043426003" }, "geometry": { "type": "Point", "coordinates": [ 121.4048493, 14.2595504 ] } },
+{ "type": "Feature", "properties": { "name": "Labuin", "PSGC": "043426008" }, "geometry": { "type": "Point", "coordinates": [ 121.3959046, 14.2489758 ] } }
+]
+}

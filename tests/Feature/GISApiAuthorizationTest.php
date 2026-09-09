@@ -30,6 +30,19 @@ class GISApiAuthorizationTest extends TestCase
             ->assertJsonPath('data.0.tracking_id', 'RCV-2026-9101');
     }
 
+    public function test_barangay_office_api_exposes_all_final_validated_markers(): void
+    {
+        $admin = User::factory()->create(['role' => 'dilg_admin']);
+
+        $response = $this->actingAs($admin)->getJson('/api/gis/barangay-offices');
+
+        $response->assertOk()
+            ->assertJsonCount(26, 'data')
+            ->assertJsonPath('meta.total_offices', 26)
+            ->assertJsonPath('meta.needs_validation', 0)
+            ->assertJsonPath('meta.note', 'All office coordinates are validated.');
+    }
+
     public function test_public_tracking_response_does_not_expose_identity_or_internal_fields(): void
     {
         $report = $this->report('RCV-2026-9103', null);

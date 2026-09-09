@@ -1,6 +1,6 @@
 {
     "type": "FeatureCollection",
-    "name": "Santa Cruz Barangay Halls",
+    "name": "CIVICLEAR Final Santa Cruz Barangay Halls",
     "crs": {
         "type": "name",
         "properties": {
@@ -13,19 +13,21 @@
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    121.4084,
-                    14.22103
+                    121.405203125,
+                    14.2238875
                 ]
             },
             "properties": {
+                "psgc": "043426001",
                 "barangay": "Alipit",
                 "office_name": "Barangay Hall - Alipit",
                 "address": "Alipit, Santa Cruz, Laguna",
-                "source": "Google Maps",
-                "validation_status": "Verified",
-                "verification_note": "Researcher verified",
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "Final reconciled hall point",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Final location used by CIVICLEAR."
             }
         },
         {
@@ -33,19 +35,21 @@
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    121.3907,
-                    14.27331
+                    121.39935,
+                    14.26792
                 ]
             },
             "properties": {
+                "psgc": "043426002",
                 "barangay": "Bagumbayan",
                 "office_name": "Barangay Hall - Bagumbayan",
                 "address": "Bagumbayan, Santa Cruz, Laguna",
-                "source": "Google Maps",
-                "validation_status": "Verified",
-                "verification_note": "Researcher verified",
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "OpenStreetMap mapped barangay hall",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Replaces earlier manual point."
             }
         },
         {
@@ -53,19 +57,21 @@
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    121.3982,
-                    14.2591
+                    121.39832,
+                    14.25851
                 ]
             },
             "properties": {
+                "psgc": "043426003",
                 "barangay": "Bubukal",
                 "office_name": "Barangay Hall - Bubukal",
                 "address": "Bubukal, Santa Cruz, Laguna",
-                "source": "Google Maps",
-                "validation_status": "Verified",
-                "verification_note": "Researcher verified",
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "OpenStreetMap mapped barangay hall",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Matches earlier manual research closely."
             }
         },
         {
@@ -74,18 +80,20 @@
                 "type": "Point",
                 "coordinates": [
                     121.4051,
-                    14.27505
+                    14.2705
                 ]
             },
             "properties": {
+                "psgc": "043426004",
                 "barangay": "Calios",
                 "office_name": "Barangay Hall - Calios",
                 "address": "Calios, Santa Cruz, Laguna",
-                "source": "Google Maps",
-                "validation_status": "Verified",
-                "verification_note": "Researcher verified",
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "Researcher-verified map point",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Final reconciled point."
             }
         },
         {
@@ -98,14 +106,16 @@
                 ]
             },
             "properties": {
+                "psgc": "043426005",
                 "barangay": "Duhat",
                 "office_name": "Barangay Hall - Duhat",
                 "address": "Duhat, Santa Cruz, Laguna",
-                "source": "Google Maps",
-                "validation_status": "Verified",
-                "verification_note": "Researcher verified",
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "Researcher-verified map point",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Final reconciled point."
             }
         },
         {
@@ -113,19 +123,21 @@
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    121.4,
-                    14.255
+                    121.383434,
+                    14.260583
                 ]
             },
             "properties": {
+                "psgc": "043426006",
                 "barangay": "Gatid",
                 "office_name": "Barangay Hall - Gatid",
                 "address": "Gatid, Santa Cruz, Laguna",
-                "source": "config centroid fallback",
-                "validation_status": "Needs manual validation",
-                "verification_note": null,
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "Researcher-verified map point",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Final reconciled point."
             }
         },
         {
@@ -138,14 +150,16 @@
                 ]
             },
             "properties": {
+                "psgc": "043426007",
                 "barangay": "Jasaan",
                 "office_name": "Barangay Hall - Jasaan",
                 "address": "Jasaan, Santa Cruz, Laguna",
-                "source": "Google Maps",
-                "validation_status": "Verified",
-                "verification_note": "Researcher verified",
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "Researcher-verified map point",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Final reconciled point."
             }
         },
         {
@@ -153,19 +167,21 @@
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    121.398,
-                    14.25909
+                    121.40083,
+                    14.2501
                 ]
             },
             "properties": {
+                "psgc": "043426008",
                 "barangay": "Labuin",
                 "office_name": "Barangay Hall - Labuin",
                 "address": "Labuin, Santa Cruz, Laguna",
-                "source": "Google Maps",
-                "validation_status": "Verified",
-                "verification_note": "Researcher verified",
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "OpenStreetMap mapped barangay hall",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Corrects earlier manual point that fell in Bubukal."
             }
         },
         {
@@ -173,19 +189,21 @@
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    121.431,
-                    14.32
+                    121.3916,
+                    14.2356
                 ]
             },
             "properties": {
+                "psgc": "043426009",
                 "barangay": "Malinao",
                 "office_name": "Barangay Hall - Malinao",
                 "address": "Malinao, Santa Cruz, Laguna",
-                "source": "config centroid fallback",
-                "validation_status": "Needs manual validation",
-                "verification_note": null,
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "Researcher-verified map point",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Final reconciled point."
             }
         },
         {
@@ -193,19 +211,21 @@
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    121.4004,
-                    14.2266
+                    121.40037,
+                    14.22638
                 ]
             },
             "properties": {
+                "psgc": "043426010",
                 "barangay": "Oogong",
                 "office_name": "Barangay Hall - Oogong",
                 "address": "Oogong, Santa Cruz, Laguna",
-                "source": "Google Maps",
-                "validation_status": "Verified",
-                "verification_note": "Researcher verified",
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "OpenStreetMap mapped barangay hall",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Matches earlier manual research closely."
             }
         },
         {
@@ -213,19 +233,21 @@
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    121.4266,
-                    14.26586
+                    121.42659,
+                    14.26569
                 ]
             },
             "properties": {
+                "psgc": "043426011",
                 "barangay": "Pagsawitan",
                 "office_name": "Barangay Hall - Pagsawitan",
                 "address": "Pagsawitan, Santa Cruz, Laguna",
-                "source": "Google Maps",
-                "validation_status": "Verified",
-                "verification_note": "Researcher verified",
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "OpenStreetMap mapped barangay hall",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Matches earlier manual research closely."
             }
         },
         {
@@ -233,19 +255,21 @@
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    121.419,
-                    14.25755
+                    121.41899,
+                    14.25748
                 ]
             },
             "properties": {
+                "psgc": "043426012",
                 "barangay": "Palasan",
                 "office_name": "Barangay Hall - Palasan",
                 "address": "Palasan, Santa Cruz, Laguna",
-                "source": "Google Maps",
-                "validation_status": "Verified",
-                "verification_note": "Researcher verified",
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "OpenStreetMap mapped barangay hall",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Higher-precision point used to avoid boundary rounding issue."
             }
         },
         {
@@ -253,19 +277,21 @@
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    121.4196,
-                    14.26679
+                    121.41838,
+                    14.27028
                 ]
             },
             "properties": {
+                "psgc": "043426013",
                 "barangay": "Patimbao",
                 "office_name": "Barangay Hall - Patimbao",
                 "address": "Patimbao, Santa Cruz, Laguna",
-                "source": "Google Maps",
-                "validation_status": "Verified",
-                "verification_note": "Researcher verified",
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "OpenStreetMap mapped barangay hall",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Final mapped government compound location."
             }
         },
         {
@@ -273,19 +299,21 @@
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    121.415,
-                    14.28
+                    121.417,
+                    14.2755
                 ]
             },
             "properties": {
+                "psgc": "043426014",
                 "barangay": "Poblacion I",
                 "office_name": "Barangay Hall - Poblacion I",
                 "address": "Poblacion I, Santa Cruz, Laguna",
-                "source": "config centroid fallback",
-                "validation_status": "Needs manual validation",
-                "verification_note": null,
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "Researcher-verified map point",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Final reconciled point."
             }
         },
         {
@@ -293,19 +321,21 @@
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    121.4171,
-                    14.27987
+                    121.41704,
+                    14.27947
                 ]
             },
             "properties": {
+                "psgc": "043426015",
                 "barangay": "Poblacion II",
                 "office_name": "Barangay Hall - Poblacion II",
                 "address": "Poblacion II, Santa Cruz, Laguna",
-                "source": "Google Maps",
-                "validation_status": "Verified",
-                "verification_note": "Researcher verified",
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "OpenStreetMap mapped barangay hall",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Matches earlier manual research closely."
             }
         },
         {
@@ -318,14 +348,16 @@
                 ]
             },
             "properties": {
+                "psgc": "043426016",
                 "barangay": "Poblacion III",
                 "office_name": "Barangay Hall - Poblacion III",
                 "address": "Poblacion III, Santa Cruz, Laguna",
-                "source": "Google Maps",
-                "validation_status": "Verified",
-                "verification_note": "Researcher verified",
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "Researcher-verified map point",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Final reconciled point."
             }
         },
         {
@@ -338,14 +370,16 @@
                 ]
             },
             "properties": {
+                "psgc": "043426017",
                 "barangay": "Poblacion IV",
                 "office_name": "Barangay Hall - Poblacion IV",
                 "address": "Poblacion IV, Santa Cruz, Laguna",
-                "source": "Google Maps",
-                "validation_status": "Verified",
-                "verification_note": "Researcher verified",
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "Researcher-verified map point",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Final reconciled point."
             }
         },
         {
@@ -353,19 +387,21 @@
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    121.412266,
-                    14.285657
+                    121.41224,
+                    14.28534
                 ]
             },
             "properties": {
+                "psgc": "043426018",
                 "barangay": "Poblacion V",
                 "office_name": "Barangay Hall - Poblacion V",
                 "address": "Poblacion V, Santa Cruz, Laguna",
-                "source": "Google Maps",
-                "validation_status": "Verified",
-                "verification_note": "Researcher verified",
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "OpenStreetMap mapped barangay hall",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Matches earlier manual research closely."
             }
         },
         {
@@ -378,14 +414,16 @@
                 ]
             },
             "properties": {
+                "psgc": "043426019",
                 "barangay": "San Jose",
                 "office_name": "Barangay Hall - San Jose",
                 "address": "San Jose, Santa Cruz, Laguna",
-                "source": "Google Maps",
-                "validation_status": "Verified",
-                "verification_note": "Researcher verified",
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "Researcher-verified map point",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Final reconciled point."
             }
         },
         {
@@ -398,14 +436,16 @@
                 ]
             },
             "properties": {
+                "psgc": "043426020",
                 "barangay": "San Juan",
                 "office_name": "Barangay Hall - San Juan",
                 "address": "San Juan, Santa Cruz, Laguna",
-                "source": "Google Maps",
-                "validation_status": "Verified",
-                "verification_note": "Researcher verified",
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "Researcher-verified map point",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Final reconciled point."
             }
         },
         {
@@ -418,14 +458,16 @@
                 ]
             },
             "properties": {
+                "psgc": "043426021",
                 "barangay": "San Pablo Norte",
                 "office_name": "Barangay Hall - San Pablo Norte",
                 "address": "San Pablo Norte, Santa Cruz, Laguna",
-                "source": "Google Maps",
-                "validation_status": "Verified",
-                "verification_note": "Researcher verified",
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "Researcher-verified map point",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Final reconciled point."
             }
         },
         {
@@ -433,19 +475,21 @@
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    121.385,
-                    14.225
+                    121.416953125,
+                    14.2829125
                 ]
             },
             "properties": {
+                "psgc": "043426022",
                 "barangay": "San Pablo Sur",
                 "office_name": "Barangay Hall - San Pablo Sur",
                 "address": "San Pablo Sur, Santa Cruz, Laguna",
-                "source": "config centroid fallback",
-                "validation_status": "Needs manual validation",
-                "verification_note": null,
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "Current mapped hall listing / Plus Code",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Resolved and inside San Pablo Sur."
             }
         },
         {
@@ -453,19 +497,21 @@
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    121.4112,
-                    14.28799
+                    121.41115,
+                    14.28783
                 ]
             },
             "properties": {
+                "psgc": "043426023",
                 "barangay": "Santisima Cruz",
                 "office_name": "Barangay Hall - Santisima Cruz",
                 "address": "Santisima Cruz, Santa Cruz, Laguna",
-                "source": "Google Maps",
-                "validation_status": "Verified",
-                "verification_note": "Researcher verified",
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "OpenStreetMap mapped barangay hall",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Final reconciled point."
             }
         },
         {
@@ -473,19 +519,21 @@
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    121.408,
-                    14.2857
+                    121.408015625,
+                    14.2855375
                 ]
             },
             "properties": {
+                "psgc": "043426024",
                 "barangay": "Santo Angel Central",
                 "office_name": "Barangay Hall - Santo Angel Central",
                 "address": "Santo Angel Central, Santa Cruz, Laguna",
-                "source": "Google Maps",
-                "validation_status": "Verified",
-                "verification_note": "Researcher verified",
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "Current mapped hall listing / Plus Code",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Resolved and inside Santo Angel Central."
             }
         },
         {
@@ -493,19 +541,21 @@
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    121.383,
-                    14.22
+                    121.40742,
+                    14.28756
                 ]
             },
             "properties": {
+                "psgc": "043426025",
                 "barangay": "Santo Angel Norte",
                 "office_name": "Barangay Hall - Santo Angel Norte",
                 "address": "Santo Angel Norte, Santa Cruz, Laguna",
-                "source": "config centroid fallback",
-                "validation_status": "Needs manual validation",
-                "verification_note": null,
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "OpenStreetMap mapped barangay hall",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Final reconciled point."
             }
         },
         {
@@ -513,19 +563,21 @@
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    121.377,
-                    14.21
+                    121.413547,
+                    14.281638
                 ]
             },
             "properties": {
+                "psgc": "043426026",
                 "barangay": "Santo Angel Sur",
                 "office_name": "Barangay Hall - Santo Angel Sur",
                 "address": "Santo Angel Sur, Santa Cruz, Laguna",
-                "source": "config centroid fallback",
-                "validation_status": "Needs manual validation",
-                "verification_note": null,
                 "osm_type": null,
-                "osm_id": null
+                "osm_id": null,
+                "source": "Current mapped hall listing / Plus Code",
+                "validation_status": "Verified",
+                "boundary_validation": "MPDO polygon verified",
+                "verification_note": "Current Zamora St hall location; replaces old hall point."
             }
         }
     ]

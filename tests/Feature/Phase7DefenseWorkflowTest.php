@@ -47,7 +47,8 @@ class Phase7DefenseWorkflowTest extends TestCase
         $submission->assertCreated()
             ->assertJsonPath('data.ai_processing_status', 'completed')
             ->assertJsonPath('data.final_ai_category', 'illegal_parking')
-            ->assertJsonPath('data.barangay_detection_status', 'barangay_boundary_unavailable');
+            ->assertJsonPath('data.detected_barangay', 'Poblacion III')
+            ->assertJsonPath('data.barangay_detection_status', 'auto_detected');
 
         $trackingToken = $submission->json('data.tracking_id');
         $reportNumber = $submission->json('data.report_number');
@@ -86,32 +87,24 @@ class Phase7DefenseWorkflowTest extends TestCase
             ->assertSee('Staff Review Needed')
             ->assertSee('Analysis Complete');
 
-        $this->actingAs($admin)
-            ->post(route('dilg.needs-barangay-review.route', $report), [
-                'selected_barangay' => 'Alipit',
-                'assignment_reason' => 'Defense validation routing based on reviewed GPS and photo evidence.',
-                'confirm_assignment' => '1',
-            ])
-            ->assertRedirect(route('dilg.needs-barangay-review.index'));
-
         $staff = User::factory()->create([
             'role' => 'barangay_staff',
-            'assigned_barangay' => 'Alipit',
+            'assigned_barangay' => 'Poblacion III',
         ]);
 
         $this->actingAs($staff)
-            ->get(route('barangay.dashboard', 'Alipit'))
+            ->get(route('barangay.dashboard', 'Poblacion III'))
             ->assertOk()
             ->assertSee($reportNumber);
 
         $this->actingAs($staff)
-            ->post(route('barangay.incoming-reports.verify', ['barangay' => 'Alipit', 'report' => $report]), [
+            ->post(route('barangay.incoming-reports.verify', ['barangay' => 'Poblacion III', 'report' => $report]), [
                 'official_violation_type' => 'Illegal Parking',
             ])
-            ->assertRedirect(route('barangay.incoming-reports', 'Alipit'));
+            ->assertRedirect(route('barangay.incoming-reports', 'Poblacion III'));
 
         $this->actingAs($staff)
-            ->put(route('barangay.report.update', ['barangay' => 'Alipit', 'report' => $report]), [
+            ->put(route('barangay.report.update', ['barangay' => 'Poblacion III', 'report' => $report]), [
                 'status' => 'In Progress',
                 'assigned_personnel' => 'Defense Validation Team',
                 'action_taken' => 'Road-clearing verification team dispatched.',
@@ -122,7 +115,7 @@ class Phase7DefenseWorkflowTest extends TestCase
         $this->withToken($trackingToken)->getJson('/api/mobile/reports/status')
             ->assertOk()
             ->assertJsonPath('data.current_status', 'In Progress')
-            ->assertJsonPath('data.barangay', 'Alipit')
+            ->assertJsonPath('data.barangay', 'Poblacion III')
             ->assertJsonPath('data.latest_action', 'Road-clearing verification team dispatched.')
             ->assertJsonFragment([
                 'status' => 'In Progress',

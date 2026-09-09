@@ -31,6 +31,7 @@ return [
         'barangay_boundary_unavailable',
         'auto_detected',
         'barangay_not_matched',
+        'barangay_boundary_ambiguous',
     ],
     'decision_sources' => [
         'image_text_agreement',

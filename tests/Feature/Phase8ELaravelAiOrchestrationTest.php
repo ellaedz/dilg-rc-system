@@ -125,7 +125,9 @@ class Phase8ELaravelAiOrchestrationTest extends TestCase
         $this->assertNull($report->verified_by);
         $this->assertNull($report->verified_at);
         $this->assertSame('Pending', $report->verification_status);
-        $this->assertSame('barangay_boundary_unavailable', $report->barangay_detection_status);
+        $this->assertSame('Poblacion III', $report->detected_barangay);
+        $this->assertSame('Barangay Hall - Poblacion III', $report->assigned_barangay_office);
+        $this->assertSame('auto_detected', $report->barangay_detection_status);
         $this->assertSame(
             'barangay_boundary_unavailable',
             $report->ai_gis_result['barangay_assignment_status']

@@ -11,6 +11,17 @@ class ManualBarangayRoutingTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_review_page_states_that_mpdo_polygons_are_active(): void
+    {
+        $admin = User::factory()->create(['role' => 'dilg_admin']);
+
+        $this->actingAs($admin)
+            ->get(route('dilg.needs-barangay-review.index'))
+            ->assertOk()
+            ->assertSee('The validated MPDO barangay polygons are active.')
+            ->assertDontSee('boundary data is not yet available');
+    }
+
     public function test_dilg_can_route_and_barangay_sees_effective_assignment(): void
     {
         $admin = User::factory()->create(['role' => 'dilg_admin']);

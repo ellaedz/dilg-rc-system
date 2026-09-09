@@ -39,14 +39,14 @@ class ManualBarangayRoutingController extends Controller
                 'needs_manual_barangay_review' => false,
                 'barangay_assignment_status' => 'manually_assigned',
                 'assigned_barangay_office' => 'Barangay Hall - '.$validated['selected_barangay'],
-                'location_context' => 'Inside Santa Cruz; Temporarily routed by DILG',
+                'location_context' => 'Inside Santa Cruz; Manually routed by DILG',
                 'date_updated' => now(),
             ]);
 
             ReportTimeline::create([
                 'report_id' => $report->id,
                 'status' => $report->status,
-                'remarks' => 'Temporary DILG Routing to '.$validated['selected_barangay'].': '.$validated['assignment_reason'],
+                'remarks' => 'Manual DILG Routing to '.$validated['selected_barangay'].': '.$validated['assignment_reason'],
                 'updated_by' => $request->user()->id,
             ]);
         });

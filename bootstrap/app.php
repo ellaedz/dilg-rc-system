@@ -8,6 +8,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Exceptions\PostTooLargeException;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -26,6 +27,25 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->render(function (HttpExceptionInterface $exception, Request $request) {
+            if ($exception->getStatusCode() !== 419) {
+                return null;
+            }
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Your session expired. Refresh the page and try again.',
+                    'error' => ['code' => 'SESSION_EXPIRED'],
+                ], 419);
+            }
+
+            return redirect()->route('login')->with(
+                'error',
+                'Your session expired. Please sign in again.'
+            );
+        });
+
         $exceptions->render(function (
             PostTooLargeException $exception,
             Request $request

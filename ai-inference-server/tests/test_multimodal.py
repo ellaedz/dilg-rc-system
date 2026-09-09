@@ -17,7 +17,7 @@ def test_multimodal_prioritizes_strong_image_when_text_is_weak():
     payload = response.json()
     assert payload["final_violation_type"] == "illegal_parking"
     assert payload["decision_source"] in {"image_priority", "image_text_agreement"}
-    assert payload["location_result"]["barangay"] is None
+    assert payload["location_result"]["barangay"] == "Poblacion III"
 
 
 def test_strong_disagreement_requires_manual_review():

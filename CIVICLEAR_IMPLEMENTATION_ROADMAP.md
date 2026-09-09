@@ -1043,28 +1043,33 @@ is_duplicate = false
 
 **Branch:** `feature/phase-13a-barangay-boundary-integration`
 
-**Status:** **BLOCKED** until validated Polygon or MultiPolygon data is available.
-
-Do not create or begin this branch while the required dataset is unavailable.
+**Status:** **COMPLETE** — validated MPDO data was integrated on 2026-09-09.
 
 ### Required work when unblocked
 
-- [ ] Obtain all Santa Cruz barangay polygons from a validated source.
-- [ ] Record source, version, validation method/date, validator, and SHA-256.
-- [ ] Validate GeoJSON structure, geometry, winding/edge behavior, and barangay names.
-- [ ] Implement point-in-polygon detection and boundary-edge handling.
-- [ ] Test known coordinates for every barangay.
-- [ ] Record automatic/manual assignment source.
-- [ ] Preserve authorized staff correction.
-- [ ] Never use nearest barangay hall points as jurisdiction.
+- [x] Obtain all Santa Cruz barangay polygons from a validated source.
+- [x] Record source, version, validation method/date, validator, and SHA-256.
+- [x] Validate GeoJSON structure, geometry, winding/edge behavior, and barangay names.
+- [x] Implement point-in-polygon detection and boundary-edge handling.
+- [x] Test known coordinates for every barangay.
+- [x] Record automatic/manual assignment source.
+- [x] Preserve authorized staff correction.
+- [x] Never use nearest barangay hall points as jurisdiction.
+- [x] Replace provisional barangay-hall markers with the final 26-point dataset.
+- [x] Verify every hall point falls inside its matching MPDO barangay polygon.
+- [x] Reconcile legacy `barangay_boundary_unavailable` reports through the MPDO polygons.
 
-Until completion:
+Completed behavior:
 
 ```text
-Municipality validation: Available
-Exact barangay detection: Unavailable
-Barangay routing: Manual through DILG
+Municipality validation: MPDO polygon coverage
+Exact barangay detection: Automatic for one unambiguous polygon match
+Barangay routing: Automatic, with manual review for shared-edge or unmatched points
 ```
+
+The validation evidence, source hashes, reproducible import command, and known GPS
+edge limitation are recorded in
+`docs/phase-records/PHASE_13A_BARANGAY_BOUNDARY_INTEGRATION.md`.
 
 ---
 

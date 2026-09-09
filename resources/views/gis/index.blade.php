@@ -432,7 +432,7 @@
     $provisionalOfficeCount = $officeCoordinateData->count() - $verifiedOfficeCount;
 @endphp
 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-    <div class="alert bg-blue-50 border border-blue-200 text-blue-900 shadow-sm"><i class="fas fa-draw-polygon"></i><div><div class="font-bold">Municipal boundary</div><div class="text-xs">Barangay polygons are not yet available.</div></div></div>
+    <div class="alert bg-blue-50 border border-blue-200 text-blue-900 shadow-sm"><i class="fas fa-draw-polygon"></i><div><div class="font-bold">{{ $barangayCount }} MPDO barangay boundaries</div><div class="text-xs">Verified polygons are active for GPS assignment.</div></div></div>
     <div class="alert bg-emerald-50 border border-emerald-200 text-emerald-900 shadow-sm"><i class="fas fa-circle-check"></i><div><div class="font-bold">{{ $verifiedOfficeCount }} verified offices</div><div class="text-xs">Researcher-ready coordinates imported.</div></div></div>
     <div class="alert bg-amber-50 border border-amber-200 text-amber-900 shadow-sm"><i class="fas fa-triangle-exclamation"></i><div><div class="font-bold">{{ $provisionalOfficeCount }} provisional offices</div><div class="text-xs">Retained fallbacks still require validation.</div></div></div>
 </div>
@@ -564,7 +564,7 @@
             </h3>
             <div class="legend-item">
                 <div class="legend-symbol boundary"></div>
-                <div class="legend-label">Santa Cruz Municipal Boundary</div>
+                <div class="legend-label">MPDO Barangay Boundary</div>
             </div>
             <div class="legend-item">
                 <div class="legend-symbol report-red"></div>
@@ -633,9 +633,10 @@
     const DEFAULT_CENTER = [{{ $defaultCenter['lat'] }}, {{ $defaultCenter['lng'] }}];
     const DEFAULT_ZOOM = 14;
     
-    // GeoJSON file URL
-    const GEOJSON_URL = "{{ $geojsonUrl }}";
-    const GEOJSON_EXISTS = {{ $geojsonExists ? 'true' : 'false' }};
+    const BARANGAY_GEOJSON_URL = @json($barangayGeojsonUrl);
+    const BARANGAY_GEOJSON_EXISTS = {{ $barangayGeojsonExists ? 'true' : 'false' }};
+    const MUNICIPAL_GEOJSON_URL = @json($municipalGeojsonUrl);
+    const MUNICIPAL_GEOJSON_EXISTS = {{ $municipalGeojsonExists ? 'true' : 'false' }};
 
     // Initialize map
     const map = L.map('map', {
@@ -653,14 +654,23 @@
         maxZoom: 19
     }).addTo(map);
 
-    // Boundary style
-    function boundaryStyle(feature) {
+    function barangayBoundaryStyle() {
         return {
-            fillColor: 'rgba(47, 128, 237, 0.1)',
-            weight: 3,
+            fillColor: '#2F80ED',
+            weight: 2,
             opacity: 1,
             color: '#174EA6',
-            fillOpacity: 0.2
+            fillOpacity: 0.14
+        };
+    }
+
+    function municipalBoundaryStyle() {
+        return {
+            fillOpacity: 0,
+            weight: 4,
+            opacity: 0.95,
+            color: '#0B3B82',
+            dashArray: '8 6'
         };
     }
 
@@ -668,15 +678,17 @@
     function highlightFeature(e) {
         const layer = e.target;
         layer.setStyle({
-            weight: 5,
-            color: '#2F80ED',
-            fillOpacity: 0.4
+            weight: 3,
+            color: '#0B3B82',
+            fillOpacity: 0.32
         });
         layer.bringToFront();
     }
 
     function resetHighlight(e) {
-        geojsonLayer.resetStyle(e.target);
+        if (window.geojsonLayer) {
+            window.geojsonLayer.resetStyle(e.target);
+        }
     }
 
     // Detect barangay name from GeoJSON properties
@@ -699,14 +711,24 @@
         return 'Barangay boundary';
     }
 
-    // Bind popup to each feature
+    function escapeHtml(value) {
+        const element = document.createElement('div');
+        element.textContent = value ?? '';
+        return element.innerHTML;
+    }
+
     function onEachFeature(feature, layer) {
         const barangayName = getBarangayName(feature.properties);
-        
+        const psgc = feature.properties?.PSGC || 'Not available';
+        const area = Number(feature.properties?.area);
+        const areaText = Number.isFinite(area) ? `${(area / 1000000).toFixed(2)} km²` : 'Not available';
+
         const popupContent = `
             <div class="barangay-popup">
-                <div class="barangay-popup-title">${barangayName}</div>
+                <div class="barangay-popup-title">Barangay ${escapeHtml(barangayName)}</div>
                 <div class="barangay-popup-subtitle">Santa Cruz, Laguna</div>
+                <div class="barangay-popup-subtitle">PSGC: ${escapeHtml(psgc)}</div>
+                <div class="barangay-popup-subtitle">Mapped area: ${escapeHtml(areaText)}</div>
             </div>
         `;
         
@@ -718,104 +740,62 @@
         });
     }
 
-    // Load GeoJSON
+
     let geojsonLayer;
-    window.geojsonLayer = null; // Make available globally for marker filtering
+    window.geojsonLayer = null;
 
-    if (GEOJSON_EXISTS) {
-        document.getElementById('loading').style.display = 'flex';
+    async function fetchGeoJson(url, label) {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Failed to load ${label} (${response.status})`);
+        }
 
-        fetch(GEOJSON_URL)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to load GeoJSON');
-                }
-                return response.json();
-            })
-            .then(data => {
-                document.getElementById('loading').style.display = 'none';
-
-                // Keep ALL polygons in MultiPolygon - show complete Santa Cruz including detached areas
-                console.log('🗺️ Loading complete Santa Cruz boundary (all areas)');
-                if (data.features[0].geometry.type === 'MultiPolygon') {
-                    console.log('📍 Santa Cruz has ' + data.features[0].geometry.coordinates.length + ' polygon area(s)');
-                }
-
-                // Add GeoJSON layer
-                geojsonLayer = L.geoJSON(data, {
-                    style: boundaryStyle,
-                    onEachFeature: onEachFeature
-                }).addTo(map);
-                
-                // Make available globally for marker filtering
-                window.geojsonLayer = geojsonLayer;
-
-                const bounds = geojsonLayer.getBounds();
-                
-                if (bounds.isValid()) {
-                    // Show ALL Santa Cruz areas including detached polygons
-                    // Create inverse mask with holes for ALL polygons in the MultiPolygon
-                    const santaCruzCoords = data.features[0].geometry.coordinates;
-                    const worldBounds = [
-                        [90, -180], [90, 180], [-90, 180], [-90, -180], [90, -180]
-                    ];
-                    
-                    let inverseMask;
-                    
-                    if (data.features[0].geometry.type === 'MultiPolygon') {
-                        // Create holes for ALL polygons (including detached areas)
-                        const holes = santaCruzCoords.map(polygon => {
-                            return polygon[0].map(coord => [coord[1], coord[0]]);
-                        });
-                        
-                        inverseMask = L.polygon([worldBounds, ...holes], {
-                            color: '#ffffff',
-                            fillColor: '#ffffff',
-                            fillOpacity: 0.85,
-                            weight: 0,
-                            interactive: false
-                        }).addTo(map);
-                        
-                        console.log('✅ Showing ALL ' + santaCruzCoords.length + ' Santa Cruz polygon area(s)');
-                    } else {
-                        // Single polygon
-                        const hole = santaCruzCoords[0].map(coord => [coord[1], coord[0]]);
-                        inverseMask = L.polygon([worldBounds, hole], {
-                            color: '#ffffff',
-                            fillColor: '#ffffff',
-                            fillOpacity: 0.85,
-                            weight: 0,
-                            interactive: false
-                        }).addTo(map);
-                    }
-                    
-                    // Fit map to ALL Santa Cruz bounds (including detached areas)
-                    map.fitBounds(bounds, { padding: [30, 30], maxZoom: 13 });
-                    
-                    // Allow panning within expanded bounds
-                    map.setMaxBounds(bounds.pad(0.2));
-                    
-                    console.log('✅ GeoJSON boundaries loaded - Complete Santa Cruz');
-                    console.log('🗺️ Map shows all Santa Cruz areas including detached barangays');
-                    
-                    // PHASE 4D: Initialize markers and clustering
-                    initializeGISMarkers(map);
-                }
-            })
-            .catch(error => {
-                document.getElementById('loading').style.display = 'none';
-                console.error('❌ Error loading GeoJSON:', error);
-                
-                L.popup()
-                    .setLatLng(DEFAULT_CENTER)
-                    .setContent('<div style="text-align: center;"><strong style="color: #ef4444;">⚠️ Failed to load boundaries</strong></div>')
-                    .openOn(map);
-            });
-    } else {
-        L.popup()
-            .setLatLng(DEFAULT_CENTER)
-            .setContent('<div style="text-align: center;"><strong style="color: #f59e0b;">📁 No GeoJSON File</strong></div>')
-            .openOn(map);
+        return response.json();
     }
+
+    async function initializeBoundaryLayers() {
+        const loading = document.getElementById('loading');
+        loading.style.display = 'flex';
+
+        try {
+            if (MUNICIPAL_GEOJSON_EXISTS) {
+                const municipalData = await fetchGeoJson(MUNICIPAL_GEOJSON_URL, 'municipal boundary');
+                L.geoJSON(municipalData, {
+                    style: municipalBoundaryStyle,
+                    interactive: false
+                }).addTo(map);
+            }
+
+            if (!BARANGAY_GEOJSON_EXISTS) {
+                throw new Error('The MPDO barangay boundary file is unavailable.');
+            }
+
+            const barangayData = await fetchGeoJson(BARANGAY_GEOJSON_URL, 'barangay boundaries');
+            geojsonLayer = L.geoJSON(barangayData, {
+                style: barangayBoundaryStyle,
+                onEachFeature
+            }).addTo(map);
+            window.geojsonLayer = geojsonLayer;
+
+            const bounds = geojsonLayer.getBounds();
+            if (bounds.isValid()) {
+                map.fitBounds(bounds, { padding: [24, 24], maxZoom: 13 });
+                map.setMaxBounds(bounds.pad(0.2));
+            }
+
+            console.info(`Loaded ${barangayData.features?.length || 0} MPDO barangay boundaries.`);
+        } catch (error) {
+            console.error('GIS boundary loading failed:', error);
+            L.popup()
+                .setLatLng(DEFAULT_CENTER)
+                .setContent('<div style="text-align:center"><strong style="color:#b91c1c">Barangay boundaries could not be loaded.</strong></div>')
+                .openOn(map);
+        } finally {
+            loading.style.display = 'none';
+            initializeGISMarkers(map);
+        }
+    }
+
+    initializeBoundaryLayers();
 </script>
 @endsection

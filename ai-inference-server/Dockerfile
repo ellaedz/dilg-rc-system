@@ -14,7 +14,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     MKL_NUM_THREADS=1 \
     NUMEXPR_NUM_THREADS=1 \
     TMPDIR=/tmp/civiclear \
-    MUNICIPAL_BOUNDARY_PATH=/app/gis/boundary.geojson \
+    MUNICIPAL_BOUNDARY_PATH=/app/gis/santa_cruz_municipality.geojson \
     BARANGAY_BOUNDARY_PATH=/app/gis/santa_cruz_barangays.geojson
 
 RUN mkdir -p /tmp/civiclear \
@@ -34,7 +34,8 @@ COPY --chown=civiclear:civiclear ai-inference-server/*.py ./
 COPY --chown=civiclear:civiclear ai-inference-server/schemas schemas
 COPY --chown=civiclear:civiclear ai-inference-server/services services
 COPY --chown=civiclear:civiclear ai-inference-server/models models
-COPY --chown=civiclear:civiclear public/gis/boundary.geojson gis/boundary.geojson
+COPY --chown=civiclear:civiclear public/gis/santa_cruz_municipality.geojson gis/santa_cruz_municipality.geojson
+COPY --chown=civiclear:civiclear public/gis/santa_cruz_barangays.geojson gis/santa_cruz_barangays.geojson
 COPY --chown=civiclear:civiclear docker/fastapi/entrypoint.sh /usr/local/bin/civiclear-fastapi-entrypoint
 RUN chmod 0555 /usr/local/bin/civiclear-fastapi-entrypoint
 

@@ -26,7 +26,7 @@ MAX_UPLOAD_BYTES = int(os.getenv("MAX_IMAGE_UPLOAD_BYTES", str(5 * 1024 * 1024))
 
 nlp_service = NLPService(Path(os.getenv("NLP_MODEL_PATH", BASE_DIR / "models/nlp/civiclear_nlp_model.joblib")))
 gis_service = GISService(
-    Path(os.getenv("MUNICIPAL_BOUNDARY_PATH", REPOSITORY_DIR / "public/gis/boundary.geojson")),
+    Path(os.getenv("MUNICIPAL_BOUNDARY_PATH", REPOSITORY_DIR / "public/gis/santa_cruz_municipality.geojson")),
     Path(os.getenv("BARANGAY_BOUNDARY_PATH", REPOSITORY_DIR / "public/gis/santa_cruz_barangays.geojson")),
 )
 fusion_service = FusionService()

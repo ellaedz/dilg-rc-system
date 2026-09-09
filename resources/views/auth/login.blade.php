@@ -69,6 +69,13 @@
                             <span>{{ session('success') }}</span>
                         </div>
                     @endif
+
+                    @if(session('error'))
+                        <div class="alert alert-error mb-6" role="alert">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>{{ session('error') }}</span>
+                        </div>
+                    @endif
                     
                     <!-- Error Alert -->
                     @if($errors->any())

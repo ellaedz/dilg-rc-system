@@ -6,7 +6,11 @@ class BarangayAssignmentService
 {
     public static function validateMunicipalityCoverage(float $latitude, float $longitude): array
     {
-        $geoJson = self::loadGeoJson(public_path('gis/boundary.geojson'));
+        // The verified MPDO barangay polygons form the authoritative municipal
+        // coverage. Keep the municipal files as fallbacks for safe deployments.
+        $geoJson = self::loadGeoJson(public_path('gis/santa_cruz_barangays.geojson'))
+            ?? self::loadGeoJson(public_path('gis/santa_cruz_municipality.geojson'))
+            ?? self::loadGeoJson(public_path('gis/boundary.geojson'));
         $isInside = $geoJson !== null && self::pointIntersectsFeatureCollection($latitude, $longitude, $geoJson);
 
         return [
@@ -30,18 +34,35 @@ class BarangayAssignmentService
             ];
         }
 
+        $matches = [];
+
         foreach ($geoJson['features'] as $feature) {
             $name = self::extractBarangayName($feature);
             $geometry = $feature['geometry'] ?? null;
 
             if ($name && $geometry && self::isPointInGeometry($latitude, $longitude, $geometry)) {
-                return [
-                    'detected_barangay' => $name,
-                    'barangay_detection_method' => 'barangay_polygon',
-                    'barangay_detection_status' => 'auto_detected',
-                    'needs_manual_barangay_review' => false,
-                ];
+                $matches[] = $name;
             }
+        }
+
+        $matches = array_values(array_unique($matches));
+
+        if (count($matches) === 1) {
+            return [
+                'detected_barangay' => $matches[0],
+                'barangay_detection_method' => 'barangay_polygon',
+                'barangay_detection_status' => 'auto_detected',
+                'needs_manual_barangay_review' => false,
+            ];
+        }
+
+        if (count($matches) > 1) {
+            return [
+                'detected_barangay' => null,
+                'barangay_detection_method' => 'barangay_polygon',
+                'barangay_detection_status' => 'barangay_boundary_ambiguous',
+                'needs_manual_barangay_review' => true,
+            ];
         }
 
         return [
@@ -185,12 +206,20 @@ class BarangayAssignmentService
     {
         $outerRing = $polygon[0] ?? [];
 
+        if (self::isPointOnRingBoundary($latitude, $longitude, $outerRing)) {
+            return true;
+        }
+
         if (! self::isPointInRing($latitude, $longitude, $outerRing)) {
             return false;
         }
 
         // A point inside an interior ring is inside a polygon hole, not the polygon.
         foreach (array_slice($polygon, 1) as $hole) {
+            if (self::isPointOnRingBoundary($latitude, $longitude, $hole)) {
+                return true;
+            }
+
             if (self::isPointInRing($latitude, $longitude, $hole)) {
                 return false;
             }
@@ -222,5 +251,31 @@ class BarangayAssignmentService
         }
 
         return $inside;
+    }
+
+    private static function isPointOnRingBoundary(float $latitude, float $longitude, array $ring): bool
+    {
+        $count = count($ring);
+        $epsilon = 1.0e-10;
+
+        for ($index = 0; $index < $count - 1; $index++) {
+            [$startLongitude, $startLatitude] = $ring[$index];
+            [$endLongitude, $endLatitude] = $ring[$index + 1];
+            $crossProduct = ($longitude - $startLongitude) * ($endLatitude - $startLatitude)
+                - ($latitude - $startLatitude) * ($endLongitude - $startLongitude);
+
+            if (abs($crossProduct) > $epsilon) {
+                continue;
+            }
+
+            if ($longitude >= min($startLongitude, $endLongitude) - $epsilon
+                && $longitude <= max($startLongitude, $endLongitude) + $epsilon
+                && $latitude >= min($startLatitude, $endLatitude) - $epsilon
+                && $latitude <= max($startLatitude, $endLatitude) + $epsilon) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

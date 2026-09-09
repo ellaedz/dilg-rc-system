@@ -7,12 +7,12 @@
     <div class="page-header">
         <div class="dashboard-eyebrow text-[#174ea6]">Municipal routing queue</div>
         <h1 class="page-title">Needs Barangay Review</h1>
-        <p class="page-subtitle">Review and temporarily route reports that cannot be assigned without barangay polygons.</p>
+        <p class="page-subtitle">Review reports whose GPS location is ambiguous, unmatched, or requires an authorized correction.</p>
     </div>
 
-    <div class="alert alert-warning shadow-sm">
-        <i class="fas fa-triangle-exclamation"></i>
-        <span>Barangay assignment is temporarily reviewed by DILG because barangay-level boundary data is not yet available.</span>
+    <div class="alert alert-info shadow-sm">
+        <i class="fas fa-map-location-dot"></i>
+        <span>The validated MPDO barangay polygons are active. Reports appear here only when automatic boundary assignment cannot make one unambiguous match.</span>
     </div>
 
     @if($errors->any())
@@ -56,7 +56,7 @@
                             <button class="btn btn-sm btn-primary" onclick="document.getElementById('route-{{ $report->id }}').showModal()">Route Report</button>
                             <dialog id="route-{{ $report->id }}" class="modal">
                                 <div class="modal-box text-left">
-                                    <h3 class="font-bold text-lg">Temporary DILG Routing</h3>
+                                    <h3 class="font-bold text-lg">Manual DILG Routing</h3>
                                     <p class="py-2 text-sm text-gray-600">Route {{ $report->report_id }} only after reviewing its GPS location and evidence.</p>
                                     <form method="POST" action="{{ route('dilg.needs-barangay-review.route', $report) }}" class="space-y-4">
                                         @csrf
@@ -73,7 +73,7 @@
                                         </label>
                                         <label class="label cursor-pointer justify-start gap-3">
                                             <input type="checkbox" name="confirm_assignment" value="1" class="checkbox checkbox-warning" required>
-                                            <span class="label-text">I confirm this temporary routing after reviewing the report.</span>
+                                            <span class="label-text">I confirm this manual routing after reviewing the report.</span>
                                         </label>
                                         <div class="modal-action">
                                             <button type="button" class="btn" onclick="document.getElementById('route-{{ $report->id }}').close()">Cancel</button>
@@ -91,7 +91,7 @@
                     <tr>
                         <td colspan="7" class="text-center py-12 text-gray-500">
                             <div class="font-semibold text-gray-700">No reports currently need barangay review.</div>
-                            <div class="text-sm mt-2">New reports inside Santa Cruz will appear here when barangay polygons are unavailable.</div>
+                            <div class="text-sm mt-2">A report will appear here when its GPS point is on a shared boundary or cannot be matched safely.</div>
                         </td>
                     </tr>
                 @endforelse

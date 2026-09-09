@@ -13,9 +13,14 @@ class GISService:
         self.barangay_boundaries = self._load_feature_collection(barangay_boundary_path)
 
     def validate(self, latitude: float, longitude: float, supplied_barangay: str | None = None) -> dict[str, Any]:
+        coverage = (
+            self.barangay_boundaries
+            if self.barangay_boundaries and self.barangay_boundaries.get("features")
+            else self.municipal_boundary
+        )
         inside = bool(
-            self.municipal_boundary
-            and self._point_intersects_collection(latitude, longitude, self.municipal_boundary)
+            coverage
+            and self._point_intersects_collection(latitude, longitude, coverage)
         )
 
         if not inside:
@@ -38,12 +43,20 @@ class GISService:
                 "location_context": "Inside Santa Cruz; Needs Barangay Review",
             }
 
-        detected = self._detect_barangay(latitude, longitude)
+        matches = self._matching_barangays(latitude, longitude)
+        detected = matches[0] if len(matches) == 1 else None
+        status = (
+            "auto_detected"
+            if detected
+            else "barangay_boundary_ambiguous"
+            if len(matches) > 1
+            else "barangay_not_matched"
+        )
         return {
             "inside_santa_cruz": True,
             "municipality_name": "Santa Cruz",
             "barangay": detected,
-            "barangay_detection_status": "auto_detected" if detected else "barangay_not_matched",
+            "barangay_detection_status": status,
             "needs_manual_barangay_review": detected is None,
             "location_context": "Inside Barangay Boundary" if detected else "Inside Santa Cruz; Needs Barangay Review",
         }
@@ -58,15 +71,19 @@ class GISService:
         except (OSError, json.JSONDecodeError, AttributeError):
             return None
 
-    def _detect_barangay(self, latitude: float, longitude: float) -> str | None:
+    def _matching_barangays(self, latitude: float, longitude: float) -> list[str]:
+        matches: list[str] = []
         for feature in self.barangay_boundaries.get("features", []):
             geometry = feature.get("geometry")
             if geometry and self._point_in_geometry(latitude, longitude, geometry):
                 properties = feature.get("properties", {})
                 for key in ("barangay", "name", "ADM4_EN"):
                     if properties.get(key):
-                        return str(properties[key]).strip()
-        return None
+                        name = str(properties[key]).strip()
+                        if name not in matches:
+                            matches.append(name)
+                        break
+        return matches
 
     def _point_intersects_collection(self, latitude: float, longitude: float, collection: dict[str, Any]) -> bool:
         return any(
@@ -84,9 +101,18 @@ class GISService:
         return False
 
     def _point_in_polygon(self, latitude: float, longitude: float, polygon: list[Any]) -> bool:
-        if not polygon or not self._point_in_ring(latitude, longitude, polygon[0]):
+        if not polygon:
             return False
-        return not any(self._point_in_ring(latitude, longitude, hole) for hole in polygon[1:])
+        if self._point_on_ring_boundary(latitude, longitude, polygon[0]):
+            return True
+        if not self._point_in_ring(latitude, longitude, polygon[0]):
+            return False
+        for hole in polygon[1:]:
+            if self._point_on_ring_boundary(latitude, longitude, hole):
+                return True
+            if self._point_in_ring(latitude, longitude, hole):
+                return False
+        return True
 
     @staticmethod
     def _point_in_ring(latitude: float, longitude: float, ring: list[list[float]]) -> bool:
@@ -103,3 +129,26 @@ class GISService:
                     inside = not inside
             previous = current
         return inside
+
+    @staticmethod
+    def _point_on_ring_boundary(latitude: float, longitude: float, ring: list[list[float]]) -> bool:
+        epsilon = 1.0e-10
+        for start, end in zip(ring, ring[1:]):
+            start_longitude, start_latitude = start[:2]
+            end_longitude, end_latitude = end[:2]
+            cross_product = (
+                (longitude - start_longitude) * (end_latitude - start_latitude)
+                - (latitude - start_latitude) * (end_longitude - start_longitude)
+            )
+            if abs(cross_product) > epsilon:
+                continue
+            if (
+                min(start_longitude, end_longitude) - epsilon
+                <= longitude
+                <= max(start_longitude, end_longitude) + epsilon
+                and min(start_latitude, end_latitude) - epsilon
+                <= latitude
+                <= max(start_latitude, end_latitude) + epsilon
+            ):
+                return True
+        return False

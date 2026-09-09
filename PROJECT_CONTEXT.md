@@ -222,10 +222,11 @@ staff must still verify or correct the final classification.
 
 ## Authoritative GIS data state
 
-- `public/gis/boundary.geojson` contains one Santa Cruz municipal MultiPolygon.
-- It must only be used to decide whether GPS coordinates are inside Santa Cruz.
-- Barangay polygons are not currently available.
-- `public/gis/santa_cruz_barangays.geojson` is the reserved future barangay dataset.
+- `public/gis/santa_cruz_municipality.geojson` contains the MPDO Santa Cruz municipal
+  MultiPolygon.
+- `public/gis/santa_cruz_barangays.geojson` contains all 26 validated MPDO barangay
+  MultiPolygons and is the authoritative coverage and assignment layer.
+- `public/gis/boundary.geojson` remains a legacy municipal fallback only.
 - Twenty barangay office points are researcher-verified Google Maps entries. Gatid,
   Malinao, Poblacion I, San Pablo Sur, Santo Angel Norte, and Santo Angel Sur remain
   config-centroid fallbacks requiring validation.
@@ -238,9 +239,10 @@ staff must still verify or correct the final classification.
 2. Attempt barangay detection only against `santa_cruz_barangays.geojson`.
 
 If the point is outside Santa Cruz, the report is unassigned with status
-`outside_coverage`. If the point is inside but barangay polygons are unavailable, the
-report is unassigned with status `barangay_boundary_unavailable` and enters the DILG
-review queue. The municipal name `Santa Cruz (Capital)` is never a barangay assignment.
+`outside_coverage`. One polygon match produces `auto_detected`. A point on a shared
+barangay edge produces `barangay_boundary_ambiguous` and enters the DILG review queue;
+an unmatched point uses `barangay_not_matched`. The municipal name `Santa Cruz
+(Capital)` is never a barangay assignment.
 
 ## Temporary DILG routing
 
@@ -249,22 +251,20 @@ requires a configured barangay, a reason, and explicit confirmation. The actor a
 timestamp are stored and a report timeline entry is created. Barangay staff cannot use
 this action.
 
-The routing warning shown to users is:
-
-> Barangay assignment is temporarily reviewed by DILG because barangay-level boundary
-> data is not yet available.
+Manual DILG routing remains available only for reports whose GPS cannot produce one
+unambiguous barangay match.
 
 ## Effective barangay
 
 The application uses this precedence rule:
 
 ```text
-effective_barangay = detected_barangay ?: manually_assigned_barangay
+effective_barangay = manually_assigned_barangay ?: citizen_reported_barangay ?: detected_barangay
 ```
 
-Automatic polygon detection therefore overrides the temporary route. Barangay queries
-use the `forEffectiveBarangay()` model scope, preventing unassigned or other-barangay
-reports from appearing in staff dashboards and GIS APIs.
+Authorized correction and the citizen's declared barangay remain explicit routing
+overrides. Barangay queries use the `forEffectiveBarangay()` model scope, preventing
+unassigned or other-barangay reports from appearing in staff dashboards and GIS APIs.
 
 ## Nearest office rule
 
@@ -297,8 +297,6 @@ routing evidence.
 
 ## Production requirements still open
 
-- Obtain and validate official barangay polygon GeoJSON.
-- Validate all barangay hall coordinates with the LGU.
 - Replace sequential public tracking IDs with high-entropy tracking credentials.
 - Add stronger anonymous-submission abuse controls beyond throttling.
 - Set production environment values, HTTPS, backups, monitoring, and `APP_DEBUG=false`.
@@ -435,6 +433,6 @@ mobile application still communicates only with Laravel.
 No Azure resource, Entra application, Key Vault secret, image, or deployment has been
 created by Stage 1. The checked-in infrastructure is a reviewable template only, with
 Consumption scale-to-zero limits and no embedded secret values. MPDO barangay polygon
-integration remains Phase 13A. Staff verification remains authoritative: AI runs after
+integration was completed in Phase 13A. Staff verification remains authoritative: AI runs after
 submission and presents its category automatically, while staff verify, reject, or
 explicitly correct that recommendation rather than manually starting inference.

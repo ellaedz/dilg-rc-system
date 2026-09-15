@@ -1001,6 +1001,8 @@ Mobile
 
 **Branch:** `feature/phase-12a-gis-official-analytics`
 
+**Status:** **COMPLETE LOCALLY** — implemented and verified on 2026-09-15; production deployment is pending approval.
+
 **Objective:** Separate operational monitoring from official verified statistics.
 
 ### Operational map
@@ -1028,12 +1030,12 @@ is_duplicate = false
 
 ### Exit gate
 
-- [ ] Operational markers distinguish lifecycle and verification states.
-- [ ] Verified Assigned, Resolved, and Closed reports remain in official totals.
-- [ ] Rejected, duplicate, outside-jurisdiction, unverified, and test reports are
+- [x] Operational markers distinguish lifecycle and verification states.
+- [x] Verified Assigned, Resolved, and Closed reports remain in official totals.
+- [x] Rejected, duplicate, outside-jurisdiction, unverified, and test reports are
       excluded.
-- [ ] Dashboard totals match direct verified-record queries.
-- [ ] GIS and analytics query tests pass.
+- [x] Dashboard totals match direct verified-record queries.
+- [x] GIS and analytics query tests pass.
 
 ---
 

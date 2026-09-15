@@ -25,9 +25,9 @@
         $metrics = [
             ['key' => 'total_reports', 'label' => 'Total reports', 'value' => $stats['total_reports'], 'icon' => 'fa-file-lines', 'color' => '#2563eb', 'bg' => '#dbeafe'],
             ['key' => 'new_reports', 'label' => 'New submissions', 'value' => $stats['new_reports'], 'icon' => 'fa-inbox', 'color' => '#ea580c', 'bg' => '#ffedd5'],
-            ['key' => 'verified_reports', 'label' => 'Verified', 'value' => $stats['verified_reports'], 'icon' => 'fa-circle-check', 'color' => '#0891b2', 'bg' => '#cffafe'],
+            ['key' => 'verified_reports', 'label' => 'Official Verified', 'value' => $stats['verified_reports'], 'icon' => 'fa-circle-check', 'color' => '#0891b2', 'bg' => '#cffafe'],
             ['key' => 'in_progress', 'label' => 'In progress', 'value' => $stats['in_progress'], 'icon' => 'fa-person-digging', 'color' => '#7c3aed', 'bg' => '#ede9fe'],
-            ['key' => 'resolved_reports', 'label' => 'Resolved', 'value' => $stats['resolved_reports'], 'icon' => 'fa-check-double', 'color' => '#059669', 'bg' => '#d1fae5'],
+            ['key' => 'resolved_reports', 'label' => 'Official Resolved', 'value' => $stats['resolved_reports'], 'icon' => 'fa-check-double', 'color' => '#059669', 'bg' => '#d1fae5'],
             ['key' => null, 'label' => 'Avg. response', 'value' => $stats['avg_response_time'], 'icon' => 'fa-stopwatch', 'color' => '#db2777', 'bg' => '#fce7f3'],
         ];
     @endphp

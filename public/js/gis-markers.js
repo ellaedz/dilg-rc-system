@@ -29,6 +29,7 @@ function escapeHtml(value) {
 function buildFilterQuery() {
     const params = new URLSearchParams();
     const values = {
+        dataset: document.getElementById('filter-dataset')?.value || 'operational',
         barangay: document.getElementById('filter-barangay')?.value || '',
         violation_type: document.getElementById('filter-violation-type')?.value || '',
         status: document.getElementById('filter-status')?.value || '',
@@ -57,6 +58,18 @@ const STATUS_COLORS = {
     'Resolved': '#10b981',           // Green
     'Rejected': '#ef4444',           // Red
     'Closed': '#6b7280'              // Gray
+};
+
+// The marker fill shows workflow status. Its ring and symbol show whether the
+// report is eligible for official statistics or why it is operational-only.
+const REPORT_STATE_STYLES = {
+    verified_valid: { background: '#10b981', border: '#047857', symbol: '<i class="fas fa-check" aria-hidden="true"></i>', label: 'Staff-verified valid violation' },
+    ai_pending: { background: '#3b82f6', border: '#1d4ed8', symbol: '<i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>', label: 'AI analysis pending' },
+    pending_verification: { background: '#f59e0b', border: '#b45309', symbol: '<i class="fas fa-clock" aria-hidden="true"></i>', label: 'Awaiting staff verification' },
+    rejected: { background: '#ef4444', border: '#b91c1c', symbol: '<i class="fas fa-xmark" aria-hidden="true"></i>', label: 'Rejected or invalid report' },
+    duplicate: { background: '#8b5cf6', border: '#6d28d9', symbol: '<i class="fas fa-copy" aria-hidden="true"></i>', label: 'Duplicate report' },
+    outside_jurisdiction: { background: '#64748b', border: '#475569', symbol: '<i class="fas fa-file-lines" aria-hidden="true"></i>', label: 'Outside supported jurisdiction' },
+    test_data: { background: '#94a3b8', border: '#64748b', symbol: '<i class="fas fa-file-lines" aria-hidden="true"></i>', label: 'Test data' }
 };
 
 // Violation type color mapping
@@ -124,6 +137,36 @@ function updateHotspotCards(data) {
         || 'N/A';
     document.getElementById('most-common-violation').textContent = data.most_common_violation_type || 'N/A';
     document.getElementById('most-common-status').textContent = data.most_common_status || 'N/A';
+
+    const dataset = document.getElementById('filter-dataset')?.value || 'operational';
+    const label = document.getElementById('mapped-reports-label');
+    const violationLabel = document.getElementById('most-common-violation-label');
+    if (label) {
+        label.textContent = dataset === 'official'
+            ? 'Official Verified Reports'
+            : 'Operational Mapped Reports';
+    }
+    if (violationLabel) {
+        violationLabel.textContent = dataset === 'official'
+            ? 'Most Common Official Violation'
+            : 'Most Common Supported Violation';
+    }
+}
+
+function createReportMarker(report) {
+    const stateStyle = REPORT_STATE_STYLES[report.operational_state]
+        || REPORT_STATE_STYLES.pending_verification;
+
+    return L.divIcon({
+        className: 'custom-report-marker',
+        html: '<div aria-label="' + escapeHtml(report.operational_state_label || stateStyle.label) + '" ' +
+            'style="background:' + stateStyle.background + ';width:24px;height:24px;border-radius:50%;' +
+            'border:3px solid ' + stateStyle.border + ';box-shadow:0 2px 7px rgba(15,23,42,.4);' +
+            'color:white;display:flex;align-items:center;justify-content:center;font-size:10px;' +
+            'font-weight:900;line-height:1;opacity:.95">' + stateStyle.symbol + '</div>',
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+    });
 }
 
 /**
@@ -246,20 +289,9 @@ function displayReportMarkers(map) {
     }
     
     allReports.forEach(report => {
-        // Determine marker color based on status
-        const statusColor = STATUS_COLORS[report.status] || '#6b7280';
-        
-        // Create custom marker icon
-        const markerIcon = L.divIcon({
-            className: 'custom-report-marker',
-            html: '<div style="background: ' + statusColor + '; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.4); opacity: 0.85;"></div>',
-            iconSize: [20, 20],
-            iconAnchor: [10, 10]
-        });
-        
         // Create marker
         const marker = L.marker([report.latitude, report.longitude], {
-            icon: markerIcon,
+            icon: createReportMarker(report),
             title: report.tracking_id
         });
         
@@ -287,11 +319,16 @@ function displayReportMarkers(map) {
  */
 function createReportPopup(report) {
     const statusColor = STATUS_COLORS[report.status] || '#6b7280';
-    const verificationColor = report.verification_status === 'Verified' ? '#10b981' : '#6b7280';
+    const stateStyle = REPORT_STATE_STYLES[report.operational_state]
+        || REPORT_STATE_STYLES.pending_verification;
     const trackingId = escapeHtml(report.tracking_id || 'Report');
-    const violationType = escapeHtml(report.selected_violation_type || 'Awaiting Staff Classification');
+    const violationType = escapeHtml(
+        report.official_violation_type
+        || report.selected_violation_type
+        || 'Awaiting Staff Classification'
+    );
     const status = escapeHtml(report.status || 'Unknown');
-    const verificationStatus = escapeHtml(report.verification_status || 'Pending');
+    const verificationStatus = escapeHtml(report.operational_state_label || stateStyle.label);
     const effectiveBarangay = escapeHtml(report.effective_barangay || 'Needs Barangay Review');
     const officeName = escapeHtml(report.assigned_barangay_office || 'Pending DILG routing');
     const detailsUrl = escapeHtml(report.details_url || '#');
@@ -307,7 +344,7 @@ function createReportPopup(report) {
         '<div style="flex: 1;"><div style="font-size: 0.7rem; color: #6b7280; text-transform: uppercase; margin-bottom: 0.25rem;">STATUS</div>' +
         '<div style="display: inline-block; padding: 0.25rem 0.5rem; background: ' + statusColor + '; color: white; font-size: 0.75rem; font-weight: 600; border-radius: 0.25rem;">' + status + '</div></div>' +
         '<div style="flex: 1;"><div style="font-size: 0.7rem; color: #6b7280; text-transform: uppercase; margin-bottom: 0.25rem;">VERIFICATION</div>' +
-        '<div style="display: inline-block; padding: 0.25rem 0.5rem; background: ' + verificationColor + '; color: white; font-size: 0.75rem; font-weight: 600; border-radius: 0.25rem;">' + verificationStatus + '</div></div>' +
+        '<div style="display: inline-block; padding: 0.25rem 0.5rem; background: ' + stateStyle.border + '; color: white; font-size: 0.75rem; font-weight: 600; border-radius: 0.25rem;">' + verificationStatus + '</div></div>' +
         '</div></div></div>' +
         '<div style="border-top: 2px solid #F4C542; padding-top: 0.75rem; margin-bottom: 0.75rem;">' +
         '<div style="font-size: 0.7rem; color: #6b7280; text-transform: uppercase; margin-bottom: 0.25rem;">DETECTED BARANGAY</div>' +
@@ -326,6 +363,8 @@ function createReportPopup(report) {
  */
 function showRecommendationPanel(report) {
     const panel = document.getElementById('recommendation-panel');
+    const emptyState = document.getElementById('report-panel-empty');
+    const content = document.getElementById('report-panel-content');
     
     if (!panel) return;
     
@@ -333,6 +372,15 @@ function showRecommendationPanel(report) {
     document.getElementById('rec-tracking-id').textContent = report.tracking_id;
     document.getElementById('rec-detected-barangay').textContent = report.effective_barangay || 'Needs Barangay Review';
     document.getElementById('rec-office-name').textContent = report.assigned_barangay_office || 'Pending DILG routing';
+    document.getElementById('rec-violation-type').textContent = report.official_violation_type
+        || report.selected_violation_type
+        || 'Awaiting staff classification';
+    document.getElementById('rec-validation-state').textContent = report.operational_state_label
+        || 'Awaiting staff verification';
+    document.getElementById('rec-gps').textContent = Number.isFinite(Number(report.latitude))
+        && Number.isFinite(Number(report.longitude))
+        ? `${Number(report.latitude).toFixed(6)}, ${Number(report.longitude).toFixed(6)}`
+        : 'Location unavailable';
     
     // Find office address
     const office = allOffices.find(o => o.office_name === report.assigned_barangay_office);
@@ -343,8 +391,9 @@ function showRecommendationPanel(report) {
     
     document.getElementById('rec-report-status').textContent = report.status;
     
-    // Show panel
-    panel.style.display = 'block';
+    panel.style.display = 'flex';
+    if (emptyState) emptyState.hidden = true;
+    if (content) content.hidden = false;
 }
 
 /**
@@ -352,10 +401,14 @@ function showRecommendationPanel(report) {
  */
 function closeRecommendationPanel() {
     const panel = document.getElementById('recommendation-panel');
+    const emptyState = document.getElementById('report-panel-empty');
+    const content = document.getElementById('report-panel-content');
     
     if (!panel) return;
-    
-    panel.style.display = 'none';
+
+    panel.style.display = 'flex';
+    if (emptyState) emptyState.hidden = false;
+    if (content) content.hidden = true;
 }
 
 /**
@@ -378,88 +431,10 @@ function setupFilters(map) {
  * Apply filters to report markers
  */
 function applyFilters(map) {
-    const barangay = document.getElementById('filter-barangay').value;
-    const violationType = document.getElementById('filter-violation-type').value;
-    const status = document.getElementById('filter-status').value;
-    const dateFrom = document.getElementById('filter-date-from').value;
-    const dateTo = document.getElementById('filter-date-to').value;
-    
-    console.log('🔍 Applying filters:', { barangay, violationType, status });
-    
-    // Filter reports
-    let filteredReports = allReports;
-    
-    if (barangay && barangay !== '') {
-        filteredReports = filteredReports.filter(r => r.effective_barangay === barangay);
-    }
-    
-    if (violationType && violationType !== '') {
-        filteredReports = filteredReports.filter(r => r.selected_violation_type === violationType);
-    }
-    
-    if (status && status !== '') {
-        filteredReports = filteredReports.filter(r => r.status === status);
-    }
+    const query = buildFilterQuery();
 
-    if (dateFrom) {
-        filteredReports = filteredReports.filter(r => (r.timestamp || '').slice(0, 10) >= dateFrom);
-    }
-
-    if (dateTo) {
-        filteredReports = filteredReports.filter(r => (r.timestamp || '').slice(0, 10) <= dateTo);
-    }
-    
-    // Remove existing markers
-    if (reportMarkersLayer) {
-        map.removeLayer(reportMarkersLayer);
-    }
-    
-    // Create new layer with filtered reports
-    if (typeof L.markerClusterGroup !== 'undefined') {
-        reportMarkersLayer = L.markerClusterGroup({
-            maxClusterRadius: 50,
-            spiderfyOnMaxZoom: true,
-            showCoverageOnHover: false,
-            zoomToBoundsOnClick: true
-        });
-    } else {
-        reportMarkersLayer = L.layerGroup();
-    }
-    
-    // Add filtered markers
-    filteredReports.forEach(report => {
-        const statusColor = STATUS_COLORS[report.status] || '#6b7280';
-        
-        const markerIcon = L.divIcon({
-            className: 'custom-report-marker',
-            html: `<div style="background: ${statusColor}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.4); opacity: 0.85;"></div>`,
-            iconSize: [20, 20],
-            iconAnchor: [10, 10]
-        });
-        
-        const marker = L.marker([report.latitude, report.longitude], {
-            icon: markerIcon,
-            title: report.tracking_id
-        });
-        
-        const popupContent = createReportPopup(report);
-        marker.bindPopup(popupContent, { maxWidth: 350 });
-        
-        marker.on('click', () => {
-            showRecommendationPanel(report);
-        });
-        
-        marker.addTo(reportMarkersLayer);
-    });
-    
-    // Add layer to map
-    reportMarkersLayer.addTo(map);
-    
-    // Update visible count
-    updateVisibleCount(filteredReports.length);
-    loadHotspotSummary(buildFilterQuery());
-    
-    console.log(`✅ Showing ${filteredReports.length} filtered reports`);
+    console.log('Applying server-authorized GIS filters:', query);
+    Promise.all([loadReports(map, query), loadHotspotSummary(query)]);
 }
 
 /**
@@ -474,12 +449,12 @@ function resetFilters(map) {
     document.getElementById('filter-status').value = '';
     document.getElementById('filter-date-from').value = '';
     document.getElementById('filter-date-to').value = '';
+    document.getElementById('filter-dataset').value = 'operational';
 
     document.getElementById('filter-barangay').value = window.CIVICLEAR_GIS_CONTEXT?.assignedBarangay || '';
-    
-    // Redisplay all reports
-    displayReportMarkers(map);
-    loadHotspotSummary(buildFilterQuery());
+
+    const query = buildFilterQuery();
+    Promise.all([loadReports(map, query), loadHotspotSummary(query)]);
     
     console.log('✅ All filters reset');
 }

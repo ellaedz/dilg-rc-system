@@ -10,9 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class AnalyticsReportController extends Controller
 {
-    public function __construct(private readonly AnalyticsExportService $exporter)
-    {
-    }
+    public function __construct(private readonly AnalyticsExportService $exporter) {}
 
     /**
      * Display DILG-wide road clearing analytics dashboard for Santa Cruz, Laguna
@@ -38,15 +36,14 @@ class AnalyticsReportController extends Controller
             ->count();
 
         // 4. Verified Violations
-        $verifiedViolations = ViolationReport::where('verification_status', 'Valid Violation')
-            ->count();
+        $verifiedViolations = ViolationReport::officialStatistics()->count();
 
         // 5. In Progress Reports
         $inProgressReports = ViolationReport::whereIn('status', ['Assigned', 'In Progress'])
             ->count();
 
         // 6. Resolved Reports
-        $resolvedReports = ViolationReport::where('status', 'Resolved')->count();
+        $resolvedReports = ViolationReport::officialStatistics()->where('status', 'Resolved')->count();
 
         // 7. Rejected Reports
         $rejectedReports = ViolationReport::whereIn('status', ['Rejected'])
@@ -108,10 +105,17 @@ class AnalyticsReportController extends Controller
             ->orderBy('count', 'DESC')
             ->get();
 
-        // 2. Reports by Violation Type
+        // Preserve the operational citizen-category dataset for backward-compatible consumers.
         $reportsByViolationType = ViolationReport::citizenClassified()
             ->select('selected_violation_type', DB::raw('COUNT(*) as count'))
             ->groupBy('selected_violation_type')
+            ->orderBy('count', 'DESC')
+            ->get();
+
+        // Official statistics always use the category confirmed by staff.
+        $officialReportsByViolationType = ViolationReport::officialStatistics()
+            ->selectRaw('official_violation_type as selected_violation_type, COUNT(*) as count')
+            ->groupBy('official_violation_type')
             ->orderBy('count', 'DESC')
             ->get();
 
@@ -168,7 +172,7 @@ class AnalyticsReportController extends Controller
             });
 
         // 7. Top Recurring Violation Type
-        $topRecurringViolationType = $reportsByViolationType->first();
+        $topRecurringViolationType = $officialReportsByViolationType->first();
 
         // ======================================
         // PACKAGE DATA FOR VIEW
@@ -195,6 +199,7 @@ class AnalyticsReportController extends Controller
             'stats',
             'reportsByBarangay',
             'reportsByViolationType',
+            'officialReportsByViolationType',
             'reportsByStatus',
             'monthlyTrend',
             'resolvedVsPending',
@@ -237,10 +242,10 @@ class AnalyticsReportController extends Controller
             ->count('detected_barangay');
 
         $pendingVerification = ViolationReport::whereIn('status', ['Submitted', 'For Verification'])->count();
-        $verifiedViolations = ViolationReport::where('verification_status', 'Valid Violation')->count();
+        $verifiedViolations = ViolationReport::officialStatistics()->count();
         $inProgressReports = ViolationReport::whereIn('status', ['Assigned', 'In Progress'])->count();
         $actionTakenReports = ViolationReport::where('status', 'Action Taken')->count();
-        $resolvedReports = ViolationReport::where('status', 'Resolved')->count();
+        $resolvedReports = ViolationReport::officialStatistics()->where('status', 'Resolved')->count();
         $rejectedReports = ViolationReport::where('status', 'Rejected')->count();
 
         $avgResponseTime = ViolationReport::whereNotNull('response_time_hours')
@@ -248,9 +253,9 @@ class AnalyticsReportController extends Controller
         $avgResponseTime = $avgResponseTime ? round($avgResponseTime, 1) : 0;
 
         // Violation Type Summary
-        $reportsByViolationType = ViolationReport::citizenClassified()
-            ->select('selected_violation_type', DB::raw('COUNT(*) as count'))
-            ->groupBy('selected_violation_type')
+        $officialReportsByViolationType = ViolationReport::officialStatistics()
+            ->selectRaw('official_violation_type as selected_violation_type, COUNT(*) as count')
+            ->groupBy('official_violation_type')
             ->orderBy('count', 'DESC')
             ->get();
 
@@ -317,7 +322,7 @@ class AnalyticsReportController extends Controller
 
         return view('analytics-reports.print', compact(
             'stats',
-            'reportsByViolationType',
+            'officialReportsByViolationType',
             'barangaySummary',
             'statusSummary',
             'topPerformingBarangay',

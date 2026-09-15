@@ -34,19 +34,19 @@
     .hotspot-cards-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 1.25rem;
-        margin-bottom: 1.5rem;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
     }
 
     .hotspot-card {
         background: white;
-        border-radius: 0.75rem;
-        padding: 1.25rem;
+        border-radius: 0.65rem;
+        padding: 0.8rem;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         border-left: 4px solid;
         display: flex;
         align-items: center;
-        gap: 1rem;
+        gap: 0.7rem;
     }
 
     .hotspot-card.blue { border-color: #3b82f6; background: linear-gradient(135deg, #dbeafe 0%, #ffffff 100%); }
@@ -55,13 +55,13 @@
     .hotspot-card.orange { border-color: #f59e0b; background: linear-gradient(135deg, #fef3c7 0%, #ffffff 100%); }
 
     .hotspot-icon {
-        width: 48px;
-        height: 48px;
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.5rem;
+        font-size: 1.05rem;
         flex-shrink: 0;
     }
 
@@ -92,9 +92,9 @@
     .filter-panel {
         background: white;
         border-radius: 0.75rem;
-        padding: 1.25rem;
+        padding: 1.15rem 1.25rem;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
         border-top: 3px solid var(--dilg-yellow);
     }
 
@@ -102,7 +102,7 @@
         font-size: 1rem;
         font-weight: 600;
         color: var(--dilg-dark-gray);
-        margin-bottom: 1rem;
+        margin-bottom: 1.1rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -110,14 +110,21 @@
 
     .filter-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
-        gap: 0.75rem;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        column-gap: 1rem;
+        row-gap: 0.9rem;
         align-items: end;
     }
 
     .filter-field {
         display: flex;
         flex-direction: column;
+        min-width: 0;
+    }
+
+    .filter-field--primary,
+    .filter-field--date {
+        grid-column: span 3;
     }
 
     .filter-label {
@@ -129,11 +136,12 @@
     }
 
     .filter-select {
-        height: 2rem;
-        padding: 0 0.75rem;
+        width: 100%;
+        height: 2.65rem;
+        padding: 0 0.8rem;
         border: 1px solid #d1d5db;
         border-radius: 0.5rem;
-        font-size: 0.875rem;
+        font-size: 0.82rem;
         color: var(--dilg-dark-gray);
     }
 
@@ -152,19 +160,19 @@
 
     .filter-buttons {
         display: grid;
-        grid-template-columns: minmax(150px, auto) minmax(96px, auto);
+        grid-template-columns: 132px 78px;
+        grid-column: 9 / -1;
         gap: 0.5rem;
-        grid-column: 1 / -1;
         justify-content: end;
         min-width: 0;
     }
 
     .filter-btn {
         min-height: 2.5rem;
-        padding: 0.625rem 1rem;
+        padding: 0.6rem 0.75rem;
         border: none;
         border-radius: 0.5rem;
-        font-size: 0.875rem;
+        font-size: 0.8rem;
         font-weight: 600;
         line-height: 1.15;
         cursor: pointer;
@@ -188,32 +196,49 @@
     }
 
     .filter-btn-reset {
-        background: #e5e7eb;
-        color: #6b7280;
+        border: 1px solid #d5deea;
+        background: #ffffff;
+        color: #64748b;
     }
 
     .filter-btn-reset:hover {
-        background: #d1d5db;
+        border-color: #b8c6d8;
+        background: #f8fafc;
+        color: #334155;
     }
 
     /* Map Container */
     .map-container {
+        position: relative;
+        z-index: 0;
+        isolation: isolate;
         display: grid;
-        grid-template-columns: 1fr 320px;
-        gap: 1.5rem;
+        grid-template-columns: minmax(0, 1fr) 420px;
+        min-height: 680px;
+        gap: 0;
+        overflow: hidden;
+        border: 1px solid #dbe4f0;
+        border-radius: 1rem;
+        background: #ffffff;
+        box-shadow: 0 16px 45px rgba(15, 51, 96, 0.13);
     }
 
     .map-card {
+        position: relative;
         background: white;
-        border-radius: 0.75rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-radius: 1rem 0 0 1rem;
+        box-shadow: none;
         overflow: hidden;
     }
 
     .card-header {
-        padding: 1.25rem;
-        border-bottom: 2px solid var(--dilg-yellow);
-        background: #fefce8;
+        position: relative;
+        z-index: 1;
+        min-height: 56px;
+        padding: 0.85rem 1.1rem;
+        border: 0;
+        border-bottom: 1px solid #dbe4f0;
+        background: #ffffff;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -240,38 +265,80 @@
 
     #map {
         width: 100%;
-        height: 650px;
+        height: 624px;
         background: #e5e7eb;
+    }
+
+    .map-stage {
+        position: relative;
+        height: 624px;
     }
 
     /* Sidebar */
     .sidebar-card {
+        position: absolute;
+        left: 1rem;
+        bottom: 1rem;
+        z-index: 700;
         background: white;
+        border: 1px solid #dbeafe;
         border-radius: 0.75rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        padding: 1.25rem;
-        margin-bottom: 1.25rem;
+        box-shadow: 0 10px 28px rgba(15, 51, 96, 0.18);
+        padding: 0.55rem 0.65rem;
+        margin: 0;
+        max-width: calc(100% - 2rem);
     }
 
     .sidebar-card-title {
-        font-size: 1rem;
+        font-size: 0.86rem;
         font-weight: 600;
         color: var(--dilg-dark-gray);
-        margin-bottom: 1rem;
+        margin-bottom: 0.4rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
     }
 
     .legend-item {
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        gap: 0.625rem;
-        padding: 0.625rem;
-        margin-bottom: 0.5rem;
-        background: #f9fafb;
-        border-radius: 0.5rem;
+        gap: 0.28rem;
+        min-height: 24px;
+        padding: 0.22rem 0.45rem 0.22rem 0.25rem;
+        margin: 0;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        font-size: 0.66rem;
+        font-weight: 700;
     }
+
+    .legend-list {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 0.3rem;
+    }
+
+    .status-pill-icon {
+        display: inline-grid;
+        width: 16px;
+        height: 16px;
+        flex: 0 0 16px;
+        place-items: center;
+        border-radius: 50%;
+        color: #ffffff;
+        font-size: 0.52rem;
+    }
+
+    .status-pill.verified { border-color: #bbf7d0; background: #ecfdf5; color: #047857; }
+    .status-pill.verified .status-pill-icon { background: #10b981; }
+    .status-pill.ai-processing { border-color: #bfdbfe; background: #eff6ff; color: #1d4ed8; }
+    .status-pill.ai-processing .status-pill-icon { background: #3b82f6; }
+    .status-pill.awaiting { border-color: #fde68a; background: #fffbeb; color: #b45309; }
+    .status-pill.awaiting .status-pill-icon { background: #f59e0b; }
+    .status-pill.rejected { border-color: #fecaca; background: #fef2f2; color: #b91c1c; }
+    .status-pill.rejected .status-pill-icon { background: #ef4444; }
+    .status-pill.duplicate { border-color: #ddd6fe; background: #f5f3ff; color: #6d28d9; }
+    .status-pill.duplicate .status-pill-icon { background: #8b5cf6; }
 
     .legend-symbol {
         width: 20px;
@@ -291,27 +358,117 @@
     .legend-symbol.report-green { background: #10b981; }
     .legend-symbol.office { background: var(--dilg-yellow); border: 2px solid var(--dilg-dark-gold); }
 
+    .legend-symbol.report-state {
+        display: grid;
+        place-items: center;
+        color: #ffffff;
+        font-size: 0.65rem;
+        font-weight: 900;
+        border: 3px solid;
+    }
+
+    .legend-symbol.verified-valid { background: #3b82f6; border-color: #059669; }
+    .legend-symbol.ai-pending { background: #3b82f6; border-color: #0ea5e9; }
+    .legend-symbol.pending-review { background: #3b82f6; border-color: #f59e0b; }
+    .legend-symbol.rejected-report { background: #64748b; border-color: #dc2626; }
+    .legend-symbol.duplicate-report { background: #64748b; border-color: #7c3aed; }
+
     .legend-label {
-        font-size: 0.8125rem;
-        color: var(--dilg-dark-gray);
-        font-weight: 500;
+        color: inherit;
+        font-size: inherit;
+        font-weight: inherit;
     }
 
     /* Recommendation Panel */
     .recommendation-panel {
-        background: white;
-        border-radius: 0.75rem;
-        padding: 1.25rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        border-top: 4px solid var(--dilg-yellow);
-        display: none;
+        background: transparent;
+        padding: 0;
+        box-shadow: none;
+        border: 0;
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+    }
+
+    .gis-side-column {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        padding: 1.6rem;
+        border-left: 1px solid #dbe4f0;
+        background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+    }
+
+    .gis-side-eyebrow {
+        color: #2563eb;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    .gis-side-title {
+        margin: 0.25rem 0 0.35rem;
+        color: #102a4c;
+        font-size: 1.35rem;
+        font-weight: 800;
+    }
+
+    .gis-side-description {
+        margin-bottom: 1.25rem;
+        color: #64748b;
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+
+    .report-panel-empty {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 360px;
+        padding: 2rem;
+        color: #64748b;
+        text-align: center;
+    }
+
+    .report-panel-empty[hidden] { display: none; }
+
+    .report-panel-empty i {
+        display: grid;
+        width: 64px;
+        height: 64px;
+        margin-bottom: 1rem;
+        place-items: center;
+        border-radius: 50%;
+        background: #eaf3ff;
+        color: #2563eb;
+        font-size: 1.5rem;
+    }
+
+    .report-panel-content[hidden] { display: none; }
+
+    .report-panel-content {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0;
+        overflow: hidden;
+        padding: 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.9rem;
+        background: #ffffff;
+        box-shadow: 0 8px 24px rgba(15, 51, 96, 0.06);
     }
 
     .rec-panel-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1rem;
+        margin: 0;
+        padding: 0 0 0.9rem;
+        border-bottom: 1px solid #eef2f7;
+        grid-column: 1 / -1;
     }
 
     .rec-panel-title {
@@ -339,35 +496,71 @@
     }
 
     .rec-field {
-        margin-bottom: 0.875rem;
+        min-width: 0;
+        margin: 0;
+        padding: 1rem 0;
+        border: 0;
+        border-bottom: 1px solid #eef2f7;
+        border-radius: 0;
+        background: transparent;
+    }
+
+    .rec-field--full {
+        grid-column: 1 / -1;
+    }
+
+    .rec-field--left {
+        padding-right: 1rem;
+        border-right: 1px solid #eef2f7;
+    }
+
+    .rec-field--right {
+        padding-left: 1rem;
+    }
+
+    .rec-field--last {
+        border-bottom: 0;
     }
 
     .rec-label {
-        font-size: 0.6875rem;
-        color: #6b7280;
+        margin-bottom: 0.4rem;
+        color: #64748b;
+        font-size: 0.7rem;
+        font-weight: 500;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 0.25rem;
-        font-weight: 600;
+        letter-spacing: 0.045em;
     }
 
     .rec-value {
-        font-size: 0.875rem;
-        color: var(--dilg-dark-gray);
+        overflow-wrap: break-word;
+        color: #172033;
+        font-size: 0.9rem;
         font-weight: 600;
+        line-height: 1.45;
+    }
+
+    .rec-value--tracking {
+        display: inline-flex;
+        width: fit-content;
+        padding: 0.3rem 0.55rem;
+        border-radius: 999px;
+        background: #eaf3ff;
+        color: #174ea6;
+        font-weight: 700;
     }
 
     .rec-highlight {
-        background: #fef3c7;
-        padding: 0.75rem;
-        border-radius: 0.5rem;
+        background: #eaf3ff;
+        padding: 1rem;
+        border-radius: 0.7rem;
         border-left: 3px solid var(--dilg-yellow);
-        margin-top: 1rem;
+        margin-top: 0.5rem;
+        grid-column: 1 / -1;
     }
 
     .rec-highlight-label {
         font-size: 0.6875rem;
-        color: #92400e;
+        color: #1d4ed8;
         text-transform: uppercase;
         margin-bottom: 0.375rem;
         font-weight: 600;
@@ -375,7 +568,7 @@
 
     .rec-highlight-value {
         font-size: 0.9375rem;
-        color: var(--dilg-dark-gold);
+        color: #102a4c;
         font-weight: 700;
     }
 
@@ -414,6 +607,8 @@
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
 
+    .leaflet-popup-pane { z-index: 800; }
+
     .barangay-popup {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
@@ -438,6 +633,31 @@
         .map-container {
             grid-template-columns: 1fr;
         }
+
+        .filter-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .filter-field--primary,
+        .filter-field--date {
+            grid-column: auto;
+        }
+
+        .filter-buttons {
+            grid-column: 1 / -1;
+        }
+
+        .gis-side-column {
+            min-height: 420px;
+            border-top: 1px solid #dbe4f0;
+            border-left: 0;
+        }
+    }
+
+    @media (max-width: 900px) {
+        .filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .filter-buttons { grid-column: 1 / -1; }
+        .legend-list { flex-wrap: wrap; }
     }
 
     @media (max-width: 640px) {
@@ -454,6 +674,9 @@
             justify-content: stretch;
         }
 
+        .filter-grid { grid-template-columns: 1fr; }
+        .filter-field { grid-column: 1 / -1; }
+
         .filter-btn {
             width: 100%;
         }
@@ -467,6 +690,23 @@
         #map {
             height: 520px;
         }
+
+        .map-stage { height: 520px; }
+
+        .card-header { padding: 0.75rem; }
+
+        .sidebar-card {
+            right: 0.75rem;
+            bottom: 0.75rem;
+            left: 0.75rem;
+            max-width: none;
+        }
+
+        .report-panel-content { grid-template-columns: 1fr; padding: 1rem; }
+        .rec-field--full, .rec-field--left, .rec-field--right { grid-column: 1; }
+        .rec-field--left { padding-right: 0; border-right: 0; }
+        .rec-field--right { padding-left: 0; }
+        .rec-field--last { border-bottom: 1px solid #eef2f7; }
     }
 </style>
 
@@ -511,7 +751,7 @@
     <div class="hotspot-card blue">
         <div class="hotspot-icon"><i class="fas fa-chart-simple"></i></div>
         <div class="hotspot-content">
-            <div class="hotspot-label">Total Mapped Reports</div>
+            <div class="hotspot-label" id="mapped-reports-label">Operational Mapped Reports</div>
             <div class="hotspot-value" id="total-mapped-reports">0</div>
         </div>
     </div>
@@ -527,7 +767,7 @@
     <div class="hotspot-card green">
         <div class="hotspot-icon"><i class="fas fa-triangle-exclamation"></i></div>
         <div class="hotspot-content">
-            <div class="hotspot-label">Most Common Violation</div>
+            <div class="hotspot-label" id="most-common-violation-label">Most Common Supported Violation</div>
             <div class="hotspot-value" id="most-common-violation" style="font-size: 0.9375rem;">N/A</div>
         </div>
     </div>
@@ -548,7 +788,15 @@
         Filter Reports
     </div>
     <div class="filter-grid">
-        <div class="filter-field">
+        <div class="filter-field filter-field--primary">
+            <label class="filter-label" for="filter-dataset">Map Dataset</label>
+            <select class="filter-select" id="filter-dataset">
+                <option value="operational">Operational reports</option>
+                <option value="official">Official verified statistics</option>
+            </select>
+        </div>
+
+        <div class="filter-field filter-field--primary">
             <label class="filter-label">Barangay</label>
             <select class="filter-select" id="filter-barangay" @disabled(!$isDilgAdmin)>
                 @if($isDilgAdmin)
@@ -562,7 +810,7 @@
             </select>
         </div>
         
-        <div class="filter-field">
+        <div class="filter-field filter-field--primary">
             <label class="filter-label">Violation Type</label>
             <select class="filter-select" id="filter-violation-type">
                 <option value="">All Violations</option>
@@ -572,7 +820,7 @@
             </select>
         </div>
         
-        <div class="filter-field">
+        <div class="filter-field filter-field--primary">
             <label class="filter-label">Status</label>
             <select class="filter-select" id="filter-status">
                 <option value="">All Statuses</option>
@@ -582,12 +830,12 @@
             </select>
         </div>
 
-        <div class="filter-field">
+        <div class="filter-field filter-field--date">
             <label class="filter-label" for="filter-date-from">Date From</label>
             <input class="filter-select" type="date" id="filter-date-from">
         </div>
 
-        <div class="filter-field">
+        <div class="filter-field filter-field--date">
             <label class="filter-label" for="filter-date-to">Date To</label>
             <input class="filter-select" type="date" id="filter-date-to">
         </div>
@@ -616,7 +864,7 @@
                 Visible Markers: <span class="visible-count-number" id="visible-markers-count">0</span>
             </div>
         </div>
-        <div style="position: relative;">
+        <div class="map-stage">
             <div id="map"></div>
             <div id="loading" class="loading-overlay" style="display: none;">
                 <div class="loading-spinner">
@@ -626,73 +874,95 @@
                     <p style="margin-top: 1rem; color: var(--dilg-dark-gray);">Loading GIS data...</p>
                 </div>
             </div>
+            <div class="sidebar-card" aria-label="Report status symbols">
+                <h3 class="sidebar-card-title">
+                    <i class="fas fa-file-circle-check"></i>
+                    Report Status
+                </h3>
+                <div class="legend-list">
+                    <div class="legend-item status-pill verified">
+                        <span class="status-pill-icon"><i class="fas fa-check"></i></span>
+                        <span class="legend-label">Verified</span>
+                    </div>
+                    <div class="legend-item status-pill ai-processing">
+                        <span class="status-pill-icon"><i class="fas fa-wand-magic-sparkles"></i></span>
+                        <span class="legend-label">AI Processing</span>
+                    </div>
+                    <div class="legend-item status-pill awaiting">
+                        <span class="status-pill-icon"><i class="fas fa-clock"></i></span>
+                        <span class="legend-label">Awaiting Review</span>
+                    </div>
+                    <div class="legend-item status-pill rejected">
+                        <span class="status-pill-icon"><i class="fas fa-xmark"></i></span>
+                        <span class="legend-label">Rejected</span>
+                    </div>
+                    <div class="legend-item status-pill duplicate">
+                        <span class="status-pill-icon"><i class="fas fa-copy"></i></span>
+                        <span class="legend-label">Duplicate</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Sidebar -->
-    <div>
-        <!-- Legend Card -->
-        <div class="sidebar-card">
-            <h3 class="sidebar-card-title">
-                <i class="fas fa-list"></i>
-                Map Legend
-            </h3>
-            <div class="legend-item">
-                <div class="legend-symbol boundary"></div>
-                <div class="legend-label">{{ $isDilgAdmin ? 'MPDO Barangay Boundary' : 'Assigned MPDO Boundary' }}</div>
-            </div>
-            <div class="legend-item">
-                <div class="legend-symbol report-red"></div>
-                <div class="legend-label">Pending Report</div>
-            </div>
-            <div class="legend-item">
-                <div class="legend-symbol report-orange"></div>
-                <div class="legend-label">In Progress Report</div>
-            </div>
-            <div class="legend-item">
-                <div class="legend-symbol report-green"></div>
-                <div class="legend-label">Resolved Report</div>
-            </div>
-            <div class="legend-item">
-                <div class="legend-symbol office"></div>
-                <div class="legend-label">Verified Barangay Office</div>
-            </div>
-            <div class="legend-item">
-                <div class="legend-symbol office" style="background:#2F80ED;border-color:#174EA6"></div>
-                <div class="legend-label">Provisional Office Coordinate</div>
-            </div>
-        </div>
+    <!-- Selected report inspector -->
+    <aside class="gis-side-column" aria-label="Selected report information">
+        <div class="gis-side-eyebrow">GIS Report Inspector</div>
+        <h2 class="gis-side-title">Selected Report</h2>
+        <p class="gis-side-description">Choose a marker to review its classification, location, status, and assigned follow-up office.</p>
 
-        <!-- Recommendation Panel -->
         <div class="recommendation-panel" id="recommendation-panel">
-            <div class="rec-panel-header">
-                <div class="rec-panel-title"><i class="fas fa-location-dot"></i> Report Details</div>
-                <button class="rec-close-btn" onclick="closeRecommendationPanel()" aria-label="Close report details">&times;</button>
+            <div class="report-panel-empty" id="report-panel-empty">
+                <i class="fas fa-location-crosshairs"></i>
+                <strong>No report selected</strong>
+                <span>Tap or click a report marker on the map.</span>
             </div>
-            
-            <div class="rec-field">
-                <div class="rec-label">Tracking ID</div>
-                <div class="rec-value" id="rec-tracking-id">-</div>
-            </div>
-            
-            <div class="rec-field">
-                <div class="rec-label">Detected Barangay</div>
-                <div class="rec-value" id="rec-detected-barangay">-</div>
-            </div>
-            
-            <div class="rec-field">
-                <div class="rec-label">Report Status</div>
-                <div class="rec-value" id="rec-report-status">-</div>
-            </div>
-            
-            <div class="rec-highlight">
-                <div class="rec-highlight-label">Recommended Barangay Office for Follow-up</div>
-                <div class="rec-highlight-value" id="rec-office-name">-</div>
-                <div style="font-size: 0.8125rem; color: #92400e; margin-top: 0.5rem;" id="rec-office-address">-</div>
-                <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;" id="rec-office-validation">-</div>
+
+            <div class="report-panel-content" id="report-panel-content" hidden>
+                <div class="rec-panel-header">
+                    <div class="rec-panel-title"><i class="fas fa-file-lines"></i> Report Details</div>
+                    <button class="rec-close-btn" onclick="closeRecommendationPanel()" aria-label="Clear selected report">&times;</button>
+                </div>
+
+                <div class="rec-field rec-field--full">
+                    <div class="rec-label">Tracking ID</div>
+                    <div class="rec-value rec-value--tracking" id="rec-tracking-id">-</div>
+                </div>
+
+                <div class="rec-field rec-field--left">
+                    <div class="rec-label">Violation Type</div>
+                    <div class="rec-value" id="rec-violation-type">-</div>
+                </div>
+
+                <div class="rec-field rec-field--right">
+                    <div class="rec-label">Validation</div>
+                    <div class="rec-value" id="rec-validation-state">-</div>
+                </div>
+
+                <div class="rec-field rec-field--left">
+                    <div class="rec-label">Report Status</div>
+                    <div class="rec-value" id="rec-report-status">-</div>
+                </div>
+
+                <div class="rec-field rec-field--right">
+                    <div class="rec-label">Barangay</div>
+                    <div class="rec-value" id="rec-detected-barangay">-</div>
+                </div>
+
+                <div class="rec-field rec-field--full rec-field--last">
+                    <div class="rec-label">GPS Coordinates</div>
+                    <div class="rec-value" id="rec-gps">-</div>
+                </div>
+
+                <div class="rec-highlight">
+                    <div class="rec-highlight-label">Recommended Barangay Office for Follow-up</div>
+                    <div class="rec-highlight-value" id="rec-office-name">-</div>
+                    <div style="font-size: 0.8125rem; color: #1e3a5f; margin-top: 0.5rem;" id="rec-office-address">-</div>
+                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;" id="rec-office-validation">-</div>
+                </div>
             </div>
         </div>
-    </div>
+    </aside>
 </div>
 
 <!-- Leaflet JS (Local) -->

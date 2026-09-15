@@ -25,11 +25,11 @@ class BarangayDashboardController extends Controller
             'new_reports' => ViolationReport::forEffectiveBarangay($barangay)
                 ->where('status', 'Submitted')->count(),
             'verified_reports' => ViolationReport::forEffectiveBarangay($barangay)
-                ->where('status', 'Verified')->count(),
+                ->officialStatistics()->count(),
             'in_progress' => ViolationReport::forEffectiveBarangay($barangay)
                 ->whereIn('status', ['Assigned', 'In Progress'])->count(),
             'resolved_reports' => ViolationReport::forEffectiveBarangay($barangay)
-                ->where('status', 'Resolved')->count(),
+                ->officialStatistics()->where('status', 'Resolved')->count(),
         ];
 
         // Calculate average response time for resolved reports
@@ -74,9 +74,9 @@ class BarangayDashboardController extends Controller
         $stats = [
             'total_reports' => ViolationReport::forEffectiveBarangay($barangay)->count(),
             'new_reports' => ViolationReport::forEffectiveBarangay($barangay)->where('status', 'Submitted')->count(),
-            'verified_reports' => ViolationReport::forEffectiveBarangay($barangay)->where('status', 'Verified')->count(),
+            'verified_reports' => ViolationReport::forEffectiveBarangay($barangay)->officialStatistics()->count(),
             'in_progress' => ViolationReport::forEffectiveBarangay($barangay)->whereIn('status', ['Assigned', 'In Progress'])->count(),
-            'resolved_reports' => ViolationReport::forEffectiveBarangay($barangay)->where('status', 'Resolved')->count(),
+            'resolved_reports' => ViolationReport::forEffectiveBarangay($barangay)->officialStatistics()->where('status', 'Resolved')->count(),
         ];
 
         return response()->json($stats);

@@ -48,6 +48,24 @@ class GISApiAuthorizationTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_generic_gis_link_redirects_barangay_staff_to_their_assigned_workspace(): void
+    {
+        $staff = User::factory()->create([
+            'role' => 'barangay_staff',
+            'assigned_barangay' => 'Alipit',
+        ]);
+
+        $this->actingAs($staff)
+            ->get(route('gis.index'))
+            ->assertRedirect(route('barangay.gis.index', 'Alipit'));
+
+        $this->actingAs($staff)
+            ->followingRedirects()
+            ->get(route('gis.index'))
+            ->assertOk()
+            ->assertSee('Barangay Alipit GIS Workspace');
+    }
+
     public function test_barangay_staff_cannot_request_another_barangay_through_gis_filters(): void
     {
         $staff = User::factory()->create(['role' => 'barangay_staff', 'assigned_barangay' => 'Alipit']);

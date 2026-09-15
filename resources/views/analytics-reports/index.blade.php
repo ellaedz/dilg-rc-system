@@ -8,6 +8,7 @@
 $stats = $stats ?? [];
 $reportsByBarangay = $reportsByBarangay ?? collect();
 $reportsByViolationType = $reportsByViolationType ?? collect();
+$officialReportsByViolationType = $officialReportsByViolationType ?? collect();
 $reportsByStatus = $reportsByStatus ?? collect();
 $monthlyTrend = $monthlyTrend ?? collect();
 $resolvedVsPending = $resolvedVsPending ?? [];
@@ -450,7 +451,7 @@ $responseTimeByBarangay = $responseTimeByBarangay ?? collect();
             <i class="fas fa-check-circle"></i>
         </div>
         <div class="metric-content">
-            <div class="metric-label">Resolved</div>
+            <div class="metric-label">Official Resolved</div>
             <div class="metric-value">{{ number_format($stats['resolved']) }}</div>
         </div>
     </div>
@@ -480,7 +481,7 @@ $responseTimeByBarangay = $responseTimeByBarangay ?? collect();
             <i class="fas fa-certificate"></i>
         </div>
         <div class="metric-content">
-            <div class="metric-label">Verified</div>
+            <div class="metric-label">Official Verified</div>
             <div class="metric-value">{{ number_format($stats['verified_violations']) }}</div>
         </div>
     </div>
@@ -563,7 +564,7 @@ $responseTimeByBarangay = $responseTimeByBarangay ?? collect();
     <!-- Reports by Violation Type -->
     <div class="section-card">
         <div class="section-header">
-            <div><h2 class="section-title">Reports by Violation Type</h2><p class="chart-description">Distribution of reports by recorded obstruction category</p></div>
+            <div><h2 class="section-title">Official Reports by Violation Type</h2><p class="chart-description">Staff-confirmed violations eligible for municipal statistics</p></div>
             <div class="section-filter">
                 <span>Last week</span>
                 <i class="fas fa-chevron-down"></i>
@@ -772,9 +773,9 @@ const barangayConfig = {
 
 // Violation Type Doughnut Chart
 const violationData = {
-    labels: @json($reportsByViolationType->pluck('selected_violation_type')->values()),
+    labels: @json($officialReportsByViolationType->pluck('selected_violation_type')->values()),
     datasets: [{
-        data: @json($reportsByViolationType->pluck('count')->map(fn ($count) => (int) $count)->values()),
+        data: @json($officialReportsByViolationType->pluck('count')->map(fn ($count) => (int) $count)->values()),
         backgroundColor: [
             '#a855f7', // Purple
             '#ec4899', // Pink  

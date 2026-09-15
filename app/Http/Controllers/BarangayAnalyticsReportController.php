@@ -12,9 +12,7 @@ use Illuminate\Support\Str;
 
 class BarangayAnalyticsReportController extends Controller
 {
-    public function __construct(private readonly AnalyticsExportService $exporter)
-    {
-    }
+    public function __construct(private readonly AnalyticsExportService $exporter) {}
 
     /**
      * Display barangay-specific analytics for transparency
@@ -45,7 +43,7 @@ class BarangayAnalyticsReportController extends Controller
         $forVerification = (clone $baseQuery)->where('status', 'For Verification')->count();
 
         // 4. Verified Reports
-        $verifiedReports = (clone $baseQuery)->where('verification_status', 'Valid Violation')->count();
+        $verifiedReports = (clone $baseQuery)->officialStatistics()->count();
 
         // 5. In Progress
         $inProgress = (clone $baseQuery)->whereIn('status', ['Assigned', 'In Progress'])->count();
@@ -54,7 +52,7 @@ class BarangayAnalyticsReportController extends Controller
         $actionTaken = (clone $baseQuery)->where('status', 'Action Taken')->count();
 
         // 7. Resolved
-        $resolved = (clone $baseQuery)->where('status', 'Resolved')->count();
+        $resolved = (clone $baseQuery)->officialStatistics()->where('status', 'Resolved')->count();
 
         // 8. Average Response Time
         $avgResponseTime = (clone $baseQuery)
@@ -78,11 +76,19 @@ class BarangayAnalyticsReportController extends Controller
             })
             ->values();
 
-        // 2. Barangay Reports by Violation Type
+        // Preserve the operational citizen-category dataset for backward-compatible consumers.
         $reportsByViolationType = ViolationReport::citizenClassified()
             ->select('selected_violation_type', DB::raw('COUNT(*) as count'))
             ->forEffectiveBarangay($barangay)
             ->groupBy('selected_violation_type')
+            ->orderBy('count', 'DESC')
+            ->get();
+
+        // Official statistics always use the category confirmed by staff.
+        $officialReportsByViolationType = ViolationReport::officialStatistics()
+            ->selectRaw('official_violation_type as selected_violation_type, COUNT(*) as count')
+            ->forEffectiveBarangay($barangay)
+            ->groupBy('official_violation_type')
             ->orderBy('count', 'DESC')
             ->get();
 
@@ -130,6 +136,7 @@ class BarangayAnalyticsReportController extends Controller
             'in_progress' => $inProgress,
             'action_taken' => $actionTaken,
             'resolved' => $resolved,
+            'resolved_reports' => $resolved,
             'avg_response_time' => $avgResponseTime,
             'resolution_rate' => $resolutionRate,
             'pending_reports' => $pendingReports,
@@ -140,6 +147,7 @@ class BarangayAnalyticsReportController extends Controller
             'stats',
             'reportsByStatus',
             'reportsByViolationType',
+            'officialReportsByViolationType',
             'monthlyTrend',
             'recentReports'
         ));
@@ -187,10 +195,10 @@ class BarangayAnalyticsReportController extends Controller
         $totalReports = (clone $baseQuery)->count();
         $newReports = (clone $baseQuery)->where('status', 'Submitted')->count();
         $forVerification = (clone $baseQuery)->where('status', 'For Verification')->count();
-        $verifiedReports = (clone $baseQuery)->where('verification_status', 'Valid Violation')->count();
+        $verifiedReports = (clone $baseQuery)->officialStatistics()->count();
         $inProgress = (clone $baseQuery)->whereIn('status', ['Assigned', 'In Progress'])->count();
         $actionTaken = (clone $baseQuery)->where('status', 'Action Taken')->count();
-        $resolved = (clone $baseQuery)->where('status', 'Resolved')->count();
+        $resolved = (clone $baseQuery)->officialStatistics()->where('status', 'Resolved')->count();
         $rejected = (clone $baseQuery)->where('status', 'Rejected')->count();
 
         $avgResponseTime = (clone $baseQuery)
@@ -199,10 +207,10 @@ class BarangayAnalyticsReportController extends Controller
         $avgResponseTime = $avgResponseTime ? round($avgResponseTime, 1) : 0;
 
         // Violation Type Summary
-        $reportsByViolationType = ViolationReport::citizenClassified()
-            ->select('selected_violation_type', DB::raw('COUNT(*) as count'))
+        $officialReportsByViolationType = ViolationReport::officialStatistics()
+            ->selectRaw('official_violation_type as selected_violation_type, COUNT(*) as count')
             ->forEffectiveBarangay($barangay)
-            ->groupBy('selected_violation_type')
+            ->groupBy('official_violation_type')
             ->orderBy('count', 'DESC')
             ->get();
 
@@ -238,6 +246,7 @@ class BarangayAnalyticsReportController extends Controller
             'in_progress' => $inProgress,
             'action_taken' => $actionTaken,
             'resolved' => $resolved,
+            'resolved_reports' => $resolved,
             'rejected' => $rejected,
             'avg_response_time' => $avgResponseTime,
             'waiting_verification' => $waitingVerification,
@@ -249,7 +258,7 @@ class BarangayAnalyticsReportController extends Controller
         return view('barangay.analytics-print', compact(
             'barangay',
             'stats',
-            'reportsByViolationType',
+            'officialReportsByViolationType',
             'statusSummary',
             'recentActions'
         ));

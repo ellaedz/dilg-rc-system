@@ -97,3 +97,32 @@ recovery export. Backup SHA-256:
 Post-cleanup verification found 22 non-test reports, zero marked test reports, and zero
 orphan timeline rows. No non-test report, account, GIS feature, or application file was
 deleted or modified by this cleanup.
+
+## Operational AI-result correction release
+
+The GIS operational summary originally read the citizen-selected classification field.
+Current mobile reports intentionally store that field as `Unclassified` until staff make
+an official decision, so the most-common card could display `N/A` even when server AI
+analysis had completed. Commit `bdb5c7cc3cf7d8903fa6092122b740e21d0fc57c`
+corrected the operational summary and filter to use completed, currently supported
+`ai_possible_violation` results. The official dataset remains based exclusively on
+`official_violation_type`.
+
+GitHub Actions run `34991624443` built the immutable images from the exact reviewed
+commit. The full regression suite passed with 205 tests and 2,080 assertions, and the
+Vite production build, JavaScript syntax check, Laravel Pint, and whitespace checks
+passed.
+
+| Item | Value |
+|---|---|
+| Laravel image digest | `sha256:9ee58e445bce39f12946c0c2ec003520380f710014bea0698dd29d8d571112e2` |
+| Active revision | `ca-civiclear-laravel--gisbdb5c7c` |
+| Active traffic | 100 percent |
+| Rollback revision | `ca-civiclear-laravel--gis151b69d` |
+| Rollback traffic | 0 percent, retained active and healthy |
+
+The candidate and public hostname passed health, login, authentication redirect,
+mobile violation-type, GIS JavaScript, 26-boundary, and 26-barangay-hall checks. No
+database migration or production data mutation was required. Rollback is traffic-only:
+assign 100 percent to `ca-civiclear-laravel--gis151b69d` and zero percent to
+`ca-civiclear-laravel--gisbdb5c7c`.

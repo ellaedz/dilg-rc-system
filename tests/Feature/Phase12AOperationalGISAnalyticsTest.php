@@ -94,6 +94,32 @@ class Phase12AOperationalGISAnalyticsTest extends TestCase
             ->assertJsonPath('data.violation_type_counts.Illegal Parking', 4);
     }
 
+    public function test_operational_summary_ignores_legacy_types_outside_current_ai_classes(): void
+    {
+        $admin = User::factory()->create(['role' => 'dilg_admin']);
+
+        foreach (range(1, 3) as $index) {
+            $this->report('RCV-2026-125'.$index, [
+                'selected_violation_type' => 'Encroachment',
+                'official_violation_type' => null,
+            ]);
+        }
+
+        foreach (range(4, 5) as $index) {
+            $this->report('RCV-2026-125'.$index, [
+                'selected_violation_type' => 'Illegal Parking',
+                'official_violation_type' => null,
+            ]);
+        }
+
+        $this->actingAs($admin)
+            ->getJson('/api/gis/hotspots-summary?dataset=operational')
+            ->assertOk()
+            ->assertJsonPath('data.most_common_violation_type', 'Illegal Parking')
+            ->assertJsonPath('data.violation_type_counts.Illegal Parking', 2)
+            ->assertJsonMissingPath('data.violation_type_counts.Encroachment');
+    }
+
     public function test_barangay_official_dataset_remains_restricted_to_assigned_barangay(): void
     {
         $staff = User::factory()->create([
@@ -219,6 +245,7 @@ class Phase12AOperationalGISAnalyticsTest extends TestCase
             ->assertSee('Awaiting Review')
             ->assertSee('Duplicate')
             ->assertSee('Report Status')
+            ->assertSee('Most Common Supported Violation')
             ->assertSee('filter-field--primary', false)
             ->assertSee('filter-field--date', false)
             ->assertSee('rec-field--full', false)

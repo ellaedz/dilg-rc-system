@@ -140,10 +140,16 @@ function updateHotspotCards(data) {
 
     const dataset = document.getElementById('filter-dataset')?.value || 'operational';
     const label = document.getElementById('mapped-reports-label');
+    const violationLabel = document.getElementById('most-common-violation-label');
     if (label) {
         label.textContent = dataset === 'official'
             ? 'Official Verified Reports'
             : 'Operational Mapped Reports';
+    }
+    if (violationLabel) {
+        violationLabel.textContent = dataset === 'official'
+            ? 'Most Common Official Violation'
+            : 'Most Common Supported Violation';
     }
 }
 

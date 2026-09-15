@@ -8,6 +8,7 @@ use App\Http\Resources\GISReportResource;
 use App\Models\ViolationReport;
 use App\Services\BarangayAssignmentService;
 use App\Services\BarangayOfficeService;
+use App\Support\OfficialViolationType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -115,7 +116,15 @@ class GISApiController extends Controller
             : 'selected_violation_type';
         $violationBase = clone $base;
         if (($validated['dataset'] ?? 'operational') === 'operational') {
-            $violationBase->citizenClassified();
+            $supportedAiViolationTypes = collect(config('ai_inference.image_classes', []))
+                ->map(fn (string $category): ?string => OfficialViolationType::fromAi($category))
+                ->filter()
+                ->values()
+                ->all();
+
+            $violationBase
+                ->citizenClassified()
+                ->whereIn($violationColumn, $supportedAiViolationTypes);
         }
 
         $violationCounts = $violationBase

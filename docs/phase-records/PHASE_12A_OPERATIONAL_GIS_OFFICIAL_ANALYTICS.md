@@ -16,6 +16,8 @@ schema is changed.
   browser memory.
 - The GIS workspace uses a map-first split layout with a compact floating report-status
   key and a persistent selected-report inspector.
+- Filters use an aligned two-row desktop grid, map popups remain above overlays, and
+  report states use accessible colored pill badges with distinct icons.
 - Barangay staff remain restricted to their assigned barangay for both datasets.
 - The generic `/gis-map` link sends barangay staff to their assigned workspace while
   keeping cross-barangay access forbidden.

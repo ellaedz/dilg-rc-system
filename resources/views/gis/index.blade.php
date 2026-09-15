@@ -110,14 +110,16 @@
 
     .filter-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
-        gap: 0.75rem;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 0.85rem 0.75rem;
         align-items: end;
     }
 
     .filter-field {
         display: flex;
         flex-direction: column;
+        grid-column: span 3;
+        min-width: 0;
     }
 
     .filter-label {
@@ -129,8 +131,9 @@
     }
 
     .filter-select {
-        height: 2rem;
-        padding: 0 0.75rem;
+        width: 100%;
+        height: 2.65rem;
+        padding: 0 0.8rem;
         border: 1px solid #d1d5db;
         border-radius: 0.5rem;
         font-size: 0.875rem;
@@ -154,7 +157,7 @@
         display: grid;
         grid-template-columns: minmax(150px, auto) minmax(96px, auto);
         gap: 0.5rem;
-        grid-column: 1 / -1;
+        grid-column: 7 / -1;
         justify-content: end;
         min-width: 0;
     }
@@ -199,7 +202,7 @@
     /* Map Container */
     .map-container {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 360px;
+        grid-template-columns: minmax(0, 1fr) 380px;
         min-height: 680px;
         gap: 0;
         overflow: hidden;
@@ -218,16 +221,13 @@
     }
 
     .card-header {
-        position: absolute;
-        top: 1rem;
-        left: 4.5rem;
-        right: 1rem;
-        z-index: 700;
-        padding: 0.75rem 1rem;
-        border: 1px solid rgba(191, 219, 254, 0.9);
-        border-radius: 0.75rem;
-        background: rgba(255, 255, 255, 0.94);
-        backdrop-filter: blur(8px);
+        position: relative;
+        z-index: 1;
+        min-height: 56px;
+        padding: 0.85rem 1.1rem;
+        border: 0;
+        border-bottom: 1px solid #dbe4f0;
+        background: #ffffff;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -254,13 +254,13 @@
 
     #map {
         width: 100%;
-        height: 680px;
+        height: 624px;
         background: #e5e7eb;
     }
 
     .map-stage {
         position: relative;
-        height: 680px;
+        height: 624px;
     }
 
     /* Sidebar */
@@ -273,7 +273,7 @@
         border: 1px solid #dbeafe;
         border-radius: 0.75rem;
         box-shadow: 0 10px 28px rgba(15, 51, 96, 0.18);
-        padding: 0.65rem 0.75rem;
+        padding: 0.8rem 0.9rem;
         margin: 0;
         max-width: calc(100% - 2rem);
     }
@@ -282,7 +282,7 @@
         font-size: 1rem;
         font-weight: 600;
         color: var(--dilg-dark-gray);
-        margin-bottom: 0.55rem;
+        margin-bottom: 0.7rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -291,17 +291,43 @@
     .legend-item {
         display: inline-flex;
         align-items: center;
-        gap: 0.4rem;
-        padding: 0.3rem 0.45rem;
+        gap: 0.42rem;
+        min-height: 30px;
+        padding: 0.35rem 0.65rem 0.35rem 0.4rem;
         margin: 0;
-        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        font-size: 0.76rem;
+        font-weight: 700;
     }
 
     .legend-list {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.2rem 0.45rem;
+        gap: 0.45rem;
     }
+
+    .status-pill-icon {
+        display: inline-grid;
+        width: 20px;
+        height: 20px;
+        flex: 0 0 20px;
+        place-items: center;
+        border-radius: 50%;
+        color: #ffffff;
+        font-size: 0.62rem;
+    }
+
+    .status-pill.verified { border-color: #bbf7d0; background: #ecfdf5; color: #047857; }
+    .status-pill.verified .status-pill-icon { background: #10b981; }
+    .status-pill.ai-processing { border-color: #bfdbfe; background: #eff6ff; color: #1d4ed8; }
+    .status-pill.ai-processing .status-pill-icon { background: #3b82f6; }
+    .status-pill.awaiting { border-color: #fde68a; background: #fffbeb; color: #b45309; }
+    .status-pill.awaiting .status-pill-icon { background: #f59e0b; }
+    .status-pill.rejected { border-color: #fecaca; background: #fef2f2; color: #b91c1c; }
+    .status-pill.rejected .status-pill-icon { background: #ef4444; }
+    .status-pill.duplicate { border-color: #ddd6fe; background: #f5f3ff; color: #6d28d9; }
+    .status-pill.duplicate .status-pill-icon { background: #8b5cf6; }
 
     .legend-symbol {
         width: 20px;
@@ -337,9 +363,9 @@
     .legend-symbol.duplicate-report { background: #64748b; border-color: #7c3aed; }
 
     .legend-label {
-        font-size: 0.72rem;
-        color: var(--dilg-dark-gray);
-        font-weight: 500;
+        color: inherit;
+        font-size: inherit;
+        font-weight: inherit;
     }
 
     /* Recommendation Panel */
@@ -357,7 +383,7 @@
         display: flex;
         flex-direction: column;
         min-width: 0;
-        padding: 1.4rem;
+        padding: 1.6rem;
         border-left: 1px solid #dbe4f0;
         background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
     }
@@ -373,14 +399,14 @@
     .gis-side-title {
         margin: 0.25rem 0 0.35rem;
         color: #102a4c;
-        font-size: 1.2rem;
+        font-size: 1.35rem;
         font-weight: 800;
     }
 
     .gis-side-description {
         margin-bottom: 1.25rem;
         color: #64748b;
-        font-size: 0.8rem;
+        font-size: 0.875rem;
         line-height: 1.5;
     }
 
@@ -450,11 +476,13 @@
     }
 
     .rec-field {
-        margin-bottom: 0.875rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 1px solid #edf2f7;
     }
 
     .rec-label {
-        font-size: 0.6875rem;
+        font-size: 0.72rem;
         color: #6b7280;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -463,7 +491,8 @@
     }
 
     .rec-value {
-        font-size: 0.875rem;
+        font-size: 0.94rem;
+        line-height: 1.45;
         color: var(--dilg-dark-gray);
         font-weight: 600;
     }
@@ -525,6 +554,8 @@
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
 
+    .leaflet-popup-pane { z-index: 800; }
+
     .barangay-popup {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
@@ -557,6 +588,11 @@
         }
     }
 
+    @media (max-width: 900px) {
+        .filter-field { grid-column: span 6; }
+        .filter-buttons { grid-column: 1 / -1; }
+    }
+
     @media (max-width: 640px) {
         .page-title {
             font-size: 1.5rem;
@@ -570,6 +606,8 @@
             grid-template-columns: 1fr 1fr;
             justify-content: stretch;
         }
+
+        .filter-field { grid-column: 1 / -1; }
 
         .filter-btn {
             width: 100%;
@@ -587,10 +625,7 @@
 
         .map-stage { height: 520px; }
 
-        .card-header {
-            left: 3.75rem;
-            padding: 0.65rem 0.75rem;
-        }
+        .card-header { padding: 0.75rem; }
 
         .sidebar-card {
             right: 0.75rem;
@@ -771,25 +806,25 @@
                     Report Status
                 </h3>
                 <div class="legend-list">
-                    <div class="legend-item">
-                        <div class="legend-symbol report-state verified-valid">&#10003;</div>
-                        <div class="legend-label">Verified</div>
+                    <div class="legend-item status-pill verified">
+                        <span class="status-pill-icon"><i class="fas fa-check"></i></span>
+                        <span class="legend-label">Verified</span>
                     </div>
-                    <div class="legend-item">
-                        <div class="legend-symbol report-state ai-pending">A</div>
-                        <div class="legend-label">AI processing</div>
+                    <div class="legend-item status-pill ai-processing">
+                        <span class="status-pill-icon"><i class="fas fa-wand-magic-sparkles"></i></span>
+                        <span class="legend-label">AI Processing</span>
                     </div>
-                    <div class="legend-item">
-                        <div class="legend-symbol report-state pending-review">!</div>
-                        <div class="legend-label">Awaiting review</div>
+                    <div class="legend-item status-pill awaiting">
+                        <span class="status-pill-icon"><i class="fas fa-clock"></i></span>
+                        <span class="legend-label">Awaiting Review</span>
                     </div>
-                    <div class="legend-item">
-                        <div class="legend-symbol report-state rejected-report">&times;</div>
-                        <div class="legend-label">Rejected</div>
+                    <div class="legend-item status-pill rejected">
+                        <span class="status-pill-icon"><i class="fas fa-xmark"></i></span>
+                        <span class="legend-label">Rejected</span>
                     </div>
-                    <div class="legend-item">
-                        <div class="legend-symbol report-state duplicate-report">D</div>
-                        <div class="legend-label">Duplicate</div>
+                    <div class="legend-item status-pill duplicate">
+                        <span class="status-pill-icon"><i class="fas fa-copy"></i></span>
+                        <span class="legend-label">Duplicate</span>
                     </div>
                 </div>
             </div>

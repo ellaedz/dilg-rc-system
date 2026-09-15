@@ -1001,7 +1001,7 @@ Mobile
 
 **Branch:** `feature/phase-12a-gis-official-analytics`
 
-**Status:** **COMPLETE LOCALLY** — implemented and verified on 2026-09-15; production deployment is pending approval.
+**Status:** **COMPLETE** — implemented, tested, deployed, and visually accepted on 2026-09-15.
 
 **Objective:** Separate operational monitoring from official verified statistics.
 
@@ -1036,6 +1036,7 @@ is_duplicate = false
       excluded.
 - [x] Dashboard totals match direct verified-record queries.
 - [x] GIS and analytics query tests pass.
+- [x] DILG and barangay GIS workspaces pass live visual acceptance.
 
 ---
 
@@ -1072,6 +1073,25 @@ Barangay routing: Automatic, with manual review for shared-edge or unmatched poi
 The validation evidence, source hashes, reproducible import command, and known GPS
 edge limitation are recorded in
 `docs/phase-records/PHASE_13A_BARANGAY_BOUNDARY_INTEGRATION.md`.
+
+## Phase 13B — Barangay GIS Workspace
+
+**Branch:** `feature/phase-12a-gis-official-analytics`
+
+**Status:** **COMPLETE** — implemented, tested, deployed, and visually accepted on 2026-09-15.
+
+- [x] Every barangay account can open its assigned GIS workspace.
+- [x] Barangay staff see only reports and hall data for their assigned barangay.
+- [x] DILG administrators retain the municipality-wide 26-barangay GIS view.
+- [x] Server-side authorization prevents cross-barangay GIS access.
+- [x] Filters, status markers, report inspector, responsive layout, and sticky-header
+      behavior are verified.
+- [x] The immutable Azure revision is healthy and serves 100 percent of production traffic.
+- [x] DILG and barangay live visual acceptance is complete.
+
+Deployment and verification evidence is recorded in
+`docs/phase-records/PHASE_13B_BARANGAY_GIS_WORKSPACE.md` and
+`docs/phase-records/PHASE_12A_OPERATIONAL_GIS_OFFICIAL_ANALYTICS.md`.
 
 ---
 
@@ -1168,26 +1188,17 @@ v1.0.0-thesis-demo
 7.  feature/phase-9a-supabase-postgres-migration
 8.  feature/phase-9b-supabase-private-storage
 9.  feature/phase-10a-cloud-tasks-ai-processing
-10. feature/phase-10b-cloud-run-secure-deployment
+10. feature/phase-10b-azure-secure-deployment
 11. test/phase-10c-cloud-end-to-end-verification
 12. feature/phase-11a-staff-verification-workflow
 13. feature/phase-12a-gis-official-analytics
 14. feature/phase-13a-barangay-boundary-integration
-    BLOCKED until validated polygons are available
-15. release/phase-14a-production-hardening
+15. feature/phase-13b-barangay-gis-workspace
+16. release/phase-14a-production-hardening
 ```
 
 ## Immediate next action
 
-Do not create a branch until the three unexplained deletions are resolved.
-
-When the worktree is understood and safe:
-
-```powershell
-git switch main
-git status
-git switch -c chore/phase-8a-baseline-safety
-```
-
-Begin only the Phase 8A checklist. Do not combine future phase work into the baseline
-branch.
+Phases 12A, 13A, and 13B are complete, deployed, and accepted. Continue with the
+remaining owner-prioritized fixes before Phase 14A final hardening. Password-management
+work is explicitly deferred until the owner resumes it.

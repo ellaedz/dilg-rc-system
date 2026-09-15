@@ -56,5 +56,7 @@ expected HTTP 404 after a database lookup. Container logs showed no application 
 
 Rollback is a traffic-only operation: route 100 percent to
 `ca-civiclear-laravel--gis28c3743` and zero percent to
-`ca-civiclear-laravel--gis13bce574f9`. Do not delete either revision until authorized
-staff complete the authenticated GIS acceptance check.
+`ca-civiclear-laravel--gis13bce574f9`. The owner subsequently completed the
+authenticated DILG and barangay GIS visual acceptance check on 2026-09-15. A newer
+Phase 12A GIS refinement revision now serves production; its evidence and current
+rollback target are recorded in the Phase 12A record.

@@ -80,8 +80,9 @@ checks. No database migration was required. The shared production database retai
 
 Rollback is traffic-only: assign 100 percent to
 `ca-civiclear-laravel--gis13bce574f9` and zero percent to
-`ca-civiclear-laravel--gis151b69d`. Do not delete either revision until authorized
-staff complete the authenticated GIS acceptance check.
+`ca-civiclear-laravel--gis151b69d`. The owner completed the authenticated DILG and
+barangay GIS visual acceptance check on 2026-09-15. The rollback revision remains
+available while subsequent work continues.
 
 ## Authorized test-data cleanup
 

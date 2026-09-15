@@ -24,7 +24,9 @@ schema is changed.
 - Official map and analytics counts use `official_violation_type` confirmed by staff.
 - DILG and barangay dashboard verified/resolved totals use the same official scope.
 - Operational citizen-category analytics remain available for backward compatibility
-  and continue excluding the internal unclassified sentinel.
+  and continue excluding the internal unclassified sentinel. The operational
+  most-common summary also excludes legacy categories outside the five current
+  trained image classes; no underlying report is hidden, changed, or deleted.
 
 ## Official-statistics eligibility
 
@@ -48,17 +50,35 @@ dedicated feature-test file. It adds no migration and makes no destructive data 
 
 ## Acceptance evidence
 
-Verified locally on 2026-09-15 (Asia/Manila):
+Verified locally and released on 2026-09-15 (Asia/Manila):
 
 - Focused GIS, analytics export/profile, and compatibility tests: 30 tests, 443 assertions.
-- Complete Laravel regression suite: 203 tests, 2,061 assertions.
+- Complete Laravel regression suite: 205 tests, 2,078 assertions.
 - Vite production asset build completed successfully.
 - Blade template compilation and JavaScript syntax checks passed.
 - Laravel Pint passed for every changed PHP file.
 - Git whitespace validation passed.
 
-## Release state
+## Production release
 
-The work is on `feature/phase-12a-gis-official-analytics`. It has not been deployed to
-Azure. The existing production revision and all reports, photos, GIS data, AI results,
-timelines, and account assignments remain unchanged.
+The reviewed feature branch was merged to `main` as commit
+`151b69d4f1d8e8af83937a8eff0a77bfd481e4bf`. GitHub Actions run
+`34986755053` built the immutable Laravel and FastAPI images from that exact commit.
+
+| Item | Value |
+|---|---|
+| Laravel image digest | `sha256:a5bdb231efeb15c5d23f7e16ac22b959751247eb37729b0b1bcf08211696b7ee` |
+| Active revision | `ca-civiclear-laravel--gis151b69d` |
+| Active traffic | 100 percent |
+| Rollback revision | `ca-civiclear-laravel--gis13bce574f9` |
+| Rollback traffic | 0 percent, retained active and healthy |
+
+The candidate and public hostname passed health, login-branding, authentication
+redirect, mobile violation-type, GIS JavaScript, 26-boundary, and 26-barangay-hall
+checks. No database migration was required. The shared production database retained
+33 reports and 27 accounts after the switch.
+
+Rollback is traffic-only: assign 100 percent to
+`ca-civiclear-laravel--gis13bce574f9` and zero percent to
+`ca-civiclear-laravel--gis151b69d`. Do not delete either revision until authorized
+staff complete the authenticated GIS acceptance check.

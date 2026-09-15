@@ -92,7 +92,7 @@
     .filter-panel {
         background: white;
         border-radius: 0.75rem;
-        padding: 0.9rem;
+        padding: 1.15rem 1.25rem;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         margin-bottom: 1rem;
         border-top: 3px solid var(--dilg-yellow);
@@ -102,7 +102,7 @@
         font-size: 1rem;
         font-weight: 600;
         color: var(--dilg-dark-gray);
-        margin-bottom: 1rem;
+        margin-bottom: 1.1rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -110,8 +110,9 @@
 
     .filter-grid {
         display: grid;
-        grid-template-columns: 1.08fr 1.08fr 1.22fr 1fr 0.92fr 0.92fr auto;
-        gap: 0.6rem;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        column-gap: 1rem;
+        row-gap: 0.9rem;
         align-items: end;
     }
 
@@ -119,6 +120,11 @@
         display: flex;
         flex-direction: column;
         min-width: 0;
+    }
+
+    .filter-field--primary,
+    .filter-field--date {
+        grid-column: span 3;
     }
 
     .filter-label {
@@ -132,7 +138,7 @@
     .filter-select {
         width: 100%;
         height: 2.65rem;
-        padding: 0 0.65rem;
+        padding: 0 0.8rem;
         border: 1px solid #d1d5db;
         border-radius: 0.5rem;
         font-size: 0.82rem;
@@ -155,6 +161,7 @@
     .filter-buttons {
         display: grid;
         grid-template-columns: 132px 78px;
+        grid-column: 9 / -1;
         gap: 0.5rem;
         justify-content: end;
         min-width: 0;
@@ -189,12 +196,15 @@
     }
 
     .filter-btn-reset {
-        background: #e5e7eb;
-        color: #6b7280;
+        border: 1px solid #d5deea;
+        background: #ffffff;
+        color: #64748b;
     }
 
     .filter-btn-reset:hover {
-        background: #d1d5db;
+        border-color: #b8c6d8;
+        background: #f8fafc;
+        color: #334155;
     }
 
     /* Map Container */
@@ -624,6 +634,19 @@
             grid-template-columns: 1fr;
         }
 
+        .filter-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .filter-field--primary,
+        .filter-field--date {
+            grid-column: auto;
+        }
+
+        .filter-buttons {
+            grid-column: 1 / -1;
+        }
+
         .gis-side-column {
             min-height: 420px;
             border-top: 1px solid #dbe4f0;
@@ -765,7 +788,7 @@
         Filter Reports
     </div>
     <div class="filter-grid">
-        <div class="filter-field">
+        <div class="filter-field filter-field--primary">
             <label class="filter-label" for="filter-dataset">Map Dataset</label>
             <select class="filter-select" id="filter-dataset">
                 <option value="operational">Operational reports</option>
@@ -773,7 +796,7 @@
             </select>
         </div>
 
-        <div class="filter-field">
+        <div class="filter-field filter-field--primary">
             <label class="filter-label">Barangay</label>
             <select class="filter-select" id="filter-barangay" @disabled(!$isDilgAdmin)>
                 @if($isDilgAdmin)
@@ -787,7 +810,7 @@
             </select>
         </div>
         
-        <div class="filter-field">
+        <div class="filter-field filter-field--primary">
             <label class="filter-label">Violation Type</label>
             <select class="filter-select" id="filter-violation-type">
                 <option value="">All Violations</option>
@@ -797,7 +820,7 @@
             </select>
         </div>
         
-        <div class="filter-field">
+        <div class="filter-field filter-field--primary">
             <label class="filter-label">Status</label>
             <select class="filter-select" id="filter-status">
                 <option value="">All Statuses</option>
@@ -807,12 +830,12 @@
             </select>
         </div>
 
-        <div class="filter-field">
+        <div class="filter-field filter-field--date">
             <label class="filter-label" for="filter-date-from">Date From</label>
             <input class="filter-select" type="date" id="filter-date-from">
         </div>
 
-        <div class="filter-field">
+        <div class="filter-field filter-field--date">
             <label class="filter-label" for="filter-date-to">Date To</label>
             <input class="filter-select" type="date" id="filter-date-to">
         </div>

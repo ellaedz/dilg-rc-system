@@ -219,6 +219,8 @@ class Phase12AOperationalGISAnalyticsTest extends TestCase
             ->assertSee('Awaiting Review')
             ->assertSee('Duplicate')
             ->assertSee('Report Status')
+            ->assertSee('filter-field--primary', false)
+            ->assertSee('filter-field--date', false)
             ->assertSee('rec-field--full', false)
             ->assertSee('rec-field--left', false)
             ->assertSee('rec-value--tracking', false)

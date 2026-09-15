@@ -63,13 +63,13 @@ const STATUS_COLORS = {
 // The marker fill shows workflow status. Its ring and symbol show whether the
 // report is eligible for official statistics or why it is operational-only.
 const REPORT_STATE_STYLES = {
-    verified_valid: { border: '#059669', symbol: '&#10003;', label: 'Staff-verified valid violation' },
-    ai_pending: { border: '#0ea5e9', symbol: 'A', label: 'AI analysis pending' },
-    pending_verification: { border: '#f59e0b', symbol: '!', label: 'Awaiting staff verification' },
-    rejected: { border: '#dc2626', symbol: '&times;', label: 'Rejected or invalid report' },
-    duplicate: { border: '#7c3aed', symbol: 'D', label: 'Duplicate report' },
-    outside_jurisdiction: { border: '#475569', symbol: '<i class="fas fa-file-lines" aria-hidden="true"></i>', label: 'Outside supported jurisdiction' },
-    test_data: { border: '#64748b', symbol: '<i class="fas fa-file-lines" aria-hidden="true"></i>', label: 'Test data' }
+    verified_valid: { background: '#10b981', border: '#047857', symbol: '<i class="fas fa-check" aria-hidden="true"></i>', label: 'Staff-verified valid violation' },
+    ai_pending: { background: '#3b82f6', border: '#1d4ed8', symbol: '<i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>', label: 'AI analysis pending' },
+    pending_verification: { background: '#f59e0b', border: '#b45309', symbol: '<i class="fas fa-clock" aria-hidden="true"></i>', label: 'Awaiting staff verification' },
+    rejected: { background: '#ef4444', border: '#b91c1c', symbol: '<i class="fas fa-xmark" aria-hidden="true"></i>', label: 'Rejected or invalid report' },
+    duplicate: { background: '#8b5cf6', border: '#6d28d9', symbol: '<i class="fas fa-copy" aria-hidden="true"></i>', label: 'Duplicate report' },
+    outside_jurisdiction: { background: '#64748b', border: '#475569', symbol: '<i class="fas fa-file-lines" aria-hidden="true"></i>', label: 'Outside supported jurisdiction' },
+    test_data: { background: '#94a3b8', border: '#64748b', symbol: '<i class="fas fa-file-lines" aria-hidden="true"></i>', label: 'Test data' }
 };
 
 // Violation type color mapping
@@ -148,16 +148,15 @@ function updateHotspotCards(data) {
 }
 
 function createReportMarker(report) {
-    const statusColor = STATUS_COLORS[report.status] || '#6b7280';
     const stateStyle = REPORT_STATE_STYLES[report.operational_state]
         || REPORT_STATE_STYLES.pending_verification;
 
     return L.divIcon({
         className: 'custom-report-marker',
         html: '<div aria-label="' + escapeHtml(report.operational_state_label || stateStyle.label) + '" ' +
-            'style="background:' + statusColor + ';width:24px;height:24px;border-radius:50%;' +
+            'style="background:' + stateStyle.background + ';width:24px;height:24px;border-radius:50%;' +
             'border:3px solid ' + stateStyle.border + ';box-shadow:0 2px 7px rgba(15,23,42,.4);' +
-            'color:white;display:flex;align-items:center;justify-content:center;font-size:13px;' +
+            'color:white;display:flex;align-items:center;justify-content:center;font-size:10px;' +
             'font-weight:900;line-height:1;opacity:.95">' + stateStyle.symbol + '</div>',
         iconSize: [24, 24],
         iconAnchor: [12, 12]

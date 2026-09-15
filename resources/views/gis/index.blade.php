@@ -110,15 +110,14 @@
 
     .filter-grid {
         display: grid;
-        grid-template-columns: repeat(12, minmax(0, 1fr));
-        gap: 0.85rem 0.75rem;
+        grid-template-columns: 1.08fr 1.08fr 1.22fr 1fr 0.92fr 0.92fr auto;
+        gap: 0.6rem;
         align-items: end;
     }
 
     .filter-field {
         display: flex;
         flex-direction: column;
-        grid-column: span 3;
         min-width: 0;
     }
 
@@ -133,10 +132,10 @@
     .filter-select {
         width: 100%;
         height: 2.65rem;
-        padding: 0 0.8rem;
+        padding: 0 0.65rem;
         border: 1px solid #d1d5db;
         border-radius: 0.5rem;
-        font-size: 0.875rem;
+        font-size: 0.82rem;
         color: var(--dilg-dark-gray);
     }
 
@@ -155,19 +154,18 @@
 
     .filter-buttons {
         display: grid;
-        grid-template-columns: minmax(150px, auto) minmax(96px, auto);
+        grid-template-columns: 132px 78px;
         gap: 0.5rem;
-        grid-column: 7 / -1;
         justify-content: end;
         min-width: 0;
     }
 
     .filter-btn {
         min-height: 2.5rem;
-        padding: 0.625rem 1rem;
+        padding: 0.6rem 0.75rem;
         border: none;
         border-radius: 0.5rem;
-        font-size: 0.875rem;
+        font-size: 0.8rem;
         font-weight: 600;
         line-height: 1.15;
         cursor: pointer;
@@ -273,16 +271,16 @@
         border: 1px solid #dbeafe;
         border-radius: 0.75rem;
         box-shadow: 0 10px 28px rgba(15, 51, 96, 0.18);
-        padding: 0.8rem 0.9rem;
+        padding: 0.55rem 0.65rem;
         margin: 0;
         max-width: calc(100% - 2rem);
     }
 
     .sidebar-card-title {
-        font-size: 1rem;
+        font-size: 0.86rem;
         font-weight: 600;
         color: var(--dilg-dark-gray);
-        margin-bottom: 0.7rem;
+        margin-bottom: 0.4rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -291,31 +289,31 @@
     .legend-item {
         display: inline-flex;
         align-items: center;
-        gap: 0.42rem;
-        min-height: 30px;
-        padding: 0.35rem 0.65rem 0.35rem 0.4rem;
+        gap: 0.28rem;
+        min-height: 24px;
+        padding: 0.22rem 0.45rem 0.22rem 0.25rem;
         margin: 0;
         border: 1px solid transparent;
         border-radius: 999px;
-        font-size: 0.76rem;
+        font-size: 0.66rem;
         font-weight: 700;
     }
 
     .legend-list {
         display: flex;
-        flex-wrap: wrap;
-        gap: 0.45rem;
+        flex-wrap: nowrap;
+        gap: 0.3rem;
     }
 
     .status-pill-icon {
         display: inline-grid;
-        width: 20px;
-        height: 20px;
-        flex: 0 0 20px;
+        width: 16px;
+        height: 16px;
+        flex: 0 0 16px;
         place-items: center;
         border-radius: 50%;
         color: #ffffff;
-        font-size: 0.62rem;
+        font-size: 0.52rem;
     }
 
     .status-pill.verified { border-color: #bbf7d0; background: #ecfdf5; color: #047857; }
@@ -439,7 +437,9 @@
     .report-panel-content[hidden] { display: none; }
 
     .report-panel-content {
-        display: block;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
         padding-top: 0.9rem;
         border-top: 1px solid #e2e8f0;
     }
@@ -449,6 +449,7 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 1rem;
+        grid-column: 1 / -1;
     }
 
     .rec-panel-title {
@@ -476,9 +477,12 @@
     }
 
     .rec-field {
-        margin-bottom: 1rem;
-        padding-bottom: 0.8rem;
-        border-bottom: 1px solid #edf2f7;
+        min-width: 0;
+        margin: 0;
+        padding: 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.65rem;
+        background: #ffffff;
     }
 
     .rec-label {
@@ -486,13 +490,14 @@
         color: #6b7280;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.38rem;
         font-weight: 600;
     }
 
     .rec-value {
-        font-size: 0.94rem;
-        line-height: 1.45;
+        overflow-wrap: anywhere;
+        font-size: 0.92rem;
+        line-height: 1.5;
         color: var(--dilg-dark-gray);
         font-weight: 600;
     }
@@ -503,6 +508,7 @@
         border-radius: 0.5rem;
         border-left: 3px solid var(--dilg-yellow);
         margin-top: 1rem;
+        grid-column: 1 / -1;
     }
 
     .rec-highlight-label {
@@ -589,8 +595,9 @@
     }
 
     @media (max-width: 900px) {
-        .filter-field { grid-column: span 6; }
+        .filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .filter-buttons { grid-column: 1 / -1; }
+        .legend-list { flex-wrap: wrap; }
     }
 
     @media (max-width: 640px) {
@@ -607,6 +614,7 @@
             justify-content: stretch;
         }
 
+        .filter-grid { grid-template-columns: 1fr; }
         .filter-field { grid-column: 1 / -1; }
 
         .filter-btn {
@@ -633,6 +641,8 @@
             left: 0.75rem;
             max-width: none;
         }
+
+        .report-panel-content { grid-template-columns: 1fr; }
     }
 </style>
 

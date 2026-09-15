@@ -199,6 +199,9 @@
 
     /* Map Container */
     .map-container {
+        position: relative;
+        z-index: 0;
+        isolation: isolate;
         display: grid;
         grid-template-columns: minmax(0, 1fr) 380px;
         min-height: 680px;
@@ -924,18 +927,12 @@
         assignedBarangay: MAP_SCOPE_BARANGAY
     };
 
-    // Keep normal page scrolling available while the pointer is over the map.
-    // Touch devices use one-finger swipes for the page and retain pinch zoom.
-    const IS_TOUCH_POINTER = window.matchMedia('(pointer: coarse)').matches;
-
     // Initialize map
     const map = L.map('map', {
         center: DEFAULT_CENTER,
         zoom: DEFAULT_ZOOM,
         zoomControl: true,
-        scrollWheelZoom: false,
-        dragging: !IS_TOUCH_POINTER,
-        touchZoom: true,
+        scrollWheelZoom: true,
         minZoom: 12,
         maxZoom: 18
     });

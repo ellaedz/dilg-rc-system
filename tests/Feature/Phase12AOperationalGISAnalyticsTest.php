@@ -219,8 +219,8 @@ class Phase12AOperationalGISAnalyticsTest extends TestCase
             ->assertSee('Awaiting Review')
             ->assertSee('Duplicate')
             ->assertSee('Report Status')
-            ->assertSee('scrollWheelZoom: false', false)
-            ->assertSee('dragging: !IS_TOUCH_POINTER', false)
+            ->assertSee('isolation: isolate', false)
+            ->assertSee('scrollWheelZoom: true', false)
             ->assertDontSee('Outside supported jurisdiction')
             ->assertDontSee('Test data');
     }

@@ -35,5 +35,26 @@ Verified on 2026-09-15 (Asia/Manila):
 - Blade views compiled successfully.
 - JavaScript syntax and Git whitespace checks passed.
 
-The live Azure revision must be deployed and smoke-tested separately before Phase 13B
-is considered released to production.
+## Production release
+
+Phase 13B was released to Azure Container Apps on 2026-09-15 (Asia/Manila) from
+application commit `ce574f9381391b68842b987e77fa735cb716f7d2`.
+
+| Item | Value |
+|---|---|
+| Laravel image digest | `sha256:c952e7e0651cb39258a6e34bec2266891fc2c8466467357e3ba33cc49d88ef95` |
+| Active revision | `ca-civiclear-laravel--gis13bce574f9` |
+| Active traffic | 100 percent |
+| Rollback revision | `ca-civiclear-laravel--gis28c3743` |
+| Rollback traffic | 0 percent, retained active and healthy |
+
+The release required no database migration. Before the traffic switch, the candidate
+revision passed health, login, authentication redirect, GIS boundary, barangay-hall,
+GIS JavaScript, mobile barangay, and mobile violation-type checks. After the switch,
+the same public checks passed and an invalid opaque tracking credential returned the
+expected HTTP 404 after a database lookup. Container logs showed no application error.
+
+Rollback is a traffic-only operation: route 100 percent to
+`ca-civiclear-laravel--gis28c3743` and zero percent to
+`ca-civiclear-laravel--gis13bce574f9`. Do not delete either revision until authorized
+staff complete the authenticated GIS acceptance check.

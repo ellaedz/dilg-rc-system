@@ -291,6 +291,23 @@
     .legend-symbol.report-green { background: #10b981; }
     .legend-symbol.office { background: var(--dilg-yellow); border: 2px solid var(--dilg-dark-gold); }
 
+    .legend-symbol.report-state {
+        display: grid;
+        place-items: center;
+        color: #ffffff;
+        font-size: 0.65rem;
+        font-weight: 900;
+        border: 3px solid;
+    }
+
+    .legend-symbol.verified-valid { background: #3b82f6; border-color: #059669; }
+    .legend-symbol.ai-pending { background: #3b82f6; border-color: #0ea5e9; }
+    .legend-symbol.pending-review { background: #3b82f6; border-color: #f59e0b; }
+    .legend-symbol.rejected-report { background: #64748b; border-color: #dc2626; }
+    .legend-symbol.duplicate-report { background: #64748b; border-color: #7c3aed; }
+    .legend-symbol.outside-report { background: #64748b; border-color: #475569; }
+    .legend-symbol.test-report { background: #64748b; border-color: #64748b; }
+
     .legend-label {
         font-size: 0.8125rem;
         color: var(--dilg-dark-gray);
@@ -511,7 +528,7 @@
     <div class="hotspot-card blue">
         <div class="hotspot-icon"><i class="fas fa-chart-simple"></i></div>
         <div class="hotspot-content">
-            <div class="hotspot-label">Total Mapped Reports</div>
+            <div class="hotspot-label" id="mapped-reports-label">Operational Mapped Reports</div>
             <div class="hotspot-value" id="total-mapped-reports">0</div>
         </div>
     </div>
@@ -548,6 +565,14 @@
         Filter Reports
     </div>
     <div class="filter-grid">
+        <div class="filter-field">
+            <label class="filter-label" for="filter-dataset">Map Dataset</label>
+            <select class="filter-select" id="filter-dataset">
+                <option value="operational">Operational reports</option>
+                <option value="official">Official verified statistics</option>
+            </select>
+        </div>
+
         <div class="filter-field">
             <label class="filter-label">Barangay</label>
             <select class="filter-select" id="filter-barangay" @disabled(!$isDilgAdmin)>
@@ -642,16 +667,32 @@
                 <div class="legend-label">{{ $isDilgAdmin ? 'MPDO Barangay Boundary' : 'Assigned MPDO Boundary' }}</div>
             </div>
             <div class="legend-item">
-                <div class="legend-symbol report-red"></div>
-                <div class="legend-label">Pending Report</div>
+                <div class="legend-symbol report-state verified-valid">&#10003;</div>
+                <div class="legend-label">Staff-verified valid violation</div>
             </div>
             <div class="legend-item">
-                <div class="legend-symbol report-orange"></div>
-                <div class="legend-label">In Progress Report</div>
+                <div class="legend-symbol report-state ai-pending">A</div>
+                <div class="legend-label">AI analysis pending</div>
             </div>
             <div class="legend-item">
-                <div class="legend-symbol report-green"></div>
-                <div class="legend-label">Resolved Report</div>
+                <div class="legend-symbol report-state pending-review">!</div>
+                <div class="legend-label">Awaiting staff verification</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-symbol report-state rejected-report">&times;</div>
+                <div class="legend-label">Rejected or invalid report</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-symbol report-state duplicate-report">D</div>
+                <div class="legend-label">Duplicate report</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-symbol report-state outside-report">O</div>
+                <div class="legend-label">Outside supported jurisdiction</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-symbol report-state test-report">T</div>
+                <div class="legend-label">Test data</div>
             </div>
             <div class="legend-item">
                 <div class="legend-symbol office"></div>

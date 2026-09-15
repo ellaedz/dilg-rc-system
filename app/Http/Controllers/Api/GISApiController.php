@@ -110,10 +110,19 @@ class GISApiController extends Controller
             ->pluck('aggregate', 'effective_barangay')
             ->toArray();
 
-        $violationCounts = (clone $base)->citizenClassified()
-            ->selectRaw('selected_violation_type, COUNT(*) as aggregate')
-            ->groupBy('selected_violation_type')->orderByDesc('aggregate')
-            ->pluck('aggregate', 'selected_violation_type')->toArray();
+        $violationColumn = ($validated['dataset'] ?? 'operational') === 'official'
+            ? 'official_violation_type'
+            : 'selected_violation_type';
+        $violationBase = clone $base;
+        if (($validated['dataset'] ?? 'operational') === 'operational') {
+            $violationBase->citizenClassified();
+        }
+
+        $violationCounts = $violationBase
+            ->whereNotNull($violationColumn)
+            ->selectRaw($violationColumn.', COUNT(*) as aggregate')
+            ->groupBy($violationColumn)->orderByDesc('aggregate')
+            ->pluck('aggregate', $violationColumn)->toArray();
 
         $statusCounts = (clone $base)->selectRaw('status, COUNT(*) as aggregate')
             ->groupBy('status')->orderByDesc('aggregate')
@@ -164,6 +173,7 @@ class GISApiController extends Controller
                 'string',
                 Rule::in(config('santa_cruz_barangays.statuses', [])),
             ],
+            'dataset' => ['nullable', 'string', Rule::in(['operational', 'official'])],
             'date_from' => ['nullable', 'date_format:Y-m-d'],
             'date_to' => [
                 'nullable',
@@ -186,12 +196,21 @@ class GISApiController extends Controller
 
     private function applyFilters(Builder $query, array $validated): Builder
     {
+        $dataset = $validated['dataset'] ?? 'operational';
+
+        if ($dataset === 'official') {
+            $query->officialStatistics();
+        }
+
         if (! empty($validated['barangay'])) {
             $query->forEffectiveBarangay($validated['barangay']);
         }
 
         if (! empty($validated['violation_type'])) {
-            $query->where('selected_violation_type', $validated['violation_type']);
+            $query->where(
+                $dataset === 'official' ? 'official_violation_type' : 'selected_violation_type',
+                $validated['violation_type']
+            );
         }
 
         if (! empty($validated['status'])) {

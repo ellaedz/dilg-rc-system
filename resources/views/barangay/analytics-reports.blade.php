@@ -8,6 +8,7 @@
 $stats = $stats ?? [];
 $reportsByStatus = $reportsByStatus ?? collect();
 $reportsByViolationType = $reportsByViolationType ?? collect();
+$officialReportsByViolationType = $officialReportsByViolationType ?? collect();
 $monthlyTrend = $monthlyTrend ?? collect();
 $recentReports = $recentReports ?? collect();
 ?>
@@ -260,7 +261,7 @@ $recentReports = $recentReports ?? collect();
     <div class="metric-card green">
         <div class="metric-icon"><i class="fas fa-check-circle"></i></div>
         <div class="metric-content">
-            <div class="metric-label">Verified</div>
+            <div class="metric-label">Official Verified</div>
             <div class="metric-value">{{ number_format($stats['verified_reports'] ?? 0) }}</div>
         </div>
     </div>
@@ -276,7 +277,7 @@ $recentReports = $recentReports ?? collect();
     <div class="metric-card cyan">
         <div class="metric-icon"><i class="fas fa-check-double"></i></div>
         <div class="metric-content">
-            <div class="metric-label">Resolved</div>
+            <div class="metric-label">Official Resolved</div>
             <div class="metric-value">{{ number_format($stats['resolved_reports'] ?? 0) }}</div>
         </div>
     </div>
@@ -312,8 +313,8 @@ $recentReports = $recentReports ?? collect();
 <div class="chart-grid-2col">
     <!-- Reports by Violation Type -->
     <div class="section-card">
-        <h2 class="section-title">Reports by Violation Type</h2>
-        <p class="chart-description">Distribution of reports by recorded obstruction category</p>
+        <h2 class="section-title">Official Reports by Violation Type</h2>
+        <p class="chart-description">Staff-confirmed violations eligible for official statistics</p>
         <div class="chart-container">
             <canvas id="violationTypePieChart" role="img" aria-label="Doughnut chart showing report totals and percentages by violation type"></canvas>
         </div>
@@ -392,9 +393,9 @@ $recentReports = $recentReports ?? collect();
 <script>
 // Violation Type Doughnut Chart
 const violationData = {
-    labels: @json($reportsByViolationType->pluck('selected_violation_type')->values()),
+    labels: @json($officialReportsByViolationType->pluck('selected_violation_type')->values()),
     datasets: [{
-        data: @json($reportsByViolationType->pluck('count')->map(fn ($count) => (int) $count)->values()),
+        data: @json($officialReportsByViolationType->pluck('count')->map(fn ($count) => (int) $count)->values()),
         backgroundColor: ['#a855f7', '#ec4899', '#06b6d4', '#10b981', '#f59e0b', '#3b82f6', '#ef4444', '#6366f1'],
         borderWidth: 0,
         spacing: 2

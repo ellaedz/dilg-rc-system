@@ -352,4 +352,77 @@ class ViolationReport extends Model
         return $query->where('needs_manual_barangay_review', true)
             ->whereNull('manually_assigned_barangay');
     }
+
+    /**
+     * Records that are eligible for official municipal statistics.
+     *
+     * Operational maps intentionally remain broader than this scope.
+     */
+    public function scopeOfficialStatistics($query)
+    {
+        return $query
+            ->where('is_test_data', false)
+            ->whereNotNull('verified_at')
+            ->whereNotNull('official_violation_type')
+            ->where('verification_status', 'Valid Violation')
+            ->where('municipality_validated', true)
+            ->where('report_status', '!=', 'Rejected')
+            ->where('is_duplicate', false);
+    }
+
+    public function getIsOfficialStatisticAttribute(): bool
+    {
+        return ! $this->is_test_data
+            && $this->verified_at !== null
+            && filled($this->official_violation_type)
+            && $this->verification_status === 'Valid Violation'
+            && $this->municipality_validated
+            && $this->report_status !== 'Rejected'
+            && ! $this->is_duplicate;
+    }
+
+    public function getOperationalMapStateAttribute(): string
+    {
+        if ($this->is_test_data) {
+            return 'test_data';
+        }
+
+        if (! $this->municipality_validated
+            || $this->barangay_assignment_status === 'outside_coverage'
+            || $this->verification_status === 'Outside Jurisdiction') {
+            return 'outside_jurisdiction';
+        }
+
+        if ($this->is_duplicate || $this->verification_status === 'Duplicate') {
+            return 'duplicate';
+        }
+
+        if ($this->status === 'Rejected'
+            || in_array($this->verification_status, ['Invalid Report', 'Insufficient Evidence'], true)) {
+            return 'rejected';
+        }
+
+        if ($this->is_official_statistic) {
+            return 'verified_valid';
+        }
+
+        if (in_array($this->ai_processing_status, [self::AI_STATUS_PENDING, self::AI_STATUS_PROCESSING], true)) {
+            return 'ai_pending';
+        }
+
+        return 'pending_verification';
+    }
+
+    public function getOperationalMapStateLabelAttribute(): string
+    {
+        return match ($this->operational_map_state) {
+            'verified_valid' => 'Staff-verified valid violation',
+            'ai_pending' => 'AI analysis pending',
+            'rejected' => 'Rejected or invalid report',
+            'duplicate' => 'Duplicate report',
+            'outside_jurisdiction' => 'Outside supported jurisdiction',
+            'test_data' => 'Test data',
+            default => 'Awaiting staff verification',
+        };
+    }
 }

@@ -394,7 +394,7 @@
                 <div class="summary-value">{{ number_format($stats['for_verification']) }}</div>
             </div>
             <div class="summary-card">
-                <div class="summary-label">Verified</div>
+                <div class="summary-label">Official Verified</div>
                 <div class="summary-value">{{ number_format($stats['verified_reports']) }}</div>
             </div>
             <div class="summary-card">
@@ -417,7 +417,7 @@
 
         <!-- Violation Type Summary -->
         <div class="section">
-            <h3 class="section-title">Violation Type Summary</h3>
+            <h3 class="section-title">Official Violation Type Summary</h3>
             <table>
                 <thead>
                     <tr>
@@ -426,7 +426,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($reportsByViolationType as $item)
+                    @forelse($officialReportsByViolationType as $item)
                         <tr>
                             <td>{{ $item->selected_violation_type }}</td>
                             <td style="text-align: right; font-weight: 600;">{{ number_format($item->count) }}</td>

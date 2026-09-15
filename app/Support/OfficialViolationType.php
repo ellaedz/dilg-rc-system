@@ -41,6 +41,21 @@ final class OfficialViolationType
         return null;
     }
 
+    public static function toAi(?string $officialType): ?string
+    {
+        if (! $officialType) {
+            return null;
+        }
+
+        foreach (self::AI_TO_OFFICIAL as $category => $label) {
+            if (strcasecmp($label, $officialType) === 0) {
+                return $category;
+            }
+        }
+
+        return null;
+    }
+
     public static function label(?string $category, string $fallback = 'Not available'): string
     {
         if (! $category) {

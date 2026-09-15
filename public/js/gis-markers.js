@@ -149,7 +149,7 @@ function updateHotspotCards(data) {
     if (violationLabel) {
         violationLabel.textContent = dataset === 'official'
             ? 'Most Common Official Violation'
-            : 'Most Common Supported Violation';
+            : 'Most Common AI Result';
     }
 }
 

@@ -767,7 +767,7 @@
     <div class="hotspot-card green">
         <div class="hotspot-icon"><i class="fas fa-triangle-exclamation"></i></div>
         <div class="hotspot-content">
-            <div class="hotspot-label" id="most-common-violation-label">Most Common Supported Violation</div>
+            <div class="hotspot-label" id="most-common-violation-label">Most Common AI Result</div>
             <div class="hotspot-value" id="most-common-violation" style="font-size: 0.9375rem;">N/A</div>
         </div>
     </div>

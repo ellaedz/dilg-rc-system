@@ -110,7 +110,7 @@
 
     .filter-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr) auto;
+        grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
         gap: 0.75rem;
         align-items: end;
     }
@@ -143,29 +143,48 @@
         box-shadow: 0 0 0 2px rgba(47, 128, 237, 0.2);
     }
 
+    .filter-select:disabled {
+        background: #eff6ff;
+        color: #174ea6;
+        cursor: not-allowed;
+        font-weight: 700;
+    }
+
     .filter-buttons {
-        display: flex;
+        display: grid;
+        grid-template-columns: minmax(150px, auto) minmax(96px, auto);
         gap: 0.5rem;
+        grid-column: 1 / -1;
+        justify-content: end;
+        min-width: 0;
     }
 
     .filter-btn {
-        height: 2rem;
-        padding: 0 1rem;
+        min-height: 2.5rem;
+        padding: 0.625rem 1rem;
         border: none;
         border-radius: 0.5rem;
         font-size: 0.875rem;
         font-weight: 600;
+        line-height: 1.15;
         cursor: pointer;
         transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        white-space: nowrap;
     }
 
     .filter-btn-apply {
         background: var(--dilg-yellow);
-        color: var(--dilg-dark-gray);
+        color: #ffffff;
+        box-shadow: 0 3px 8px rgba(47, 128, 237, 0.24);
     }
 
     .filter-btn-apply:hover {
         background: var(--dilg-dark-gold);
+        transform: translateY(-1px);
     }
 
     .filter-btn-reset {
@@ -410,6 +429,45 @@
         font-size: 0.75rem;
         color: #6b7280;
     }
+
+    @media (max-width: 1180px) {
+        .hotspot-cards-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .map-container {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .page-title {
+            font-size: 1.5rem;
+        }
+
+        .hotspot-cards-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-buttons {
+            grid-template-columns: 1fr 1fr;
+            justify-content: stretch;
+        }
+
+        .filter-btn {
+            width: 100%;
+        }
+
+        .card-header {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        #map {
+            height: 520px;
+        }
+    }
 </style>
 
 <!-- Leaflet CSS (Local) -->
@@ -421,18 +479,29 @@
 <div class="page-header">
     <h1 class="page-title">
         <i class="fas fa-map-marked-alt"></i>
-        Road Clearing GIS Monitoring Map
+        {{ $isDilgAdmin ? 'Road Clearing GIS Monitoring Map' : 'Barangay '.$mapScopeBarangay.' GIS Workspace' }}
     </h1>
-    <p class="page-subtitle">Santa Cruz, Laguna &mdash; report clustering, hotspots, and follow-up office recommendations</p>
+    <p class="page-subtitle">
+        @if($isDilgAdmin)
+            Santa Cruz, Laguna &mdash; report clustering, hotspots, and follow-up office recommendations
+        @else
+            Assigned-barangay reports only &mdash; secured map monitoring for Barangay {{ $mapScopeBarangay }}
+        @endif
+    </p>
 </div>
 
 @php
     $officeCoordinateData = collect(config('santa_cruz_barangay_halls', []));
+    if (!$isDilgAdmin) {
+        $officeCoordinateData = $officeCoordinateData->filter(
+            fn (array $office) => strcasecmp((string) ($office['barangay'] ?? ''), (string) $mapScopeBarangay) === 0
+        );
+    }
     $verifiedOfficeCount = $officeCoordinateData->where('validation_status', 'Verified')->count();
     $provisionalOfficeCount = $officeCoordinateData->count() - $verifiedOfficeCount;
 @endphp
 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-    <div class="alert bg-blue-50 border border-blue-200 text-blue-900 shadow-sm"><i class="fas fa-draw-polygon"></i><div><div class="font-bold">{{ $barangayCount }} MPDO barangay boundaries</div><div class="text-xs">Verified polygons are active for GPS assignment.</div></div></div>
+    <div class="alert bg-blue-50 border border-blue-200 text-blue-900 shadow-sm"><i class="fas fa-draw-polygon"></i><div><div class="font-bold">{{ $isDilgAdmin ? $barangayCount.' MPDO barangay boundaries' : 'Barangay '.$mapScopeBarangay.' boundary' }}</div><div class="text-xs">{{ $isDilgAdmin ? 'Verified polygons are active for GPS assignment.' : 'Your assigned polygon is highlighted; neighboring polygons are map context only.' }}</div></div></div>
     <div class="alert bg-emerald-50 border border-emerald-200 text-emerald-900 shadow-sm"><i class="fas fa-circle-check"></i><div><div class="font-bold">{{ $verifiedOfficeCount }} verified offices</div><div class="text-xs">Researcher-ready coordinates imported.</div></div></div>
     <div class="alert bg-amber-50 border border-amber-200 text-amber-900 shadow-sm"><i class="fas fa-triangle-exclamation"></i><div><div class="font-bold">{{ $provisionalOfficeCount }} provisional offices</div><div class="text-xs">Retained fallbacks still require validation.</div></div></div>
 </div>
@@ -450,8 +519,8 @@
     <div class="hotspot-card purple">
         <div class="hotspot-icon"><i class="fas fa-fire-flame-curved"></i></div>
         <div class="hotspot-content">
-            <div class="hotspot-label">Top Hotspot Barangay</div>
-            <div class="hotspot-value" id="top-hotspot-barangay" style="font-size: 1.125rem;">N/A</div>
+            <div class="hotspot-label">{{ $isDilgAdmin ? 'Top Hotspot Barangay' : 'Assigned Barangay' }}</div>
+            <div class="hotspot-value" id="top-hotspot-barangay" style="font-size: 1.125rem;">{{ $mapScopeBarangay ?? 'N/A' }}</div>
         </div>
     </div>
     
@@ -481,11 +550,15 @@
     <div class="filter-grid">
         <div class="filter-field">
             <label class="filter-label">Barangay</label>
-            <select class="filter-select" id="filter-barangay">
-                <option value="">All Barangays</option>
-                @foreach(config('santa_cruz_barangays.barangays', []) as $barangayData)
-                    <option value="{{ $barangayData['name'] }}">{{ $barangayData['name'] }}</option>
-                @endforeach
+            <select class="filter-select" id="filter-barangay" @disabled(!$isDilgAdmin)>
+                @if($isDilgAdmin)
+                    <option value="">All Barangays</option>
+                    @foreach(config('santa_cruz_barangays.barangays', []) as $barangayData)
+                        <option value="{{ $barangayData['name'] }}">{{ $barangayData['name'] }}</option>
+                    @endforeach
+                @else
+                    <option value="{{ $mapScopeBarangay }}" selected>{{ $mapScopeBarangay }}</option>
+                @endif
             </select>
         </div>
         
@@ -493,11 +566,9 @@
             <label class="filter-label">Violation Type</label>
             <select class="filter-select" id="filter-violation-type">
                 <option value="">All Violations</option>
-                <option value="Illegal Parking">Illegal Parking</option>
-                <option value="Road Obstruction">Road Obstruction</option>
-                <option value="Vendor Encroachment">Vendor Encroachment</option>
-                <option value="Construction Material">Construction Material</option>
-                <option value="Abandoned Vehicle">Abandoned Vehicle</option>
+                @foreach(config('santa_cruz_barangays.violation_types', []) as $violationType)
+                    <option value="{{ $violationType }}">{{ $violationType }}</option>
+                @endforeach
             </select>
         </div>
         
@@ -505,16 +576,20 @@
             <label class="filter-label">Status</label>
             <select class="filter-select" id="filter-status">
                 <option value="">All Statuses</option>
-                <option value="Submitted">Submitted</option>
-                <option value="For Verification">For Verification</option>
-                <option value="Verified">Verified</option>
-                <option value="Assigned">Assigned</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Action Taken">Action Taken</option>
-                <option value="Resolved">Resolved</option>
-                <option value="Rejected">Rejected</option>
-                <option value="Closed">Closed</option>
+                @foreach(config('santa_cruz_barangays.statuses', []) as $status)
+                    <option value="{{ $status }}">{{ $status }}</option>
+                @endforeach
             </select>
+        </div>
+
+        <div class="filter-field">
+            <label class="filter-label" for="filter-date-from">Date From</label>
+            <input class="filter-select" type="date" id="filter-date-from">
+        </div>
+
+        <div class="filter-field">
+            <label class="filter-label" for="filter-date-to">Date To</label>
+            <input class="filter-select" type="date" id="filter-date-to">
         </div>
         
         <div class="filter-buttons">
@@ -535,7 +610,7 @@
         <div class="card-header">
             <h2 class="card-title">
                 <i class="fas fa-map"></i>
-                Interactive GIS Map
+                {{ $isDilgAdmin ? 'Interactive Municipal GIS Map' : 'Barangay '.$mapScopeBarangay.' Operational Map' }}
             </h2>
             <div class="visible-count">
                 Visible Markers: <span class="visible-count-number" id="visible-markers-count">0</span>
@@ -564,7 +639,7 @@
             </h3>
             <div class="legend-item">
                 <div class="legend-symbol boundary"></div>
-                <div class="legend-label">MPDO Barangay Boundary</div>
+                <div class="legend-label">{{ $isDilgAdmin ? 'MPDO Barangay Boundary' : 'Assigned MPDO Boundary' }}</div>
             </div>
             <div class="legend-item">
                 <div class="legend-symbol report-red"></div>
@@ -637,6 +712,11 @@
     const BARANGAY_GEOJSON_EXISTS = {{ $barangayGeojsonExists ? 'true' : 'false' }};
     const MUNICIPAL_GEOJSON_URL = @json($municipalGeojsonUrl);
     const MUNICIPAL_GEOJSON_EXISTS = {{ $municipalGeojsonExists ? 'true' : 'false' }};
+    const MAP_SCOPE_BARANGAY = @json($mapScopeBarangay);
+    window.CIVICLEAR_GIS_CONTEXT = {
+        isDilgAdmin: {{ $isDilgAdmin ? 'true' : 'false' }},
+        assignedBarangay: MAP_SCOPE_BARANGAY
+    };
 
     // Initialize map
     const map = L.map('map', {
@@ -654,13 +734,27 @@
         maxZoom: 19
     }).addTo(map);
 
-    function barangayBoundaryStyle() {
+    function barangayBoundaryStyle(feature) {
+        const barangayName = getBarangayName(feature?.properties);
+        const isAssignedBoundary = MAP_SCOPE_BARANGAY
+            && barangayName.localeCompare(MAP_SCOPE_BARANGAY, undefined, { sensitivity: 'accent' }) === 0;
+
+        if (MAP_SCOPE_BARANGAY && !isAssignedBoundary) {
+            return {
+                fillColor: '#cbd5e1',
+                weight: 1,
+                opacity: 0.65,
+                color: '#94a3b8',
+                fillOpacity: 0.06
+            };
+        }
+
         return {
             fillColor: '#2F80ED',
-            weight: 2,
+            weight: isAssignedBoundary ? 4 : 2,
             opacity: 1,
             color: '#174EA6',
-            fillOpacity: 0.14
+            fillOpacity: isAssignedBoundary ? 0.28 : 0.14
         };
     }
 
@@ -677,6 +771,11 @@
     // Boundary hover style
     function highlightFeature(e) {
         const layer = e.target;
+        const barangayName = getBarangayName(layer.feature?.properties);
+        if (MAP_SCOPE_BARANGAY
+            && barangayName.localeCompare(MAP_SCOPE_BARANGAY, undefined, { sensitivity: 'accent' }) !== 0) {
+            return;
+        }
         layer.setStyle({
             weight: 3,
             color: '#0B3B82',
@@ -719,6 +818,13 @@
 
     function onEachFeature(feature, layer) {
         const barangayName = getBarangayName(feature.properties);
+        const isAssignedBoundary = !MAP_SCOPE_BARANGAY
+            || barangayName.localeCompare(MAP_SCOPE_BARANGAY, undefined, { sensitivity: 'accent' }) === 0;
+
+        if (!isAssignedBoundary) {
+            return;
+        }
+
         const psgc = feature.properties?.PSGC || 'Not available';
         const area = Number(feature.properties?.area);
         const areaText = Number.isFinite(area) ? `${(area / 1000000).toFixed(2)} km²` : 'Not available';
@@ -777,10 +883,23 @@
             }).addTo(map);
             window.geojsonLayer = geojsonLayer;
 
-            const bounds = geojsonLayer.getBounds();
+            let bounds = geojsonLayer.getBounds();
+            if (MAP_SCOPE_BARANGAY) {
+                const assignedBounds = L.latLngBounds();
+                geojsonLayer.eachLayer(layer => {
+                    const layerName = getBarangayName(layer.feature?.properties);
+                    if (layerName.localeCompare(MAP_SCOPE_BARANGAY, undefined, { sensitivity: 'accent' }) === 0) {
+                        assignedBounds.extend(layer.getBounds());
+                    }
+                });
+
+                if (assignedBounds.isValid()) {
+                    bounds = assignedBounds;
+                }
+            }
             if (bounds.isValid()) {
-                map.fitBounds(bounds, { padding: [24, 24], maxZoom: 13 });
-                map.setMaxBounds(bounds.pad(0.2));
+                map.fitBounds(bounds, { padding: [24, 24], maxZoom: MAP_SCOPE_BARANGAY ? 16 : 13 });
+                map.setMaxBounds(bounds.pad(MAP_SCOPE_BARANGAY ? 1.2 : 0.2));
             }
 
             console.info(`Loaded ${barangayData.features?.length || 0} MPDO barangay boundaries.`);

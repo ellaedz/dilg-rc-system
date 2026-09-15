@@ -20,6 +20,32 @@ let officeMarkersLayer = null;
 let allReports = [];
 let allOffices = [];
 
+function escapeHtml(value) {
+    const element = document.createElement('div');
+    element.textContent = value ?? '';
+    return element.innerHTML;
+}
+
+function buildFilterQuery() {
+    const params = new URLSearchParams();
+    const values = {
+        barangay: document.getElementById('filter-barangay')?.value || '',
+        violation_type: document.getElementById('filter-violation-type')?.value || '',
+        status: document.getElementById('filter-status')?.value || '',
+        date_from: document.getElementById('filter-date-from')?.value || '',
+        date_to: document.getElementById('filter-date-to')?.value || ''
+    };
+
+    Object.entries(values).forEach(([key, value]) => {
+        if (value) {
+            params.set(key, value);
+        }
+    });
+
+    const query = params.toString();
+    return query ? `?${query}` : '';
+}
+
 // Status color mapping (matching DaisyUI badge colors)
 const STATUS_COLORS = {
     'Submitted': '#3b82f6',          // Blue
@@ -69,10 +95,10 @@ function initializeGISMarkers(map) {
 /**
  * Load hotspot summary statistics
  */
-function loadHotspotSummary() {
+function loadHotspotSummary(query = '') {
     console.log('📊 Loading hotspot summary...');
     
-    fetch('/api/gis/hotspots-summary')
+    return fetch(`/api/gis/hotspots-summary${query}`)
         .then(response => response.json())
         .then(result => {
             if (result.success) {
@@ -93,7 +119,9 @@ function loadHotspotSummary() {
 function updateHotspotCards(data) {
     // Update card values
     document.getElementById('total-mapped-reports').textContent = data.total_mapped_reports || 0;
-    document.getElementById('top-hotspot-barangay').textContent = data.top_hotspot_barangay || 'N/A';
+    document.getElementById('top-hotspot-barangay').textContent = data.top_hotspot_barangay
+        || window.CIVICLEAR_GIS_CONTEXT?.assignedBarangay
+        || 'N/A';
     document.getElementById('most-common-violation').textContent = data.most_common_violation_type || 'N/A';
     document.getElementById('most-common-status').textContent = data.most_common_status || 'N/A';
 }
@@ -177,10 +205,10 @@ function displayOfficeMarkers(map) {
  * Load violation reports and add markers
  * Shows ALL reports with GPS coordinates (including detached Santa Cruz areas)
  */
-function loadReports(map) {
+function loadReports(map, query = '') {
     console.log('📍 Loading violation reports...');
     
-    fetch('/api/gis/reports')
+    return fetch(`/api/gis/reports${query}`)
         .then(response => response.json())
         .then(result => {
             if (result.success) {
@@ -260,27 +288,34 @@ function displayReportMarkers(map) {
 function createReportPopup(report) {
     const statusColor = STATUS_COLORS[report.status] || '#6b7280';
     const verificationColor = report.verification_status === 'Verified' ? '#10b981' : '#6b7280';
+    const trackingId = escapeHtml(report.tracking_id || 'Report');
+    const violationType = escapeHtml(report.selected_violation_type || 'Awaiting Staff Classification');
+    const status = escapeHtml(report.status || 'Unknown');
+    const verificationStatus = escapeHtml(report.verification_status || 'Pending');
+    const effectiveBarangay = escapeHtml(report.effective_barangay || 'Needs Barangay Review');
+    const officeName = escapeHtml(report.assigned_barangay_office || 'Pending DILG routing');
+    const detailsUrl = escapeHtml(report.details_url || '#');
     
     const popupHTML = '<div style="font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; min-width: 280px;">' +
         '<div style="font-size: 1rem; font-weight: 700; color: #333333; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">' +
-        report.tracking_id + '</div>' +
+        trackingId + '</div>' +
         '<div style="background: #f9fafb; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.75rem;">' +
         '<div style="display: grid; grid-template-columns: 1fr; gap: 0.5rem;">' +
         '<div><div style="font-size: 0.7rem; color: #6b7280; text-transform: uppercase; margin-bottom: 0.25rem;">VIOLATION TYPE</div>' +
-        '<div style="font-size: 0.875rem; font-weight: 600; color: #333333;">' + report.selected_violation_type + '</div></div>' +
+        '<div style="font-size: 0.875rem; font-weight: 600; color: #333333;">' + violationType + '</div></div>' +
         '<div style="display: flex; gap: 0.5rem;">' +
         '<div style="flex: 1;"><div style="font-size: 0.7rem; color: #6b7280; text-transform: uppercase; margin-bottom: 0.25rem;">STATUS</div>' +
-        '<div style="display: inline-block; padding: 0.25rem 0.5rem; background: ' + statusColor + '; color: white; font-size: 0.75rem; font-weight: 600; border-radius: 0.25rem;">' + report.status + '</div></div>' +
+        '<div style="display: inline-block; padding: 0.25rem 0.5rem; background: ' + statusColor + '; color: white; font-size: 0.75rem; font-weight: 600; border-radius: 0.25rem;">' + status + '</div></div>' +
         '<div style="flex: 1;"><div style="font-size: 0.7rem; color: #6b7280; text-transform: uppercase; margin-bottom: 0.25rem;">VERIFICATION</div>' +
-        '<div style="display: inline-block; padding: 0.25rem 0.5rem; background: ' + verificationColor + '; color: white; font-size: 0.75rem; font-weight: 600; border-radius: 0.25rem;">' + report.verification_status + '</div></div>' +
+        '<div style="display: inline-block; padding: 0.25rem 0.5rem; background: ' + verificationColor + '; color: white; font-size: 0.75rem; font-weight: 600; border-radius: 0.25rem;">' + verificationStatus + '</div></div>' +
         '</div></div></div>' +
         '<div style="border-top: 2px solid #F4C542; padding-top: 0.75rem; margin-bottom: 0.75rem;">' +
         '<div style="font-size: 0.7rem; color: #6b7280; text-transform: uppercase; margin-bottom: 0.25rem;">DETECTED BARANGAY</div>' +
-        '<div style="font-size: 0.875rem; font-weight: 600; color: #333333; margin-bottom: 0.5rem;">' + (report.effective_barangay || 'Needs Barangay Review') + '</div>' +
+        '<div style="font-size: 0.875rem; font-weight: 600; color: #333333; margin-bottom: 0.5rem;">' + effectiveBarangay + '</div>' +
         '<div style="font-size: 0.7rem; color: #6b7280; text-transform: uppercase; margin-bottom: 0.25rem;">RECOMMENDED BARANGAY OFFICE FOR FOLLOW-UP</div>' +
-        '<div style="font-size: 0.875rem; font-weight: 600; color: #D4A017;">' + (report.assigned_barangay_office || 'Pending DILG routing') + '</div></div>' +
+        '<div style="font-size: 0.875rem; font-weight: 600; color: #174EA6;">' + officeName + '</div></div>' +
         '<div style="text-align: center; margin-top: 0.75rem;">' +
-        '<a href="/violation-reports" style="display: inline-block; padding: 0.5rem 1rem; background: #F4C542; color: #333333; text-decoration: none; border-radius: 0.5rem; font-weight: 600; font-size: 0.875rem;">View Report Details</a>' +
+        '<a href="' + detailsUrl + '" style="display: inline-block; padding: 0.5rem 1rem; background: #2F80ED; color: white; text-decoration: none; border-radius: 0.5rem; font-weight: 600; font-size: 0.875rem;">View Report Details</a>' +
         '</div></div>';
     
     return popupHTML;
@@ -346,6 +381,8 @@ function applyFilters(map) {
     const barangay = document.getElementById('filter-barangay').value;
     const violationType = document.getElementById('filter-violation-type').value;
     const status = document.getElementById('filter-status').value;
+    const dateFrom = document.getElementById('filter-date-from').value;
+    const dateTo = document.getElementById('filter-date-to').value;
     
     console.log('🔍 Applying filters:', { barangay, violationType, status });
     
@@ -362,6 +399,14 @@ function applyFilters(map) {
     
     if (status && status !== '') {
         filteredReports = filteredReports.filter(r => r.status === status);
+    }
+
+    if (dateFrom) {
+        filteredReports = filteredReports.filter(r => (r.timestamp || '').slice(0, 10) >= dateFrom);
+    }
+
+    if (dateTo) {
+        filteredReports = filteredReports.filter(r => (r.timestamp || '').slice(0, 10) <= dateTo);
     }
     
     // Remove existing markers
@@ -412,6 +457,7 @@ function applyFilters(map) {
     
     // Update visible count
     updateVisibleCount(filteredReports.length);
+    loadHotspotSummary(buildFilterQuery());
     
     console.log(`✅ Showing ${filteredReports.length} filtered reports`);
 }
@@ -426,9 +472,14 @@ function resetFilters(map) {
     document.getElementById('filter-barangay').value = '';
     document.getElementById('filter-violation-type').value = '';
     document.getElementById('filter-status').value = '';
+    document.getElementById('filter-date-from').value = '';
+    document.getElementById('filter-date-to').value = '';
+
+    document.getElementById('filter-barangay').value = window.CIVICLEAR_GIS_CONTEXT?.assignedBarangay || '';
     
     // Redisplay all reports
     displayReportMarkers(map);
+    loadHotspotSummary(buildFilterQuery());
     
     console.log('✅ All filters reset');
 }

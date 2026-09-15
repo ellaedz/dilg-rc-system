@@ -115,6 +115,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/barangay/{barangay}/analytics-reports/export', [BarangayAnalyticsReportController::class, 'export'])->name('barangay.analytics-reports.export');
         Route::get('/barangay/{barangay}/analytics-reports/print', [BarangayAnalyticsReportController::class, 'print'])->name('barangay.analytics-reports.print');
 
+        // Barangay GIS workspace (server-scoped to the authenticated assignment)
+        Route::get('/barangay/{barangay}/gis-map', [GISController::class, 'index'])->name('barangay.gis.index');
+
         // Barangay Profile
         Route::get('/barangay/{barangay}/profile', function ($barangay) {
             return view('profile.index', compact('barangay'));

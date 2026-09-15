@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class GISController extends Controller
 {
     /**
      * Display the Santa Cruz GIS monitoring map.
-     *
-     * @return View
      */
-    public function index()
+    public function index(Request $request): View
     {
         $municipalGeojsonPath = public_path('gis/santa_cruz_municipality.geojson');
         $barangayGeojsonPath = public_path('gis/santa_cruz_barangays.geojson');
@@ -19,6 +18,7 @@ class GISController extends Controller
         // Get user information for role-based layout
         $user = auth()->user();
         $isDilgAdmin = $user && $user->role === 'dilg_admin';
+        $mapScopeBarangay = $isDilgAdmin ? null : $user?->assigned_barangay;
 
         // Get barangay list
         $barangays = config('santa_cruz_barangays.barangays', []);
@@ -37,6 +37,7 @@ class GISController extends Controller
             'barangayGeojsonExists' => file_exists($barangayGeojsonPath),
             'barangayGeojsonUrl' => asset('gis/santa_cruz_barangays.geojson'),
             'isDilgAdmin' => $isDilgAdmin,
+            'mapScopeBarangay' => $mapScopeBarangay,
             'barangayCount' => $barangayCount,
             'defaultCenter' => $defaultCenter,
         ]);

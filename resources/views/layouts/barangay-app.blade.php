@@ -44,6 +44,7 @@
 
             <div class="app-nav-label">Insights</div>
             <a href="{{ route('barangay.analytics-reports', $userBarangay) }}" class="app-nav-link {{ request()->routeIs('barangay.analytics-reports') ? 'active' : '' }}"><i class="fas fa-chart-line"></i><span>Analytics</span></a>
+            <a href="{{ route('barangay.gis.index', $userBarangay) }}" class="app-nav-link {{ request()->routeIs('barangay.gis.*') ? 'active' : '' }}"><i class="fas fa-map-location-dot"></i><span>GIS Map</span></a>
 
             <div class="app-nav-label">Account</div>
             <a href="{{ $profileRoute }}" class="app-nav-link {{ request()->routeIs('profile') || request()->routeIs('barangay.profile') ? 'active' : '' }}"><i class="fas fa-user-gear"></i><span>Profile</span></a>

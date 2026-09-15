@@ -12,6 +12,7 @@ class GISReportResource extends JsonResource
         return [
             'report_id' => $this->report_id,
             'tracking_id' => $this->report_id,
+            'details_url' => route('violation-reports.show', $this->resource),
             'selected_violation_type' => $this->citizen_selected_violation_type,
             'citizen_selected_violation_type' => $this->citizen_selected_violation_type,
             'has_citizen_classification' => $this->has_citizen_classification,

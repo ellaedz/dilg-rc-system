@@ -10,6 +10,7 @@ use App\Services\BarangayAssignmentService;
 use App\Services\BarangayOfficeService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class GISApiController extends Controller
 {
@@ -38,29 +39,14 @@ class GISApiController extends Controller
 
     public function reports(Request $request)
     {
-        $validated = $request->validate([
-            'barangay' => ['nullable', 'string', 'max:100'],
-            'violation_type' => ['nullable', 'string', 'max:100'],
-            'status' => ['nullable', 'string', 'max:50'],
-        ]);
+        $validated = $this->validatedFilters($request);
+        $this->authorizeRequestedBarangay($request, $validated['barangay'] ?? null);
 
-        $query = $this->visibleReportsQuery($request)
+        $query = $this->applyFilters($this->visibleReportsQuery($request), $validated)
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
             ->where('latitude', '!=', 0)
             ->where('longitude', '!=', 0);
-
-        if (! empty($validated['barangay'])) {
-            $query->forEffectiveBarangay($validated['barangay']);
-        }
-
-        if (! empty($validated['violation_type'])) {
-            $query->where('selected_violation_type', $validated['violation_type']);
-        }
-
-        if (! empty($validated['status'])) {
-            $query->where('status', $validated['status']);
-        }
 
         $reports = $query->latest()->get();
 
@@ -75,6 +61,15 @@ class GISApiController extends Controller
     {
         $offices = collect(config('santa_cruz_barangay_halls', []))
             ->filter(fn (array $office) => isset($office['latitude'], $office['longitude']))
+            ->when(
+                $request->user()->role === 'barangay_staff',
+                fn ($items) => $items->filter(
+                    fn (array $office) => strcasecmp(
+                        (string) ($office['barangay'] ?? ''),
+                        (string) $request->user()->assigned_barangay
+                    ) === 0
+                )
+            )
             ->values();
         $needsValidation = $offices->where('validation_status', 'Needs manual validation')->count();
 
@@ -94,7 +89,10 @@ class GISApiController extends Controller
 
     public function hotspotsSummary(Request $request)
     {
-        $base = $this->visibleReportsQuery($request)
+        $validated = $this->validatedFilters($request);
+        $this->authorizeRequestedBarangay($request, $validated['barangay'] ?? null);
+
+        $base = $this->applyFilters($this->visibleReportsQuery($request), $validated)
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
             ->where('latitude', '!=', 0)
@@ -143,6 +141,69 @@ class GISApiController extends Controller
 
         if ($user->role === 'barangay_staff') {
             $query->forEffectiveBarangay($user->assigned_barangay);
+        }
+
+        return $query;
+    }
+
+    private function validatedFilters(Request $request): array
+    {
+        return $request->validate([
+            'barangay' => [
+                'nullable',
+                'string',
+                Rule::in(array_column(config('santa_cruz_barangays.barangays', []), 'name')),
+            ],
+            'violation_type' => [
+                'nullable',
+                'string',
+                Rule::in(config('santa_cruz_barangays.violation_types', [])),
+            ],
+            'status' => [
+                'nullable',
+                'string',
+                Rule::in(config('santa_cruz_barangays.statuses', [])),
+            ],
+            'date_from' => ['nullable', 'date_format:Y-m-d'],
+            'date_to' => [
+                'nullable',
+                'date_format:Y-m-d',
+                Rule::when($request->filled('date_from'), 'after_or_equal:date_from'),
+            ],
+        ]);
+    }
+
+    private function authorizeRequestedBarangay(Request $request, ?string $barangay): void
+    {
+        $user = $request->user();
+
+        if ($user->role === 'barangay_staff'
+            && $barangay !== null
+            && strcasecmp((string) $user->assigned_barangay, $barangay) !== 0) {
+            abort(403, 'Access denied. GIS data is restricted to your assigned barangay.');
+        }
+    }
+
+    private function applyFilters(Builder $query, array $validated): Builder
+    {
+        if (! empty($validated['barangay'])) {
+            $query->forEffectiveBarangay($validated['barangay']);
+        }
+
+        if (! empty($validated['violation_type'])) {
+            $query->where('selected_violation_type', $validated['violation_type']);
+        }
+
+        if (! empty($validated['status'])) {
+            $query->where('status', $validated['status']);
+        }
+
+        if (! empty($validated['date_from'])) {
+            $query->whereDate('date_submitted', '>=', $validated['date_from']);
+        }
+
+        if (! empty($validated['date_to'])) {
+            $query->whereDate('date_submitted', '<=', $validated['date_to']);
         }
 
         return $query;

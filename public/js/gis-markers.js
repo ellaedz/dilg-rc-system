@@ -68,8 +68,8 @@ const REPORT_STATE_STYLES = {
     pending_verification: { border: '#f59e0b', symbol: '!', label: 'Awaiting staff verification' },
     rejected: { border: '#dc2626', symbol: '&times;', label: 'Rejected or invalid report' },
     duplicate: { border: '#7c3aed', symbol: 'D', label: 'Duplicate report' },
-    outside_jurisdiction: { border: '#475569', symbol: 'O', label: 'Outside supported jurisdiction' },
-    test_data: { border: '#64748b', symbol: 'T', label: 'Test data' }
+    outside_jurisdiction: { border: '#475569', symbol: '<i class="fas fa-file-lines" aria-hidden="true"></i>', label: 'Outside supported jurisdiction' },
+    test_data: { border: '#64748b', symbol: '<i class="fas fa-file-lines" aria-hidden="true"></i>', label: 'Test data' }
 };
 
 // Violation type color mapping
@@ -358,6 +358,8 @@ function createReportPopup(report) {
  */
 function showRecommendationPanel(report) {
     const panel = document.getElementById('recommendation-panel');
+    const emptyState = document.getElementById('report-panel-empty');
+    const content = document.getElementById('report-panel-content');
     
     if (!panel) return;
     
@@ -365,6 +367,15 @@ function showRecommendationPanel(report) {
     document.getElementById('rec-tracking-id').textContent = report.tracking_id;
     document.getElementById('rec-detected-barangay').textContent = report.effective_barangay || 'Needs Barangay Review';
     document.getElementById('rec-office-name').textContent = report.assigned_barangay_office || 'Pending DILG routing';
+    document.getElementById('rec-violation-type').textContent = report.official_violation_type
+        || report.selected_violation_type
+        || 'Awaiting staff classification';
+    document.getElementById('rec-validation-state').textContent = report.operational_state_label
+        || 'Awaiting staff verification';
+    document.getElementById('rec-gps').textContent = Number.isFinite(Number(report.latitude))
+        && Number.isFinite(Number(report.longitude))
+        ? `${Number(report.latitude).toFixed(6)}, ${Number(report.longitude).toFixed(6)}`
+        : 'Location unavailable';
     
     // Find office address
     const office = allOffices.find(o => o.office_name === report.assigned_barangay_office);
@@ -375,8 +386,9 @@ function showRecommendationPanel(report) {
     
     document.getElementById('rec-report-status').textContent = report.status;
     
-    // Show panel
-    panel.style.display = 'block';
+    panel.style.display = 'flex';
+    if (emptyState) emptyState.hidden = true;
+    if (content) content.hidden = false;
 }
 
 /**
@@ -384,10 +396,14 @@ function showRecommendationPanel(report) {
  */
 function closeRecommendationPanel() {
     const panel = document.getElementById('recommendation-panel');
+    const emptyState = document.getElementById('report-panel-empty');
+    const content = document.getElementById('report-panel-content');
     
     if (!panel) return;
-    
-    panel.style.display = 'none';
+
+    panel.style.display = 'flex';
+    if (emptyState) emptyState.hidden = false;
+    if (content) content.hidden = true;
 }
 
 /**

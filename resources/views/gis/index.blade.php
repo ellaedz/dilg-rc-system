@@ -34,19 +34,19 @@
     .hotspot-cards-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 1.25rem;
-        margin-bottom: 1.5rem;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
     }
 
     .hotspot-card {
         background: white;
-        border-radius: 0.75rem;
-        padding: 1.25rem;
+        border-radius: 0.65rem;
+        padding: 0.8rem;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         border-left: 4px solid;
         display: flex;
         align-items: center;
-        gap: 1rem;
+        gap: 0.7rem;
     }
 
     .hotspot-card.blue { border-color: #3b82f6; background: linear-gradient(135deg, #dbeafe 0%, #ffffff 100%); }
@@ -55,13 +55,13 @@
     .hotspot-card.orange { border-color: #f59e0b; background: linear-gradient(135deg, #fef3c7 0%, #ffffff 100%); }
 
     .hotspot-icon {
-        width: 48px;
-        height: 48px;
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.5rem;
+        font-size: 1.05rem;
         flex-shrink: 0;
     }
 
@@ -92,9 +92,9 @@
     .filter-panel {
         background: white;
         border-radius: 0.75rem;
-        padding: 1.25rem;
+        padding: 0.9rem;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
         border-top: 3px solid var(--dilg-yellow);
     }
 
@@ -199,21 +199,35 @@
     /* Map Container */
     .map-container {
         display: grid;
-        grid-template-columns: 1fr 320px;
-        gap: 1.5rem;
+        grid-template-columns: minmax(0, 1fr) 360px;
+        min-height: 680px;
+        gap: 0;
+        overflow: hidden;
+        border: 1px solid #dbe4f0;
+        border-radius: 1rem;
+        background: #ffffff;
+        box-shadow: 0 16px 45px rgba(15, 51, 96, 0.13);
     }
 
     .map-card {
+        position: relative;
         background: white;
-        border-radius: 0.75rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-radius: 1rem 0 0 1rem;
+        box-shadow: none;
         overflow: hidden;
     }
 
     .card-header {
-        padding: 1.25rem;
-        border-bottom: 2px solid var(--dilg-yellow);
-        background: #fefce8;
+        position: absolute;
+        top: 1rem;
+        left: 4.5rem;
+        right: 1rem;
+        z-index: 700;
+        padding: 0.75rem 1rem;
+        border: 1px solid rgba(191, 219, 254, 0.9);
+        border-radius: 0.75rem;
+        background: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(8px);
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -240,37 +254,53 @@
 
     #map {
         width: 100%;
-        height: 650px;
+        height: 680px;
         background: #e5e7eb;
+    }
+
+    .map-stage {
+        position: relative;
+        height: 680px;
     }
 
     /* Sidebar */
     .sidebar-card {
+        position: absolute;
+        left: 1rem;
+        bottom: 1rem;
+        z-index: 700;
         background: white;
+        border: 1px solid #dbeafe;
         border-radius: 0.75rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        padding: 1.25rem;
-        margin-bottom: 1.25rem;
+        box-shadow: 0 10px 28px rgba(15, 51, 96, 0.18);
+        padding: 0.65rem 0.75rem;
+        margin: 0;
+        max-width: calc(100% - 2rem);
     }
 
     .sidebar-card-title {
         font-size: 1rem;
         font-weight: 600;
         color: var(--dilg-dark-gray);
-        margin-bottom: 1rem;
+        margin-bottom: 0.55rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
     }
 
     .legend-item {
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        gap: 0.625rem;
-        padding: 0.625rem;
-        margin-bottom: 0.5rem;
-        background: #f9fafb;
-        border-radius: 0.5rem;
+        gap: 0.4rem;
+        padding: 0.3rem 0.45rem;
+        margin: 0;
+        background: transparent;
+    }
+
+    .legend-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.2rem 0.45rem;
     }
 
     .legend-symbol {
@@ -305,23 +335,87 @@
     .legend-symbol.pending-review { background: #3b82f6; border-color: #f59e0b; }
     .legend-symbol.rejected-report { background: #64748b; border-color: #dc2626; }
     .legend-symbol.duplicate-report { background: #64748b; border-color: #7c3aed; }
-    .legend-symbol.outside-report { background: #64748b; border-color: #475569; }
-    .legend-symbol.test-report { background: #64748b; border-color: #64748b; }
 
     .legend-label {
-        font-size: 0.8125rem;
+        font-size: 0.72rem;
         color: var(--dilg-dark-gray);
         font-weight: 500;
     }
 
     /* Recommendation Panel */
     .recommendation-panel {
-        background: white;
-        border-radius: 0.75rem;
-        padding: 1.25rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        border-top: 4px solid var(--dilg-yellow);
-        display: none;
+        background: transparent;
+        padding: 0;
+        box-shadow: none;
+        border: 0;
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+    }
+
+    .gis-side-column {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        padding: 1.4rem;
+        border-left: 1px solid #dbe4f0;
+        background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+    }
+
+    .gis-side-eyebrow {
+        color: #2563eb;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    .gis-side-title {
+        margin: 0.25rem 0 0.35rem;
+        color: #102a4c;
+        font-size: 1.2rem;
+        font-weight: 800;
+    }
+
+    .gis-side-description {
+        margin-bottom: 1.25rem;
+        color: #64748b;
+        font-size: 0.8rem;
+        line-height: 1.5;
+    }
+
+    .report-panel-empty {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 360px;
+        padding: 2rem;
+        color: #64748b;
+        text-align: center;
+    }
+
+    .report-panel-empty[hidden] { display: none; }
+
+    .report-panel-empty i {
+        display: grid;
+        width: 64px;
+        height: 64px;
+        margin-bottom: 1rem;
+        place-items: center;
+        border-radius: 50%;
+        background: #eaf3ff;
+        color: #2563eb;
+        font-size: 1.5rem;
+    }
+
+    .report-panel-content[hidden] { display: none; }
+
+    .report-panel-content {
+        display: block;
+        padding-top: 0.9rem;
+        border-top: 1px solid #e2e8f0;
     }
 
     .rec-panel-header {
@@ -375,7 +469,7 @@
     }
 
     .rec-highlight {
-        background: #fef3c7;
+        background: #eaf3ff;
         padding: 0.75rem;
         border-radius: 0.5rem;
         border-left: 3px solid var(--dilg-yellow);
@@ -384,7 +478,7 @@
 
     .rec-highlight-label {
         font-size: 0.6875rem;
-        color: #92400e;
+        color: #1d4ed8;
         text-transform: uppercase;
         margin-bottom: 0.375rem;
         font-weight: 600;
@@ -392,7 +486,7 @@
 
     .rec-highlight-value {
         font-size: 0.9375rem;
-        color: var(--dilg-dark-gold);
+        color: #102a4c;
         font-weight: 700;
     }
 
@@ -455,6 +549,12 @@
         .map-container {
             grid-template-columns: 1fr;
         }
+
+        .gis-side-column {
+            min-height: 420px;
+            border-top: 1px solid #dbe4f0;
+            border-left: 0;
+        }
     }
 
     @media (max-width: 640px) {
@@ -483,6 +583,20 @@
 
         #map {
             height: 520px;
+        }
+
+        .map-stage { height: 520px; }
+
+        .card-header {
+            left: 3.75rem;
+            padding: 0.65rem 0.75rem;
+        }
+
+        .sidebar-card {
+            right: 0.75rem;
+            bottom: 0.75rem;
+            left: 0.75rem;
+            max-width: none;
         }
     }
 </style>
@@ -641,7 +755,7 @@
                 Visible Markers: <span class="visible-count-number" id="visible-markers-count">0</span>
             </div>
         </div>
-        <div style="position: relative;">
+        <div class="map-stage">
             <div id="map"></div>
             <div id="loading" class="loading-overlay" style="display: none;">
                 <div class="loading-spinner">
@@ -651,89 +765,95 @@
                     <p style="margin-top: 1rem; color: var(--dilg-dark-gray);">Loading GIS data...</p>
                 </div>
             </div>
+            <div class="sidebar-card" aria-label="Report status symbols">
+                <h3 class="sidebar-card-title">
+                    <i class="fas fa-file-circle-check"></i>
+                    Report Status
+                </h3>
+                <div class="legend-list">
+                    <div class="legend-item">
+                        <div class="legend-symbol report-state verified-valid">&#10003;</div>
+                        <div class="legend-label">Verified</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-symbol report-state ai-pending">A</div>
+                        <div class="legend-label">AI processing</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-symbol report-state pending-review">!</div>
+                        <div class="legend-label">Awaiting review</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-symbol report-state rejected-report">&times;</div>
+                        <div class="legend-label">Rejected</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-symbol report-state duplicate-report">D</div>
+                        <div class="legend-label">Duplicate</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Sidebar -->
-    <div>
-        <!-- Legend Card -->
-        <div class="sidebar-card">
-            <h3 class="sidebar-card-title">
-                <i class="fas fa-list"></i>
-                Map Legend
-            </h3>
-            <div class="legend-item">
-                <div class="legend-symbol boundary"></div>
-                <div class="legend-label">{{ $isDilgAdmin ? 'MPDO Barangay Boundary' : 'Assigned MPDO Boundary' }}</div>
-            </div>
-            <div class="legend-item">
-                <div class="legend-symbol report-state verified-valid">&#10003;</div>
-                <div class="legend-label">Staff-verified valid violation</div>
-            </div>
-            <div class="legend-item">
-                <div class="legend-symbol report-state ai-pending">A</div>
-                <div class="legend-label">AI analysis pending</div>
-            </div>
-            <div class="legend-item">
-                <div class="legend-symbol report-state pending-review">!</div>
-                <div class="legend-label">Awaiting staff verification</div>
-            </div>
-            <div class="legend-item">
-                <div class="legend-symbol report-state rejected-report">&times;</div>
-                <div class="legend-label">Rejected or invalid report</div>
-            </div>
-            <div class="legend-item">
-                <div class="legend-symbol report-state duplicate-report">D</div>
-                <div class="legend-label">Duplicate report</div>
-            </div>
-            <div class="legend-item">
-                <div class="legend-symbol report-state outside-report">O</div>
-                <div class="legend-label">Outside supported jurisdiction</div>
-            </div>
-            <div class="legend-item">
-                <div class="legend-symbol report-state test-report">T</div>
-                <div class="legend-label">Test data</div>
-            </div>
-            <div class="legend-item">
-                <div class="legend-symbol office"></div>
-                <div class="legend-label">Verified Barangay Office</div>
-            </div>
-            <div class="legend-item">
-                <div class="legend-symbol office" style="background:#2F80ED;border-color:#174EA6"></div>
-                <div class="legend-label">Provisional Office Coordinate</div>
-            </div>
-        </div>
+    <!-- Selected report inspector -->
+    <aside class="gis-side-column" aria-label="Selected report information">
+        <div class="gis-side-eyebrow">GIS Report Inspector</div>
+        <h2 class="gis-side-title">Selected Report</h2>
+        <p class="gis-side-description">Choose a marker to review its classification, location, status, and assigned follow-up office.</p>
 
-        <!-- Recommendation Panel -->
         <div class="recommendation-panel" id="recommendation-panel">
-            <div class="rec-panel-header">
-                <div class="rec-panel-title"><i class="fas fa-location-dot"></i> Report Details</div>
-                <button class="rec-close-btn" onclick="closeRecommendationPanel()" aria-label="Close report details">&times;</button>
+            <div class="report-panel-empty" id="report-panel-empty">
+                <i class="fas fa-location-crosshairs"></i>
+                <strong>No report selected</strong>
+                <span>Tap or click a report marker on the map.</span>
             </div>
-            
-            <div class="rec-field">
-                <div class="rec-label">Tracking ID</div>
-                <div class="rec-value" id="rec-tracking-id">-</div>
-            </div>
-            
-            <div class="rec-field">
-                <div class="rec-label">Detected Barangay</div>
-                <div class="rec-value" id="rec-detected-barangay">-</div>
-            </div>
-            
-            <div class="rec-field">
-                <div class="rec-label">Report Status</div>
-                <div class="rec-value" id="rec-report-status">-</div>
-            </div>
-            
-            <div class="rec-highlight">
-                <div class="rec-highlight-label">Recommended Barangay Office for Follow-up</div>
-                <div class="rec-highlight-value" id="rec-office-name">-</div>
-                <div style="font-size: 0.8125rem; color: #92400e; margin-top: 0.5rem;" id="rec-office-address">-</div>
-                <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;" id="rec-office-validation">-</div>
+
+            <div class="report-panel-content" id="report-panel-content" hidden>
+                <div class="rec-panel-header">
+                    <div class="rec-panel-title"><i class="fas fa-file-lines"></i> Report Details</div>
+                    <button class="rec-close-btn" onclick="closeRecommendationPanel()" aria-label="Clear selected report">&times;</button>
+                </div>
+
+                <div class="rec-field">
+                    <div class="rec-label">Tracking ID</div>
+                    <div class="rec-value" id="rec-tracking-id">-</div>
+                </div>
+
+                <div class="rec-field">
+                    <div class="rec-label">Violation Type</div>
+                    <div class="rec-value" id="rec-violation-type">-</div>
+                </div>
+
+                <div class="rec-field">
+                    <div class="rec-label">Validation</div>
+                    <div class="rec-value" id="rec-validation-state">-</div>
+                </div>
+
+                <div class="rec-field">
+                    <div class="rec-label">Report Status</div>
+                    <div class="rec-value" id="rec-report-status">-</div>
+                </div>
+
+                <div class="rec-field">
+                    <div class="rec-label">Barangay</div>
+                    <div class="rec-value" id="rec-detected-barangay">-</div>
+                </div>
+
+                <div class="rec-field">
+                    <div class="rec-label">GPS Coordinates</div>
+                    <div class="rec-value" id="rec-gps">-</div>
+                </div>
+
+                <div class="rec-highlight">
+                    <div class="rec-highlight-label">Recommended Barangay Office for Follow-up</div>
+                    <div class="rec-highlight-value" id="rec-office-name">-</div>
+                    <div style="font-size: 0.8125rem; color: #1e3a5f; margin-top: 0.5rem;" id="rec-office-address">-</div>
+                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;" id="rec-office-validation">-</div>
+                </div>
             </div>
         </div>
-    </div>
+    </aside>
 </div>
 
 <!-- Leaflet JS (Local) -->

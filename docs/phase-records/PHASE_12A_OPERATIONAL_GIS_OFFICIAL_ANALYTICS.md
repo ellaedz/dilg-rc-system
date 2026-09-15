@@ -14,6 +14,8 @@ schema is changed.
   duplicate, outside-jurisdiction, and test records.
 - Map filtering is performed by the authenticated server query instead of only in
   browser memory.
+- The GIS workspace uses a map-first split layout with a compact floating report-status
+  key and a persistent selected-report inspector.
 - Barangay staff remain restricted to their assigned barangay for both datasets.
 - Official map and analytics counts use `official_violation_type` confirmed by staff.
 - DILG and barangay dashboard verified/resolved totals use the same official scope.

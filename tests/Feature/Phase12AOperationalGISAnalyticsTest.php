@@ -215,11 +215,12 @@ class Phase12AOperationalGISAnalyticsTest extends TestCase
             ->assertOk()
             ->assertSee('Operational reports')
             ->assertSee('Official verified statistics')
-            ->assertSee('AI analysis pending')
-            ->assertSee('Awaiting staff verification')
-            ->assertSee('Duplicate report')
-            ->assertSee('Outside supported jurisdiction')
-            ->assertSee('Test data');
+            ->assertSee('AI processing')
+            ->assertSee('Awaiting review')
+            ->assertSee('Duplicate')
+            ->assertSee('Report Status')
+            ->assertDontSee('Outside supported jurisdiction')
+            ->assertDontSee('Test data');
     }
 
     private function report(string $reportId, array $overrides = []): ViolationReport

@@ -203,7 +203,7 @@
         z-index: 0;
         isolation: isolate;
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 380px;
+        grid-template-columns: minmax(0, 1fr) 420px;
         min-height: 680px;
         gap: 0;
         overflow: hidden;
@@ -441,17 +441,23 @@
 
     .report-panel-content {
         display: grid;
-        grid-template-columns: minmax(0, 1fr);
-        gap: 0.6rem;
-        padding-top: 0.9rem;
-        border-top: 1px solid #e2e8f0;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0;
+        overflow: hidden;
+        padding: 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.9rem;
+        background: #ffffff;
+        box-shadow: 0 8px 24px rgba(15, 51, 96, 0.06);
     }
 
     .rec-panel-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1rem;
+        margin: 0;
+        padding: 0 0 0.9rem;
+        border-bottom: 1px solid #eef2f7;
         grid-column: 1 / -1;
     }
 
@@ -482,35 +488,63 @@
     .rec-field {
         min-width: 0;
         margin: 0;
-        padding: 0.65rem 0.8rem;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.65rem;
-        background: #ffffff;
+        padding: 1rem 0;
+        border: 0;
+        border-bottom: 1px solid #eef2f7;
+        border-radius: 0;
+        background: transparent;
+    }
+
+    .rec-field--full {
+        grid-column: 1 / -1;
+    }
+
+    .rec-field--left {
+        padding-right: 1rem;
+        border-right: 1px solid #eef2f7;
+    }
+
+    .rec-field--right {
+        padding-left: 1rem;
+    }
+
+    .rec-field--last {
+        border-bottom: 0;
     }
 
     .rec-label {
-        font-size: 0.72rem;
-        color: #6b7280;
+        margin-bottom: 0.4rem;
+        color: #64748b;
+        font-size: 0.7rem;
+        font-weight: 500;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 0.38rem;
-        font-weight: 600;
+        letter-spacing: 0.045em;
     }
 
     .rec-value {
         overflow-wrap: break-word;
-        font-size: 0.92rem;
-        line-height: 1.5;
-        color: var(--dilg-dark-gray);
+        color: #172033;
+        font-size: 0.9rem;
         font-weight: 600;
+        line-height: 1.45;
+    }
+
+    .rec-value--tracking {
+        display: inline-flex;
+        width: fit-content;
+        padding: 0.3rem 0.55rem;
+        border-radius: 999px;
+        background: #eaf3ff;
+        color: #174ea6;
+        font-weight: 700;
     }
 
     .rec-highlight {
         background: #eaf3ff;
-        padding: 0.75rem;
-        border-radius: 0.5rem;
+        padding: 1rem;
+        border-radius: 0.7rem;
         border-left: 3px solid var(--dilg-yellow);
-        margin-top: 1rem;
+        margin-top: 0.5rem;
         grid-column: 1 / -1;
     }
 
@@ -645,7 +679,11 @@
             max-width: none;
         }
 
-        .report-panel-content { grid-template-columns: 1fr; }
+        .report-panel-content { grid-template-columns: 1fr; padding: 1rem; }
+        .rec-field--full, .rec-field--left, .rec-field--right { grid-column: 1; }
+        .rec-field--left { padding-right: 0; border-right: 0; }
+        .rec-field--right { padding-left: 0; }
+        .rec-field--last { border-bottom: 1px solid #eef2f7; }
     }
 </style>
 
@@ -863,32 +901,32 @@
                     <button class="rec-close-btn" onclick="closeRecommendationPanel()" aria-label="Clear selected report">&times;</button>
                 </div>
 
-                <div class="rec-field">
+                <div class="rec-field rec-field--full">
                     <div class="rec-label">Tracking ID</div>
-                    <div class="rec-value" id="rec-tracking-id">-</div>
+                    <div class="rec-value rec-value--tracking" id="rec-tracking-id">-</div>
                 </div>
 
-                <div class="rec-field">
+                <div class="rec-field rec-field--left">
                     <div class="rec-label">Violation Type</div>
                     <div class="rec-value" id="rec-violation-type">-</div>
                 </div>
 
-                <div class="rec-field">
+                <div class="rec-field rec-field--right">
                     <div class="rec-label">Validation</div>
                     <div class="rec-value" id="rec-validation-state">-</div>
                 </div>
 
-                <div class="rec-field">
+                <div class="rec-field rec-field--left">
                     <div class="rec-label">Report Status</div>
                     <div class="rec-value" id="rec-report-status">-</div>
                 </div>
 
-                <div class="rec-field">
+                <div class="rec-field rec-field--right">
                     <div class="rec-label">Barangay</div>
                     <div class="rec-value" id="rec-detected-barangay">-</div>
                 </div>
 
-                <div class="rec-field">
+                <div class="rec-field rec-field--full rec-field--last">
                     <div class="rec-label">GPS Coordinates</div>
                     <div class="rec-value" id="rec-gps">-</div>
                 </div>

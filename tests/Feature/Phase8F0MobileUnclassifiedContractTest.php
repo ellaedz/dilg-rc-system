@@ -246,11 +246,12 @@ class Phase8F0MobileUnclassifiedContractTest extends TestCase
             ->assertJsonPath('data.final_ai_confidence', 0.79);
     }
 
-    public function test_citizen_category_analytics_exclude_the_internal_unclassified_state(): void
+    public function test_citizen_analytics_exclude_the_internal_unclassified_state_and_gis_uses_ai_results(): void
     {
         $unclassified = $this->submit('phase-8f0-analytics-unclassified-01');
         $classified = $this->submit('phase-8f0-analytics-classified-001', [
             'selected_violation_type' => 'Illegal Parking',
+            'photo' => $this->photo(),
         ]);
 
         $unclassified->assertCreated();

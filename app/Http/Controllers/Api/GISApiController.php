@@ -111,27 +111,32 @@ class GISApiController extends Controller
             ->pluck('aggregate', 'effective_barangay')
             ->toArray();
 
-        $violationColumn = ($validated['dataset'] ?? 'operational') === 'official'
-            ? 'official_violation_type'
-            : 'selected_violation_type';
-        $violationBase = clone $base;
-        if (($validated['dataset'] ?? 'operational') === 'operational') {
-            $supportedAiViolationTypes = collect(config('ai_inference.image_classes', []))
-                ->map(fn (string $category): ?string => OfficialViolationType::fromAi($category))
-                ->filter()
-                ->values()
-                ->all();
+        $dataset = $validated['dataset'] ?? 'operational';
+        if ($dataset === 'official') {
+            $violationCounts = (clone $base)
+                ->whereNotNull('official_violation_type')
+                ->selectRaw('official_violation_type, COUNT(*) as aggregate')
+                ->groupBy('official_violation_type')
+                ->orderByDesc('aggregate')
+                ->orderBy('official_violation_type')
+                ->pluck('aggregate', 'official_violation_type')
+                ->toArray();
+        } else {
+            $aiCounts = (clone $base)
+                ->where('ai_processing_status', ViolationReport::AI_STATUS_COMPLETED)
+                ->whereIn('ai_possible_violation', config('ai_inference.image_classes', []))
+                ->selectRaw('ai_possible_violation, COUNT(*) as aggregate')
+                ->groupBy('ai_possible_violation')
+                ->orderByDesc('aggregate')
+                ->orderBy('ai_possible_violation')
+                ->pluck('aggregate', 'ai_possible_violation');
 
-            $violationBase
-                ->citizenClassified()
-                ->whereIn($violationColumn, $supportedAiViolationTypes);
+            $violationCounts = $aiCounts
+                ->mapWithKeys(fn ($count, string $category): array => [
+                    OfficialViolationType::label($category) => $count,
+                ])
+                ->toArray();
         }
-
-        $violationCounts = $violationBase
-            ->whereNotNull($violationColumn)
-            ->selectRaw($violationColumn.', COUNT(*) as aggregate')
-            ->groupBy($violationColumn)->orderByDesc('aggregate')
-            ->pluck('aggregate', $violationColumn)->toArray();
 
         $statusCounts = (clone $base)->selectRaw('status, COUNT(*) as aggregate')
             ->groupBy('status')->orderByDesc('aggregate')
@@ -216,10 +221,20 @@ class GISApiController extends Controller
         }
 
         if (! empty($validated['violation_type'])) {
-            $query->where(
-                $dataset === 'official' ? 'official_violation_type' : 'selected_violation_type',
-                $validated['violation_type']
-            );
+            if ($dataset === 'official') {
+                $query->where('official_violation_type', $validated['violation_type']);
+            } else {
+                $officialType = $validated['violation_type'];
+                $aiCategory = OfficialViolationType::toAi($officialType);
+
+                $query->where(function (Builder $builder) use ($officialType, $aiCategory): void {
+                    $builder->where('selected_violation_type', $officialType);
+                    if ($aiCategory !== null
+                        && in_array($aiCategory, config('ai_inference.image_classes', []), true)) {
+                        $builder->orWhere('ai_possible_violation', $aiCategory);
+                    }
+                });
+            }
         }
 
         if (! empty($validated['status'])) {

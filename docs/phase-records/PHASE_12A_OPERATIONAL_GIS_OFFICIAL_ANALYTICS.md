@@ -82,3 +82,17 @@ Rollback is traffic-only: assign 100 percent to
 `ca-civiclear-laravel--gis13bce574f9` and zero percent to
 `ca-civiclear-laravel--gis151b69d`. Do not delete either revision until authorized
 staff complete the authenticated GIS acceptance check.
+
+## Authorized test-data cleanup
+
+After release, the owner authorized permanent removal of reports that were explicitly
+marked `is_test_data = true`. A verified recovery export was created before deletion.
+The exact removed set was `RCV-2026-0001` through `RCV-2026-0010`, plus
+`RCV-2026-0037`: 11 report rows and 10 cascade-linked timeline rows. One referenced
+private photo object was deliberately retained and its object reference remains in the
+recovery export. Backup SHA-256:
+`8ababb841b9899911674aaad62612294a02d0c4869253537717c83707770b4e8`.
+
+Post-cleanup verification found 22 non-test reports, zero marked test reports, and zero
+orphan timeline rows. No non-test report, account, GIS feature, or application file was
+deleted or modified by this cleanup.

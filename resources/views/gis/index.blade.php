@@ -438,8 +438,8 @@
 
     .report-panel-content {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0.75rem;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.6rem;
         padding-top: 0.9rem;
         border-top: 1px solid #e2e8f0;
     }
@@ -479,7 +479,7 @@
     .rec-field {
         min-width: 0;
         margin: 0;
-        padding: 0.75rem;
+        padding: 0.65rem 0.8rem;
         border: 1px solid #e2e8f0;
         border-radius: 0.65rem;
         background: #ffffff;
@@ -495,7 +495,7 @@
     }
 
     .rec-value {
-        overflow-wrap: anywhere;
+        overflow-wrap: break-word;
         font-size: 0.92rem;
         line-height: 1.5;
         color: var(--dilg-dark-gray);

@@ -2,11 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class GISController extends Controller
 {
+    /**
+     * Send an authenticated user to the GIS workspace allowed for their role.
+     */
+    public function entry(Request $request): RedirectResponse|View
+    {
+        $user = $request->user();
+
+        if ($user->role === 'dilg_admin') {
+            return $this->index($request);
+        }
+
+        if ($user->role === 'barangay_staff' && filled($user->assigned_barangay)) {
+            return redirect()->route('barangay.gis.index', $user->assigned_barangay);
+        }
+
+        abort(403, 'Access denied. A valid GIS role and barangay assignment are required.');
+    }
+
     /**
      * Display the Santa Cruz GIS monitoring map.
      */

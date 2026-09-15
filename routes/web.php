@@ -39,6 +39,9 @@ Route::middleware(['auth'])->group(function () {
     // Logout Route
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+    // Role-aware GIS entry point. Barangay staff are redirected to their assigned map.
+    Route::get('/gis-map', [GISController::class, 'entry'])->name('gis.index');
+
     // ========================================
     // DILG ADMIN ROUTES (dilg_admin role only)
     // ========================================
@@ -68,9 +71,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/ai-analytics', function () {
             return view('ai-analytics.index');
         })->name('ai.index');
-
-        // GIS Map Routes (Phase 4B - Barangay Boundary Integration)
-        Route::get('/gis-map', [GISController::class, 'index'])->name('gis.index');
 
         Route::get('/needs-barangay-review', [ManualBarangayRoutingController::class, 'index'])
             ->name('dilg.needs-barangay-review.index');

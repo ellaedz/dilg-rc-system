@@ -17,6 +17,8 @@ schema is changed.
 - The GIS workspace uses a map-first split layout with a compact floating report-status
   key and a persistent selected-report inspector.
 - Barangay staff remain restricted to their assigned barangay for both datasets.
+- The generic `/gis-map` link sends barangay staff to their assigned workspace while
+  keeping cross-barangay access forbidden.
 - Official map and analytics counts use `official_violation_type` confirmed by staff.
 - DILG and barangay dashboard verified/resolved totals use the same official scope.
 - Operational citizen-category analytics remain available for backward compatibility

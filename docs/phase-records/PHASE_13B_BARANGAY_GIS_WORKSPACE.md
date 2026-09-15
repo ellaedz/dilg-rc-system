@@ -29,8 +29,8 @@ barangay through a route or API query return HTTP 403.
 
 Verified on 2026-09-15 (Asia/Manila):
 
-- Focused GIS and navigation suite: 14 tests, 332 assertions.
-- Complete Laravel regression suite: 195 tests, 1,889 assertions.
+- Focused GIS and navigation suite: 15 tests, 462 assertions, including all 26 barangay accounts.
+- Complete Laravel regression suite: 196 tests, 2,019 assertions.
 - Production Vite build completed successfully.
 - Blade views compiled successfully.
 - JavaScript syntax and Git whitespace checks passed.

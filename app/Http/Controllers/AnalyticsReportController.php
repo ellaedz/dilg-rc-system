@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ViolationReport;
 use App\Services\AnalyticsExportService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,8 +16,16 @@ class AnalyticsReportController extends Controller
     /**
      * Display DILG-wide road clearing analytics dashboard for Santa Cruz, Laguna
      */
-    public function index()
+    public function index(Request $request)
     {
+        $request->validate([
+            'barangay_period' => ['sometimes', 'in:all,7d,30d'],
+            'violation_period' => ['sometimes', 'in:all,7d,30d'],
+        ]);
+
+        $barangayPeriod = $request->query('barangay_period', 'all');
+        $violationPeriod = $request->query('violation_period', 'all');
+
         // ======================================
         // STATISTICS CARDS
         // ======================================
@@ -97,10 +106,14 @@ class AnalyticsReportController extends Controller
         // ======================================
 
         // 1. Reports by Barangay
-        $reportsByBarangay = ViolationReport::select('detected_barangay', DB::raw('COUNT(*) as count'))
+        $reportsByBarangayQuery = ViolationReport::select('detected_barangay', DB::raw('COUNT(*) as count'))
             ->whereNotNull('detected_barangay')
             ->where('detected_barangay', '!=', 'Location Not Available')
-            ->where('detected_barangay', '!=', 'Outside Santa Cruz Coverage')
+            ->where('detected_barangay', '!=', 'Outside Santa Cruz Coverage');
+
+        $this->applyChartPeriod($reportsByBarangayQuery, $barangayPeriod);
+
+        $reportsByBarangay = $reportsByBarangayQuery
             ->groupBy('detected_barangay')
             ->orderBy('count', 'DESC')
             ->get();
@@ -113,8 +126,12 @@ class AnalyticsReportController extends Controller
             ->get();
 
         // Official statistics always use the category confirmed by staff.
-        $officialReportsByViolationType = ViolationReport::officialStatistics()
-            ->selectRaw('official_violation_type as selected_violation_type, COUNT(*) as count')
+        $officialReportsByViolationTypeQuery = ViolationReport::officialStatistics()
+            ->selectRaw('official_violation_type as selected_violation_type, COUNT(*) as count');
+
+        $this->applyChartPeriod($officialReportsByViolationTypeQuery, $violationPeriod);
+
+        $officialReportsByViolationType = $officialReportsByViolationTypeQuery
             ->groupBy('official_violation_type')
             ->orderBy('count', 'DESC')
             ->get();
@@ -172,7 +189,11 @@ class AnalyticsReportController extends Controller
             });
 
         // 7. Top Recurring Violation Type
-        $topRecurringViolationType = $officialReportsByViolationType->first();
+        $topRecurringViolationType = ViolationReport::officialStatistics()
+            ->selectRaw('official_violation_type as selected_violation_type, COUNT(*) as count')
+            ->groupBy('official_violation_type')
+            ->orderBy('count', 'DESC')
+            ->first();
 
         // ======================================
         // PACKAGE DATA FOR VIEW
@@ -203,8 +224,19 @@ class AnalyticsReportController extends Controller
             'reportsByStatus',
             'monthlyTrend',
             'resolvedVsPending',
-            'responseTimeByBarangay'
+            'responseTimeByBarangay',
+            'barangayPeriod',
+            'violationPeriod'
         ));
+    }
+
+    private function applyChartPeriod(Builder $query, string $period): void
+    {
+        if ($period === '7d') {
+            $query->where('created_at', '>=', now()->subDays(7));
+        } elseif ($period === '30d') {
+            $query->where('created_at', '>=', now()->subDays(30));
+        }
     }
 
     public function export(Request $request)

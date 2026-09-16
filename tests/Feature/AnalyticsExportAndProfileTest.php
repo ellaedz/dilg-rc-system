@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Models\ViolationReport;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class AnalyticsExportAndProfileTest extends TestCase
@@ -92,6 +93,49 @@ class AnalyticsExportAndProfileTest extends TestCase
                 ->assertSee("profile-{$index}@example.test")
                 ->assertSee('Assigned barangay records');
         }
+    }
+
+    public function test_dilg_chart_periods_filter_their_own_data_without_changing_overall_totals(): void
+    {
+        $admin = User::factory()->create(['role' => 'dilg_admin', 'assigned_barangay' => null]);
+
+        $old = $this->report('RCV-2026-9301', 'Alipit');
+        $recent = $this->report('RCV-2026-9302', 'Calios');
+
+        foreach ([$old, $recent] as $report) {
+            $report->forceFill([
+                'official_violation_type' => 'Illegal Parking',
+                'verified_at' => now(),
+                'verification_status' => 'Valid Violation',
+                'municipality_validated' => true,
+                'is_test_data' => false,
+                'is_duplicate' => false,
+            ])->save();
+        }
+
+        DB::table('violation_reports')->where('id', $old->id)
+            ->update(['created_at' => now()->subDays(20)]);
+
+        $this->actingAs($admin)
+            ->get('/analytics-reports?barangay_period=7d&violation_period=30d')
+            ->assertOk()
+            ->assertViewHas('barangayPeriod', '7d')
+            ->assertViewHas('violationPeriod', '30d')
+            ->assertViewHas('reportsByBarangay', fn ($rows) => $rows->count() === 1 && $rows->first()->detected_barangay === 'Calios')
+            ->assertViewHas('officialReportsByViolationType', fn ($rows) => $rows->count() === 1 && (int) $rows->first()->count === 2)
+            ->assertViewHas('stats', fn ($stats) => $stats['total_reports'] === 2);
+
+        $this->actingAs($admin)
+            ->get('/analytics-reports?barangay_period=invalid')
+            ->assertSessionHasErrors('barangay_period');
+    }
+
+    public function test_login_page_links_to_the_public_landing_page(): void
+    {
+        $this->get('/login')
+            ->assertOk()
+            ->assertSee(route('welcome'))
+            ->assertSee('Back to CIVICLEAR Home');
     }
 
     private function report(string $reportNumber, string $barangay): ViolationReport

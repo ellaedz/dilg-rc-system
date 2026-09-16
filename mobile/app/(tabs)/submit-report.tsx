@@ -17,12 +17,10 @@ import { colors } from '@/constants/colors';
 import { useReportDraft } from '@/hooks/useReportDraft';
 import { useTrackingIds } from '@/hooks/useTrackingIds';
 import {
-  getReportStatus,
   submitMobileReport,
   toApiError,
   validateMunicipality,
 } from '@/services/api';
-import { waitForAiResult } from '@/services/reportPolling';
 import { runSingleSubmission } from '@/services/submissionCoordinator';
 import {
   discardSubmissionRecovery,
@@ -66,7 +64,7 @@ export default function SubmitReportScreen() {
     continueStoredDraft,
     discardStoredDraft,
   } = useReportDraft();
-  const { saveSubmittedReport, updateTrackingRecordFromStatus } = useTrackingIds();
+  const { saveSubmittedReport } = useTrackingIds();
   const [errors, setErrors] = useState<ReportDraftValidationErrors>({});
   const [feedback, setFeedback] = useState<string | null>(null);
   const [permissionMessage, setPermissionMessage] = useState<string | null>(null);
@@ -352,30 +350,15 @@ export default function SubmitReportScreen() {
       throw error;
     }
 
-    setUploadProgress(84);
-    try {
-      const aiResult = await waitForAiResult({
-        fetchStatus: () => getReportStatus(submitted.trackingToken),
-        onStatus: async (nextStatus, attempt) => {
-          await updateTrackingRecordFromStatus(localRecordId, nextStatus);
-          setUploadProgress(Math.min(98, 84 + attempt));
-        },
-      });
-      if (aiResult.aiProcessingStatus === 'completed' || aiResult.aiProcessingStatus === 'failed') {
-        setUploadProgress(100);
-        await new Promise((resolve) => setTimeout(resolve, 350));
-      }
-    } catch {
-      // The report is already safely submitted. The result screen continues
-      // automatic polling if a temporary connection problem occurs here.
-    }
-
     try {
       await discardSubmissionRecovery(record.localDraftId);
       if (draftRef.current.localDraftId === record.localDraftId) await clearDraft();
     } catch {
       setFeedback('The report was submitted, but local cleanup needs attention.');
     }
+    // The server and local tracking record are saved. AI status is updated by
+    // polling on the confirmation screen; it must not delay confirmation.
+    setUploadProgress(100);
     router.push(`/submission-success?localRecordId=${encodeURIComponent(localRecordId)}`);
     return submitted;
   }

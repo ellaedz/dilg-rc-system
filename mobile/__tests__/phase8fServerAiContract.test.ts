@@ -6,12 +6,7 @@ import {
   parseSubmittedReport,
 } from '@/services/api';
 import { validateApiBaseUrl } from '@/constants/config';
-import {
-  isAiResultReady,
-  nextPollingDelay,
-  startReportPolling,
-  waitForAiResult,
-} from '@/services/reportPolling';
+import { nextPollingDelay, startReportPolling } from '@/services/reportPolling';
 import { runSingleSubmission } from '@/services/submissionCoordinator';
 import { createIdempotencyKey, transitionSubmissionState } from '@/services/submissionState';
 import { maskTrackingToken } from '@/services/trackingCredentials';
@@ -273,7 +268,7 @@ describe('Phase 8F server-AI contract', () => {
     expect(nextPollingDelay(99)).toBe(30_000);
   });
 
-  test('submission waits until the automatic AI result is ready', async () => {
+  test('confirmation polling updates AI results after an initial pending status', async () => {
     const pending = { ...status('Submitted'), aiProcessingStatus: 'pending' };
     const completed = {
       ...status('Submitted'),
@@ -281,25 +276,24 @@ describe('Phase 8F server-AI contract', () => {
       finalAiCategory: 'illegal_parking',
       finalAiConfidence: 0.86,
     };
-    const statuses = [pending, completed];
-    const attempts: number[] = [];
+    const resolved = { ...status('Resolved'), aiProcessingStatus: 'completed' };
+    const statuses = [pending, completed, resolved];
+    const observed: ReportStatus[] = [];
     const sleeps: number[] = [];
 
-    const result = await waitForAiResult({
+    const polling = startReportPolling({
       fetchStatus: async () => statuses.shift()!,
-      onStatus: (_nextStatus, attempt) => {
-        attempts.push(attempt);
+      onStatus: (nextStatus) => {
+        observed.push(nextStatus);
       },
       sleep: async (milliseconds) => {
         sleeps.push(milliseconds);
       },
     });
 
-    expect(result).toBe(completed);
-    expect(attempts).toEqual([1, 2]);
-    expect(sleeps).toEqual([3_000]);
-    expect(isAiResultReady(pending)).toBe(false);
-    expect(isAiResultReady(completed)).toBe(true);
-    expect(isAiResultReady({ ...pending, aiProcessingStatus: 'failed' })).toBe(true);
+    await polling.done;
+    expect(observed).toEqual([pending, completed, resolved]);
+    expect(observed[1].finalAiCategory).toBe('illegal_parking');
+    expect(sleeps).toEqual([5_000, 5_000]);
   });
 });

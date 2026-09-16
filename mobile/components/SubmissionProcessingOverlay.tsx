@@ -43,7 +43,7 @@ export function SubmissionProcessingOverlay({ visible, progress }: SubmissionPro
             <Text style={styles.title}>Processing Your Report</Text>
             <Text style={styles.subtitle}>
               {progress >= 80
-                ? 'AI is checking the photo and report description.'
+                ? 'Saving your tracking details. AI analysis will update on the next screen.'
                 : 'Please wait while we securely save your submission.'}
             </Text>
           </View>
@@ -57,7 +57,7 @@ export function SubmissionProcessingOverlay({ visible, progress }: SubmissionPro
             <View style={styles.steps}>
               <Text style={styles.activeStep}>• Preparing report details</Text>
               <Text style={boundedProgress >= 20 ? styles.activeStep : styles.pendingStep}>• Uploading photo evidence</Text>
-              <Text style={boundedProgress >= 80 ? styles.activeStep : styles.pendingStep}>• Analyzing photo and description</Text>
+              <Text style={boundedProgress >= 80 ? styles.activeStep : styles.pendingStep}>• Saving report reference</Text>
             </View>
             <ActivityIndicator color={colors.primaryBlue} size="small" />
             <Text style={styles.powered}>Powered by CIVICLEAR secure server processing</Text>

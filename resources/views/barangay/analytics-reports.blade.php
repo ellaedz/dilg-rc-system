@@ -380,7 +380,7 @@ $recentReports = $recentReports ?? collect();
                 @forelse($recentReports as $report)
                     <tr>
                         <td><strong>{{ $report->report_id }}</strong></td>
-                        <td>{{ $report->citizen_violation_type_label }}</td>
+                        <td>{{ $report->display_violation_type }}</td>
                         <td><x-status-badge :status="$report->status" size="sm" /></td>
                         <td>{{ $report->created_at->format('M d, Y') }}</td>
                         <td>

@@ -49,6 +49,55 @@ class Phase11AStaffVerificationWorkflowTest extends TestCase
         $this->assertStringContainsString('agreed with AI', $timeline->remarks);
     }
 
+    public function test_staff_and_admin_see_the_official_type_on_report_details_and_location_map_after_response_update(): void
+    {
+        $staff = $this->staff('Alipit');
+        $admin = User::factory()->create(['role' => 'dilg_admin', 'assigned_barangay' => null]);
+        $report = $this->pendingReport('RCV-2026-9110', 'Alipit');
+
+        $this->assertSame('Awaiting Staff Classification', $report->display_violation_type);
+        $this->actingAs($staff)->get(route('violation-reports.show', $report))
+            ->assertOk()
+            ->assertSee('violation_type: "Awaiting Staff Classification"', false)
+            ->assertDontSee('violation_type: null', false);
+
+        $this->actingAs($staff)->post(
+            route('barangay.incoming-reports.verify', ['barangay' => 'Alipit', 'report' => $report]),
+            ['official_violation_type' => 'Illegal Parking']
+        )->assertRedirect();
+
+        $this->actingAs($staff)->put(
+            route('barangay.report.update', ['barangay' => 'Alipit', 'report' => $report]),
+            ['status' => 'In Progress']
+        )->assertRedirect();
+
+        $report->refresh();
+        $this->assertSame('In Progress', $report->status);
+        $this->assertSame('Unclassified', $report->selected_violation_type);
+        $this->assertSame('Illegal Parking', $report->display_violation_type);
+
+        foreach ([$staff, $admin] as $user) {
+            $this->actingAs($user)->get(route('violation-reports.show', $report))
+                ->assertOk()
+                ->assertSee('<div class="detail-value"><strong>Illegal Parking</strong></div>', false)
+                ->assertSee('violation_type: "Illegal Parking"', false)
+                ->assertDontSee('violation_type: null', false)
+                ->assertDontSee('Awaiting Staff Classification');
+        }
+    }
+
+    public function test_official_type_overrides_a_different_citizen_selection_without_rewriting_it(): void
+    {
+        $report = $this->pendingReport('RCV-2026-9111', 'Alipit');
+        $report->update([
+            'selected_violation_type' => 'Road Obstruction',
+            'official_violation_type' => 'Illegal Parking',
+        ]);
+
+        $this->assertSame('Road Obstruction', $report->citizen_violation_type_label);
+        $this->assertSame('Illegal Parking', $report->display_violation_type);
+    }
+
     public function test_staff_correction_requires_a_reason_and_preserves_the_ai_result(): void
     {
         $staff = $this->staff('Alipit');

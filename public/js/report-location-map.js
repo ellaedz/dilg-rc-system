@@ -78,16 +78,16 @@ function initializeReportLocationMap(reportData, geojsonUrl) {
     // Create report popup content
     const popupContent = '<div style="font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; min-width: 200px;">' +
         '<div style="font-size: 1rem; font-weight: 700; color: #333333; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">' +
-        '<span style="font-size: 1.125rem;">📋</span>' + reportData.tracking_id + '</div>' +
+        '<span style="font-size: 1.125rem;">📋</span>' + escapeMapText(mapLabel(reportData.tracking_id, 'Report')) + '</div>' +
         '<div style="background: #f9fafb; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem;">' +
         '<div style="font-size: 0.7rem; color: #6b7280; text-transform: uppercase; margin-bottom: 0.25rem;">VIOLATION TYPE</div>' +
-        '<div style="font-size: 0.875rem; font-weight: 600; color: #333333; margin-bottom: 0.5rem;">' + reportData.violation_type + '</div>' +
+        '<div style="font-size: 0.875rem; font-weight: 600; color: #333333; margin-bottom: 0.5rem;">' + escapeMapText(mapLabel(reportData.violation_type, 'Awaiting Staff Classification')) + '</div>' +
         '<div style="font-size: 0.7rem; color: #6b7280; text-transform: uppercase; margin-bottom: 0.25rem;">STATUS</div>' +
-        '<div style="display: inline-block; padding: 0.25rem 0.5rem; background: ' + markerColor + '; color: white; font-size: 0.75rem; font-weight: 600; border-radius: 0.25rem; margin-bottom: 0.5rem;">' + reportData.status + '</div>' +
+        '<div style="display: inline-block; padding: 0.25rem 0.5rem; background: ' + markerColor + '; color: white; font-size: 0.75rem; font-weight: 600; border-radius: 0.25rem; margin-bottom: 0.5rem;">' + escapeMapText(mapLabel(reportData.status, 'Unknown')) + '</div>' +
         '<div style="font-size: 0.7rem; color: #6b7280; text-transform: uppercase; margin-bottom: 0.25rem;">DETECTED BARANGAY</div>' +
-        '<div style="font-size: 0.875rem; font-weight: 600; color: #333333; margin-bottom: 0.5rem;">' + reportData.detected_barangay + '</div>' +
+        '<div style="font-size: 0.875rem; font-weight: 600; color: #333333; margin-bottom: 0.5rem;">' + escapeMapText(mapLabel(reportData.detected_barangay, 'Not yet assigned')) + '</div>' +
         '<div style="font-size: 0.7rem; color: #6b7280; text-transform: uppercase; margin-bottom: 0.25rem;">LOCATION CONTEXT</div>' +
-        '<div style="font-size: 0.875rem; color: #333333;">' + (reportData.location_context || 'N/A') + '</div></div>' +
+        '<div style="font-size: 0.875rem; color: #333333;">' + escapeMapText(mapLabel(reportData.location_context, 'N/A')) + '</div></div>' +
         '</div>';
     
     reportMarker.bindPopup(popupContent, { maxWidth: 300 }).openPopup();
@@ -125,7 +125,7 @@ function loadBarangayBoundaries(map, geojsonUrl, detectedBarangay) {
                     const barangayName = getBarangayName(feature.properties);
                     
                     // Highlight detected barangay
-                    if (barangayName && barangayName.toLowerCase() === detectedBarangay.toLowerCase()) {
+                    if (barangayName && typeof detectedBarangay === 'string' && barangayName.toLowerCase() === detectedBarangay.toLowerCase()) {
                         return {
                             fillColor: '#F4C542',
                             weight: 4,
@@ -148,7 +148,7 @@ function loadBarangayBoundaries(map, geojsonUrl, detectedBarangay) {
                     const barangayName = getBarangayName(feature.properties);
                     
                     const popupContent = '<div style="font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif;">' +
-                        '<div style="font-size: 0.9375rem; font-weight: 700; color: #333333;">' + barangayName + '</div>' +
+                        '<div style="font-size: 0.9375rem; font-weight: 700; color: #333333;">' + escapeMapText(barangayName) + '</div>' +
                         '<div style="font-size: 0.75rem; color: #6b7280;">Santa Cruz, Laguna</div>' +
                         '</div>';
                     
@@ -210,15 +210,34 @@ function addBarangayOfficeMarker(map, reportData) {
     // Create office popup content
     const popupContent = '<div style="font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; min-width: 200px;">' +
         '<div style="font-size: 1rem; font-weight: 700; color: #333333; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">' +
-        '<span style="font-size: 1.125rem;">🏢</span>' + reportData.assigned_barangay_office + '</div>' +
+        '<span style="font-size: 1.125rem;">🏢</span>' + escapeMapText(mapLabel(reportData.assigned_barangay_office, 'Barangay Office')) + '</div>' +
         '<div style="background: #fef3c7; padding: 0.75rem; border-radius: 0.5rem; border-left: 3px solid #F4C542;">' +
         '<div style="font-size: 0.7rem; color: #92400e; text-transform: uppercase; margin-bottom: 0.25rem;">RECOMMENDED BARANGAY OFFICE FOR FOLLOW-UP</div>' +
-        '<div style="font-size: 0.875rem; color: #333333; margin-top: 0.5rem;">' + reportData.detected_barangay + ', Santa Cruz, Laguna</div>' +
+        '<div style="font-size: 0.875rem; color: #333333; margin-top: 0.5rem;">' + escapeMapText(mapLabel(reportData.detected_barangay, 'Barangay not assigned')) + ', Santa Cruz, Laguna</div>' +
         '</div></div>';
     
     officeMarker.bindPopup(popupContent, { maxWidth: 300 });
     
     console.log('✅ Barangay office marker added');
+}
+
+// Keep empty legacy map fields from rendering as literal "null".
+function mapLabel(value, fallback) {
+    if (typeof value !== 'string' || !value.trim() || value.trim().toLowerCase() === 'null') {
+        return fallback;
+    }
+
+    return value.trim();
+}
+
+function escapeMapText(value) {
+    return value.replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    })[char]);
 }
 
 // Export for global access

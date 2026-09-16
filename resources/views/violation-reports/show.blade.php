@@ -241,7 +241,7 @@
 
                 <div class="detail-row">
                     <div class="detail-label">Violation Type:</div>
-                    <div class="detail-value"><strong>{{ $violationReport->citizen_violation_type_label }}</strong></div>
+                    <div class="detail-value"><strong>{{ $violationReport->display_violation_type }}</strong></div>
                 </div>
 
                 <div class="detail-row">
@@ -517,14 +517,14 @@
             <script src="{{ asset('js/leaflet.js') }}"></script>
             
             <!-- Report Location Map JS -->
-            <script src="{{ asset('js/report-location-map.js') }}"></script>
+            <script src="{{ asset('js/report-location-map.js') }}?v=20260917"></script>
             
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
                     // Prepare report data
                     const reportData = {
                         tracking_id: @json($violationReport->report_id),
-                        violation_type: @json($violationReport->citizen_selected_violation_type),
+                        violation_type: @json($violationReport->display_violation_type),
                         status: @json($violationReport->status),
                         detected_barangay: @json($violationReport->effective_barangay),
                         assigned_barangay_office: @json($violationReport->assigned_barangay_office),

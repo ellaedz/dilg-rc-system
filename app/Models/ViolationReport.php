@@ -322,6 +322,13 @@ class ViolationReport extends Model
         return CitizenViolationType::staffLabel($this->selected_violation_type);
     }
 
+    public function getDisplayViolationTypeAttribute(): string
+    {
+        return filled($this->official_violation_type)
+            ? $this->official_violation_type
+            : $this->citizen_violation_type_label;
+    }
+
     public function scopeCitizenClassified($query)
     {
         return $query->where(

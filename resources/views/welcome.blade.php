@@ -43,12 +43,15 @@
         .welcome-brand strong { display: block; font-size: 1.04rem; letter-spacing: 0.025em; }
         .welcome-brand span { display: block; color: #bcd6f3; font-size: 0.72rem; }
         .welcome-links { display: flex; align-items: center; gap: 6px; }
-        .welcome-links > a:not(.welcome-login) { padding: 10px 12px; color: #d9e9fb; font-size: 0.88rem; font-weight: 650; border-radius: 10px; }
-        .welcome-links > a:not(.welcome-login):hover { color: white; background: rgba(255, 255, 255, 0.1); }
+        .welcome-links > a:not(.welcome-login) { position: relative; padding: 10px 11px; color: #d9e9fb; font-size: 0.88rem; font-weight: 650; opacity: 0.72; }
+        .welcome-links > a:not(.welcome-login)::after { content: ""; position: absolute; right: 11px; bottom: 5px; left: 11px; height: 2px; background: #70d8f3; transform: scaleX(0); transform-origin: left; transition: transform 180ms ease; }
+        .welcome-links > a:not(.welcome-login):hover, .welcome-links > a:not(.welcome-login):focus-visible { color: white; opacity: 1; }
+        .welcome-links > a:not(.welcome-login):hover::after, .welcome-links > a:not(.welcome-login):focus-visible::after { transform: scaleX(1); }
 
         .welcome-login, .welcome-button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 46px; padding: 0 19px; border: 1px solid transparent; border-radius: 12px; font-size: 0.9rem; font-weight: 800; cursor: pointer; }
-        .welcome-login { margin-left: 8px; color: var(--welcome-deep); background: white; box-shadow: 0 10px 24px rgba(3, 16, 46, 0.2); }
-        .welcome-login:hover { color: var(--welcome-blue); transform: translateY(-1px); }
+        .welcome-login svg, .welcome-button svg { width: 17px; height: 17px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+        .welcome-login { margin-left: 9px; color: white; border-color: rgba(255, 255, 255, 0.46); border-radius: 9px; background: transparent; box-shadow: none; }
+        .welcome-login:hover { color: white; border-color: rgba(255, 255, 255, 0.82); background: rgba(255, 255, 255, 0.08); transform: translateY(-1px); }
         .welcome-menu { display: none; width: 44px; height: 44px; color: white; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; background: rgba(255, 255, 255, 0.08); }
 
         .welcome-hero { position: relative; min-height: 760px; display: flex; align-items: center; color: white; background: var(--welcome-navy); isolation: isolate; }
@@ -57,14 +60,14 @@
         .welcome-hero-grid { width: 100%; display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(330px, 0.72fr); align-items: center; gap: 72px; padding-block: 154px 92px; }
         .welcome-eyebrow { display: inline-flex; align-items: center; gap: 9px; margin-bottom: 20px; color: #9fdef5; font-size: 0.74rem; font-weight: 850; letter-spacing: 0.14em; text-transform: uppercase; }
         .welcome-eyebrow::before { content: ""; width: 34px; height: 2px; background: var(--welcome-cyan); }
-        .welcome-hero h1 { max-width: 760px; margin: 0; font-size: clamp(3rem, 6.2vw, 5.6rem); line-height: 0.98; letter-spacing: -0.058em; text-wrap: balance; }
-        .welcome-hero h1 span { display: block; color: #74d7f2; }
+        .welcome-hero h1 { max-width: 760px; margin: 0; font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; font-size: clamp(3.2rem, 6.2vw, 5.75rem); font-weight: 600; line-height: 0.96; letter-spacing: -0.045em; text-wrap: balance; }
+        .welcome-hero h1 span { display: block; color: #82def5; font-style: italic; font-weight: 500; }
         .welcome-hero-copy > p { max-width: 670px; margin: 26px 0 0; color: #d2e4f8; font-size: clamp(1rem, 1.5vw, 1.16rem); }
         .welcome-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
-        .welcome-button--primary { color: white; background: linear-gradient(135deg, #1f6ee5, #149ed4); box-shadow: 0 14px 30px rgba(7, 112, 205, 0.34); }
-        .welcome-button--primary:hover { transform: translateY(-2px); box-shadow: 0 18px 34px rgba(7, 112, 205, 0.44); }
-        .welcome-button--ghost { color: white; border-color: rgba(255, 255, 255, 0.38); background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(8px); }
-        .welcome-button--ghost:hover { background: rgba(255, 255, 255, 0.14); }
+        .welcome-button--primary { color: white; border-radius: 9px; background: #168fd2; box-shadow: none; }
+        .welcome-button--primary:hover { background: #21a1df; transform: translateY(-1px); }
+        .welcome-button--ghost { color: white; border-color: rgba(255, 255, 255, 0.42); border-radius: 9px; background: transparent; backdrop-filter: blur(8px); }
+        .welcome-button--ghost:hover { border-color: rgba(255, 255, 255, 0.76); background: rgba(255, 255, 255, 0.07); transform: translateY(-1px); }
         .welcome-facts { display: flex; flex-wrap: wrap; gap: 26px; margin: 42px 0 0; padding: 0; list-style: none; }
         .welcome-facts li { display: flex; align-items: center; gap: 10px; color: #d7e8fa; font-size: 0.84rem; font-weight: 650; }
         .welcome-facts i { color: #65d9f4; }
@@ -77,7 +80,8 @@
         .welcome-live::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #3ee3a1; box-shadow: 0 0 0 5px rgba(62, 227, 161, 0.12); }
         .welcome-flow-list { position: relative; display: grid; gap: 10px; }
         .welcome-flow-item { display: grid; grid-template-columns: 42px 1fr auto; align-items: center; gap: 13px; min-height: 68px; padding: 10px 12px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; background: rgba(4, 25, 64, 0.44); }
-        .welcome-flow-icon { width: 42px; height: 42px; display: grid; place-items: center; color: #82def5; border-radius: 12px; background: rgba(42, 178, 224, 0.14); }
+        .welcome-flow-item > .welcome-flow-icon { width: 42px; height: 42px; display: grid; place-items: center; margin: 0; color: #91e5f8; border: 1px solid rgba(145, 229, 248, 0.22); border-radius: 11px; background: rgba(42, 178, 224, 0.1); }
+        .welcome-flow-icon svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
         .welcome-flow-item strong { display: block; font-size: 0.9rem; }
         .welcome-flow-item span { display: block; margin-top: 1px; color: #aac3df; font-size: 0.74rem; }
         .welcome-flow-number { color: rgba(255, 255, 255, 0.35); font-size: 0.7rem; font-weight: 800; }
@@ -243,7 +247,10 @@
                     <a href="#mandate">DILG mandate</a>
                     <a href="#coverage">Report coverage</a>
                     <a href="#mobile-app">Mobile app</a>
-                    <a class="welcome-login" href="{{ route('login') }}"><i class="fas fa-shield-halved" aria-hidden="true"></i> Admin / Staff Login</a>
+                    <a class="welcome-login" href="{{ route('login') }}">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5.5 5.6v5.2c0 4.2 2.6 7.9 6.5 9.7 3.9-1.8 6.5-5.5 6.5-9.7V5.6L12 3Z"/><path d="M9.5 12.2 11.2 14l3.6-4"/></svg>
+                        Admin / Staff Login
+                    </a>
                 </div>
             </nav>
         </header>
@@ -256,8 +263,14 @@
                         <h1>Clear roads. <span>Connected communities.</span></h1>
                         <p>CIVICLEAR connects citizen reports, GPS-based barangay routing, AI-assisted review, staff verification, and response tracking for road-clearing operations across Santa Cruz, Laguna.</p>
                         <div class="welcome-actions">
-                            <a class="welcome-button welcome-button--primary" href="{{ route('login') }}"><i class="fas fa-right-to-bracket" aria-hidden="true"></i> Enter Staff Portal</a>
-                            <a class="welcome-button welcome-button--ghost" href="#mobile-app"><i class="fas fa-mobile-screen-button" aria-hidden="true"></i> Explore the Mobile App</a>
+                            <a class="welcome-button welcome-button--primary" href="{{ route('login') }}">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-4"/><path d="m10 8 4 4-4 4M14 12H3"/></svg>
+                                Enter Staff Portal
+                            </a>
+                            <a class="welcome-button welcome-button--ghost" href="#mobile-app">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M10.5 18.2h3"/></svg>
+                                Explore the Mobile App
+                            </a>
                         </div>
                         <ul class="welcome-facts" aria-label="System facts">
                             <li><i class="fas fa-location-dot" aria-hidden="true"></i> 26 barangays</li>
@@ -269,10 +282,10 @@
                     <aside class="welcome-flow" aria-label="CIVICLEAR operational flow">
                         <div class="welcome-flow-title"><strong>From report to response</strong><span class="welcome-live">Connected workflow</span></div>
                         <div class="welcome-flow-list">
-                            <div class="welcome-flow-item"><span class="welcome-flow-icon"><i class="fas fa-camera" aria-hidden="true"></i></span><span><strong>Citizen report</strong><span>Photo, description, and GPS evidence</span></span><span class="welcome-flow-number">01</span></div>
-                            <div class="welcome-flow-item"><span class="welcome-flow-icon"><i class="fas fa-map-location-dot" aria-hidden="true"></i></span><span><strong>Barangay routing</strong><span>Boundary-aware municipal assignment</span></span><span class="welcome-flow-number">02</span></div>
-                            <div class="welcome-flow-item"><span class="welcome-flow-icon"><i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i></span><span><strong>Assisted review</strong><span>AI suggestion with staff confirmation</span></span><span class="welcome-flow-number">03</span></div>
-                            <div class="welcome-flow-item"><span class="welcome-flow-icon"><i class="fas fa-circle-check" aria-hidden="true"></i></span><span><strong>Tracked action</strong><span>Verification, response, and resolution timeline</span></span><span class="welcome-flow-number">04</span></div>
+                            <div class="welcome-flow-item"><span class="welcome-flow-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8.5h3l1.4-2h7.2l1.4 2h3v9.5H4Z"/><circle cx="12" cy="13" r="3.2"/></svg></span><span><strong>Citizen report</strong><span>Photo, description, and GPS evidence</span></span><span class="welcome-flow-number">01</span></div>
+                            <div class="welcome-flow-item"><span class="welcome-flow-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18.5c2.5-4 4.7-5.8 7-5.5 2.1.3 3.4-1 4.8-3.8"/><path d="M17 6.5c0 2.8-3 5.6-3 5.6s-3-2.8-3-5.6a3 3 0 1 1 6 0Z"/><circle cx="14" cy="6.5" r=".7"/></svg></span><span><strong>Barangay routing</strong><span>Boundary-aware municipal assignment</span></span><span class="welcome-flow-number">02</span></div>
+                            <div class="welcome-flow-item"><span class="welcome-flow-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 19 9.7-9.7M13.4 5.6l5 5M16.5 3v2.2M20.6 7.1h-2.2M8 5l.7 1.7L10.5 7l-1.8.7L8 9.5l-.7-1.8L5.5 7l1.8-.3L8 5Z"/></svg></span><span><strong>Assisted review</strong><span>AI suggestion with staff confirmation</span></span><span class="welcome-flow-number">03</span></div>
+                            <div class="welcome-flow-item"><span class="welcome-flow-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m8.2 12.2 2.4 2.4 5.3-5.4"/></svg></span><span><strong>Tracked action</strong><span>Verification, response, and resolution timeline</span></span><span class="welcome-flow-number">04</span></div>
                         </div>
                     </aside>
                 </div>
@@ -395,7 +408,7 @@
                 <div class="welcome-container">
                     <div class="welcome-cta-card">
                         <div><h2>Authorized municipal or barangay personnel?</h2><p>Continue to your assigned CIVICLEAR monitoring workspace.</p></div>
-                        <a class="welcome-button" href="{{ route('login') }}">Open Staff Login <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                        <a class="welcome-button" href="{{ route('login') }}">Open Staff Login <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5"/></svg></a>
                     </div>
                 </div>
             </section>

@@ -125,28 +125,43 @@
         .welcome-capability h3 { margin: 20px 0 8px; font-size: 1.05rem; }
         .welcome-capability p { margin: 0; color: var(--welcome-muted); font-size: 0.88rem; }
 
-        .welcome-mandate-layout { display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(340px, 0.74fr); gap: 28px; align-items: stretch; }
-        .welcome-memo { padding: 38px; border: 1px solid #cfe1f5; border-radius: 7px; background: linear-gradient(145deg, #ffffff, #f1f7ff); box-shadow: 0 18px 46px rgba(30, 78, 139, 0.06); }
-        .welcome-memo-badge { display: inline-flex; align-items: center; gap: 8px; padding: 7px 10px; color: #0f5d9e; border-radius: 999px; background: #dff3ff; font-size: 0.7rem; font-weight: 850; letter-spacing: 0.08em; text-transform: uppercase; }
-        .welcome-memo h3 { margin: 22px 0 12px; font-size: clamp(1.55rem, 3vw, 2.25rem); line-height: 1.15; letter-spacing: -0.03em; }
+        .welcome-mandate-layout { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.72fr); gap: 24px; align-items: start; }
+        .welcome-memo { padding: 38px; border: 1px solid #dbe7f4; border-top: 3px solid var(--welcome-blue); border-radius: 7px; background: white; box-shadow: none; }
+        .welcome-memo-badge { display: inline-flex; align-items: center; gap: 8px; padding: 0; color: #0f5d9e; background: transparent; font-size: 0.7rem; font-weight: 850; letter-spacing: 0.08em; text-transform: uppercase; }
+        .welcome-memo h3 { max-width: 610px; margin: 22px 0 12px; font-size: clamp(1.55rem, 2.5vw, 2.05rem); line-height: 1.15; letter-spacing: -0.03em; text-wrap: balance; }
         .welcome-memo > p { margin: 0; color: var(--welcome-muted); }
         .welcome-policy-list { display: grid; gap: 12px; margin: 28px 0 0; padding: 0; list-style: none; }
         .welcome-policy-list li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; color: #314661; font-size: 0.9rem; }
         .welcome-policy-list i { margin-top: 3px; color: var(--welcome-green); }
         .welcome-source-link { display: inline-flex; align-items: center; gap: 8px; margin-top: 28px; color: var(--welcome-blue); font-size: 0.84rem; font-weight: 800; }
         .welcome-source-link:hover { text-decoration: underline; }
-        .welcome-supporting { display: grid; gap: 14px; }
-        .welcome-support-card { padding: 25px; border: 1px solid var(--welcome-line); border-radius: 7px; background: white; }
+        .welcome-supporting { overflow: hidden; border: 1px solid var(--welcome-line); border-top: 3px solid #79bfe7; border-radius: 7px; background: white; }
+        .welcome-support-card { padding: 27px 26px; border: 0; border-bottom: 1px solid var(--welcome-line); background: transparent; }
         .welcome-support-card span { color: var(--welcome-sky); font-size: 0.7rem; font-weight: 850; letter-spacing: 0.08em; text-transform: uppercase; }
         .welcome-support-card h3 { margin: 8px 0 9px; font-size: 1rem; }
         .welcome-support-card p { margin: 0; color: var(--welcome-muted); font-size: 0.85rem; }
-        .welcome-legal-note { display: flex; gap: 11px; padding: 18px 20px; color: #66531a; border: 1px solid #f0d88a; border-radius: 16px; background: #fff9e8; font-size: 0.8rem; }
+        .welcome-legal-note { display: flex; align-items: flex-start; gap: 11px; padding: 20px 26px; color: #66531a; border: 0; background: #fffaf0; font-size: 0.8rem; }
+        .welcome-legal-note i { margin-top: 4px; }
 
         .welcome-class-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
-        .welcome-class-card { min-height: 192px; padding: 23px 20px; border: 1px solid var(--welcome-line); border-radius: 7px; background: white; box-shadow: 0 9px 28px rgba(30, 72, 123, 0.035); }
-        .welcome-class-icon { width: 44px; height: 44px; display: grid; place-items: center; color: white; border-radius: 14px; background: linear-gradient(135deg, #1d5fc3, #1aa6d4); }
-        .welcome-class-card h3 { margin: 19px 0 8px; font-size: 0.94rem; line-height: 1.25; }
+        .welcome-class-card { position: relative; overflow: hidden; min-height: 184px; padding: 22px 20px; border: 1px solid #e1eaf4; border-radius: 7px; background: white; box-shadow: none; transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease; }
+        .welcome-class-card::before { content: ""; position: absolute; top: 0; right: 0; left: 0; height: 2px; background: linear-gradient(90deg, var(--welcome-blue), var(--welcome-cyan)); transform: scaleX(0); transform-origin: left; transition: transform 260ms ease; }
+        .welcome-class-card:hover { transform: translateY(-5px); border-color: #bad3ee; box-shadow: 0 14px 30px rgba(24, 78, 143, 0.09); }
+        .welcome-class-card:hover::before { transform: scaleX(1); }
+        .welcome-class-icon { width: 42px; height: 42px; display: grid; place-items: center; color: #1767b5; border: 1px solid #cfe5f7; border-radius: 10px; background: #eef8ff; transition: color 220ms ease, background 220ms ease, transform 220ms ease; }
+        .welcome-class-card:hover .welcome-class-icon { color: white; background: var(--welcome-blue); transform: translateY(-2px); }
+        .welcome-class-card h3 { margin: 18px 0 8px; font-size: 0.94rem; line-height: 1.25; }
         .welcome-class-card p { margin: 0; color: var(--welcome-muted); font-size: 0.78rem; line-height: 1.5; }
+        .welcome-class-grid--animated .welcome-class-card { opacity: 0; }
+        .welcome-class-grid--animated.is-visible .welcome-class-card { animation: welcome-class-reveal 520ms ease both; }
+        .welcome-class-grid--animated.is-visible .welcome-class-card:nth-child(2) { animation-delay: 80ms; }
+        .welcome-class-grid--animated.is-visible .welcome-class-card:nth-child(3) { animation-delay: 160ms; }
+        .welcome-class-grid--animated.is-visible .welcome-class-card:nth-child(4) { animation-delay: 240ms; }
+        .welcome-class-grid--animated.is-visible .welcome-class-card:nth-child(5) { animation-delay: 320ms; }
+        @keyframes welcome-class-reveal {
+            from { opacity: 0; filter: blur(2px); }
+            to { opacity: 1; filter: blur(0); }
+        }
         .welcome-class-note { margin: 22px 0 0; color: var(--welcome-muted); font-size: 0.8rem; }
 
         .welcome-mobile-layout { display: grid; grid-template-columns: 0.92fr 1.08fr; align-items: center; gap: 72px; }
@@ -236,6 +251,7 @@
             html { scroll-behavior: auto; }
             *, *::before, *::after { transition-duration: 0.01ms !important; }
             .welcome-hero-visual::before, .welcome-hero-visual::after { animation: none; transform: none; }
+            .welcome-class-grid--animated .welcome-class-card { opacity: 1; animation: none; }
         }
     </style>
 </head>
@@ -424,6 +440,20 @@
     <script>
         const menuButton = document.querySelector('.welcome-menu');
         const menuLinks = document.getElementById('welcome-links');
+        const classGrid = document.querySelector('.welcome-class-grid');
+
+        if (classGrid && 'IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            classGrid.classList.add('welcome-class-grid--animated');
+
+            const classGridObserver = new IntersectionObserver((entries, observer) => {
+                if (!entries[0]?.isIntersecting) return;
+
+                classGrid.classList.add('is-visible');
+                observer.unobserve(classGrid);
+            }, { threshold: 0.2 });
+
+            classGridObserver.observe(classGrid);
+        }
 
         menuButton?.addEventListener('click', () => {
             const isOpen = menuButton.getAttribute('aria-expanded') === 'true';

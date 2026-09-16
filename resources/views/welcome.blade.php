@@ -181,7 +181,7 @@
         .welcome-phone-row strong { display: block; font-size: 0.76rem; }
         .welcome-phone-row span { display: block; color: var(--welcome-muted); font-size: 0.65rem; }
         .welcome-phone-action { width: 100%; margin-top: 14px; padding: 12px; color: white; border: 0; border-radius: 12px; background: linear-gradient(135deg, #174ea6, #168fd2); font-weight: 800; }
-        .welcome-mobile-copy h2 { margin: 0; font-size: clamp(2.15rem, 4vw, 3.5rem); line-height: 1.06; letter-spacing: -0.045em; }
+        .welcome-mobile-copy h2 { max-width: 680px; margin: 0; font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; font-size: clamp(2.35rem, 4.4vw, 3.85rem); font-weight: 500; line-height: 1.02; letter-spacing: -0.045em; text-wrap: balance; }
         .welcome-mobile-copy > p { margin: 20px 0 0; color: #c2d8ee; }
         .welcome-mobile-steps { display: grid; gap: 15px; margin-top: 34px; }
         .welcome-mobile-step { display: grid; grid-template-columns: 48px 1fr; gap: 15px; align-items: start; }

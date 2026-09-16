@@ -21,10 +21,8 @@ use Illuminate\Support\Facades\Route;
 // PUBLIC ROUTES (No Authentication)
 // ========================================
 
-// Redirect root to login
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+// Public CIVICLEAR information and service introduction.
+Route::view('/', 'welcome')->name('welcome');
 
 // Authentication Routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

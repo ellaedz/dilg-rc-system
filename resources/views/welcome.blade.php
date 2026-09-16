@@ -59,7 +59,8 @@
         .welcome-hero { position: relative; color: var(--welcome-ink); background: white; }
         .welcome-hero-grid { width: min(1320px, calc(100% - 40px)); min-height: 650px; display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(390px, 0.92fr); align-items: stretch; gap: 0; padding-block: 28px 70px; }
         .welcome-hero-copy { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: clamp(54px, 7vw, 92px); text-align: center; background: linear-gradient(145deg, #dceefa, #cde4f4); }
-        .welcome-eyebrow { display: inline-flex; align-items: center; margin-bottom: 24px; color: var(--welcome-blue); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
+        .welcome-eyebrow { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 24px; color: var(--welcome-blue); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
+        .welcome-eyebrow::before, .welcome-eyebrow::after { content: ""; width: 30px; height: 1px; background: currentColor; opacity: 0.8; }
         .welcome-hero h1 { max-width: 760px; margin: 0; color: #092e58; font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; font-size: clamp(3.15rem, 5.5vw, 5.35rem); font-weight: 600; line-height: 0.98; letter-spacing: -0.045em; text-wrap: balance; }
         .welcome-hero h1 span { display: block; color: #155f91; font-style: normal; font-weight: 500; }
         .welcome-hero-copy > p { max-width: 620px; margin: 28px 0 0; color: #3e5b73; font-size: clamp(1rem, 1.4vw, 1.14rem); }
@@ -213,6 +214,8 @@
 
         @media (max-width: 620px) {
             .welcome-section { padding-block: 72px; }
+            .welcome-eyebrow { font-size: 0.64rem; letter-spacing: 0.1em; }
+            .welcome-eyebrow::before, .welcome-eyebrow::after { width: 18px; }
             .welcome-hero h1 { font-size: clamp(2.7rem, 15vw, 4.2rem); }
             .welcome-hero-copy { padding: 52px 22px; }
             .welcome-hero-visual { min-height: 480px; padding: 16px; }
@@ -281,7 +284,7 @@
                         </ul>
                     </div>
 
-                    <aside class="welcome-hero-visual" style="--hero-map: url('{{ asset('images/welcome-gps-map.jpg') }}');" aria-label="CIVICLEAR operational flow">
+                    <aside class="welcome-hero-visual" style="--hero-map: url('{{ asset('images/welcome-gps-map-hq.png') }}');" aria-label="CIVICLEAR operational flow">
                         <div class="welcome-flow">
                             <div class="welcome-flow-title"><strong>From report to response</strong><span class="welcome-live">Connected workflow</span></div>
                             <div class="welcome-flow-list">
@@ -374,7 +377,7 @@
                 </div>
             </section>
 
-            <section class="welcome-section welcome-section--blue" id="mobile-app" style="--hero-map: url('{{ asset('images/welcome-gps-map.jpg') }}');">
+            <section class="welcome-section welcome-section--blue" id="mobile-app" style="--hero-map: url('{{ asset('images/welcome-gps-map-hq.png') }}');">
                 <div class="welcome-container welcome-mobile-layout">
                     <div class="welcome-phone-wrap" aria-hidden="true">
                         <div class="welcome-phone-glow"></div>

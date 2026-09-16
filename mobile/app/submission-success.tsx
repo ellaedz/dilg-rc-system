@@ -14,7 +14,7 @@ import type { ReportStatus } from '@/types/report';
 import { analysisMatchLabel, humanizeLabel, missingAnalysisScoreLabel } from '@/utils/formatters';
 
 const WORKFLOW_STEPS = [
-  { status: 'Submitted', description: 'Your report was received and classified.' },
+  { status: 'Submitted', description: 'Your report was received. AI analysis may still be in progress.' },
   { status: 'Under Review', description: 'The selected barangay reviews the report and AI result.' },
   { status: 'Assigned', description: 'The appropriate response unit is assigned.' },
   { status: 'In Progress', description: 'The response unit is acting on the report.' },

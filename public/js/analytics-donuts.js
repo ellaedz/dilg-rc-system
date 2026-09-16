@@ -18,14 +18,6 @@
         'closed': '#66758a'
     };
 
-    function withAlpha(hex, alpha) {
-        const value = hex.replace('#', '');
-        const red = parseInt(value.substring(0, 2), 16);
-        const green = parseInt(value.substring(2, 4), 16);
-        const blue = parseInt(value.substring(4, 6), 16);
-        return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
-    }
-
     function normalizeValues(values) {
         return values.map(value => Number(value) || 0);
     }
@@ -37,7 +29,7 @@
     const centerTextPlugin = {
         id: 'dilgCenterText',
         afterDraw(chart, args, pluginOptions) {
-            const innerArc = chart.getDatasetMeta(1)?.data?.[0] ?? chart.getDatasetMeta(0)?.data?.[0];
+            const innerArc = chart.getDatasetMeta(0)?.data?.[0];
             if (!innerArc) {
                 const { ctx, chartArea } = chart;
                 if (!chartArea) return;
@@ -51,49 +43,28 @@
                 return;
             }
 
-            const values = normalizeValues(chart.data.datasets[1]?.data ?? chart.data.datasets[0]?.data ?? []);
+            const values = normalizeValues(chart.data.datasets[0]?.data ?? []);
             const total = totalOf(values);
             const { ctx } = chart;
             const label = pluginOptions?.label || 'TOTAL REPORTS';
             const unit = pluginOptions?.unit || 'reports';
-            const valueSize = Math.max(22, Math.min(36, chart.width * 0.075));
+            const valueSize = Math.max(21, Math.min(30, chart.width * 0.085));
 
             ctx.save();
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillStyle = '#718096';
             ctx.font = '700 10px Inter, system-ui, sans-serif';
-            ctx.fillText(label, innerArc.x, innerArc.y - 24);
+            ctx.fillText(label, innerArc.x, innerArc.y - 20);
             ctx.fillStyle = '#102b4c';
             ctx.font = `800 ${valueSize}px Inter, system-ui, sans-serif`;
             ctx.fillText(total.toLocaleString(), innerArc.x, innerArc.y + 2);
             ctx.fillStyle = '#64748b';
             ctx.font = '600 11px Inter, system-ui, sans-serif';
-            ctx.fillText(unit, innerArc.x, innerArc.y + 27);
+            ctx.fillText(unit, innerArc.x, innerArc.y + 23);
             ctx.restore();
         }
     };
-
-    function legendLabels(chart) {
-        const labels = chart.data.labels || [];
-        const dataset = chart.data.datasets[1] || chart.data.datasets[0];
-        const values = normalizeValues(dataset.data || []);
-        const total = totalOf(values);
-
-        return labels.map((label, index) => {
-            const value = values[index];
-            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-            return {
-                text: `${label}  ${value.toLocaleString()} · ${percentage}%`,
-                fillStyle: dataset.backgroundColor[index],
-                strokeStyle: dataset.backgroundColor[index],
-                lineWidth: 0,
-                hidden: !chart.getDataVisibility(index),
-                index,
-                pointStyle: 'circle'
-            };
-        });
-    }
 
     function createConfig({ labels, values, centerLabel, unit = 'reports', colors = DEFAULT_COLORS }) {
         const cleanLabels = Array.from(labels || []);
@@ -104,35 +75,21 @@
             type: 'doughnut',
             data: {
                 labels: cleanLabels,
-                datasets: [
-                    {
-                        data: cleanValues,
-                        backgroundColor: assignedColors.map(color => withAlpha(color, 0.35)),
-                        borderColor: 'transparent',
-                        borderWidth: 0,
-                        borderRadius: 18,
-                        spacing: 1,
-                        weight: 0.55,
-                        hoverOffset: 0
-                    },
-                    {
-                        data: cleanValues,
-                        backgroundColor: assignedColors,
-                        borderColor: 'transparent',
-                        borderWidth: 0,
-                        borderRadius: 18,
-                        spacing: 3,
-                        weight: 1,
-                        hoverOffset: 7
-                    }
-                ]
+                datasets: [{
+                    data: cleanValues,
+                    backgroundColor: assignedColors,
+                    borderColor: '#fff',
+                    borderWidth: 2,
+                    borderRadius: 3,
+                    hoverOffset: 4
+                }]
             },
             plugins: [centerTextPlugin],
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: '56%',
-                radius: '88%',
+                cutout: '73%',
+                radius: '77%',
                 rotation: -90,
                 animation: {
                     duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 500,
@@ -141,25 +98,8 @@
                 interaction: { mode: 'nearest', intersect: true },
                 plugins: {
                     dilgCenterText: { label: centerLabel, unit },
-                    legend: {
-                        position: 'bottom',
-                        onClick(event, legendItem, legend) {
-                            legend.chart.toggleDataVisibility(legendItem.index);
-                            legend.chart.update();
-                        },
-                        labels: {
-                            generateLabels: legendLabels,
-                            usePointStyle: true,
-                            pointStyle: 'circle',
-                            boxWidth: 8,
-                            boxHeight: 8,
-                            padding: 14,
-                            color: '#46566b',
-                            font: { size: 11, weight: '600', family: 'Inter, system-ui, sans-serif' }
-                        }
-                    },
+                    legend: { display: false },
                     tooltip: {
-                        filter(context) { return context.datasetIndex === 1; },
                         callbacks: {
                             label(context) {
                                 const total = totalOf(normalizeValues(context.dataset.data));
@@ -179,5 +119,38 @@
         );
     }
 
-    window.DilgAnalyticsDonut = { createConfig, statusColors };
+    function renderLegend(container, chart) {
+        if (!container) return;
+
+        const labels = chart.data.labels || [];
+        const dataset = chart.data.datasets[0];
+        const values = normalizeValues(dataset.data || []);
+        const total = totalOf(values);
+        container.replaceChildren();
+
+        if (total === 0) {
+            const empty = document.createElement('span');
+            empty.className = 'donut-legend-empty';
+            empty.textContent = 'No reports in this period';
+            container.appendChild(empty);
+            return;
+        }
+
+        labels.forEach((label, index) => {
+            const item = document.createElement('div');
+            item.className = 'donut-legend-item';
+            const dot = document.createElement('span');
+            dot.className = 'donut-legend-dot';
+            dot.style.backgroundColor = dataset.backgroundColor[index];
+            const name = document.createElement('span');
+            name.className = 'donut-legend-name';
+            name.textContent = label;
+            const value = document.createElement('strong');
+            value.textContent = `${Math.round((values[index] / total) * 100)}%`;
+            item.append(dot, name, value);
+            container.appendChild(item);
+        });
+    }
+
+    window.DilgAnalyticsDonut = { createConfig, renderLegend, statusColors };
 })();

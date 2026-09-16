@@ -66,7 +66,7 @@ class AnalyticsExportService
 
     public function downloadPdf(View $view, string $filename): Response
     {
-        return Pdf::loadView($view->name(), $view->getData())
+        return Pdf::loadView($view->name(), array_merge($view->getData(), ['pdfExport' => true]))
             ->setPaper('a4', 'portrait')
             ->download($filename);
     }

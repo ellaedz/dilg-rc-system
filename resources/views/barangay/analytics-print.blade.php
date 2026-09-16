@@ -20,7 +20,7 @@
             background: white;
         }
 
-+        .gov-status { display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border:1px solid var(--ring,#cbd5e1);border-radius:999px;background:var(--bg,#eef2f6);color:var(--fg,#475569);font:700 9px Arial,sans-serif;white-space:nowrap;-webkit-print-color-adjust:exact;print-color-adjust:exact; }
+        .gov-status { display:inline-block;padding:2px 7px;border:1px solid #cbd5e1;border-radius:8px;background:#eef2f6;color:#475569;font:700 9px Arial,sans-serif;white-space:nowrap; }
         .gov-status-dot { width:5px;height:5px;border-radius:50%;background:currentColor; }
         .gov-status--submitted {--bg:#e8f1ff;--fg:#1558a6;--ring:#b8d4f7}.gov-status--for-verification {--bg:#fff4d6;--fg:#8a5a00;--ring:#efd28a}.gov-status--verified {--bg:#dff7f8;--fg:#0b6870;--ring:#9edfe3}.gov-status--assigned {--bg:#e8eafd;--fg:#3e46a3;--ring:#c4c8f5}.gov-status--in-progress {--bg:#f0e8ff;--fg:#6e34a7;--ring:#d6bdf3}.gov-status--action-taken {--bg:#e0f6ee;--fg:#08745a;--ring:#a7dfce}.gov-status--resolved {--bg:#e2f6e8;--fg:#176b35;--ring:#a9ddb9}.gov-status--rejected {--bg:#fde8e8;--fg:#a42525;--ring:#f1b8b8}.gov-status--closed {--bg:#e9edf2;--fg:#43536a;--ring:#c8d0da}
 
@@ -110,15 +110,16 @@
         }
 
         .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0.5rem;
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
             margin-bottom: 2rem;
             border: 1px solid #000000;
         }
 
         .summary-card {
             padding: 0.75rem;
+            vertical-align: top;
             background: #ffffff;
             border-right: 1px solid #cccccc;
             border-bottom: 1px solid #cccccc;
@@ -214,15 +215,17 @@
         }
 
         .signature-section {
+            width: 100%;
             margin-top: 2rem;
             margin-bottom: 2rem;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
+            border: none;
+            table-layout: fixed;
         }
 
         .signature-box {
+            width: 50%;
             text-align: center;
+            border: none;
         }
 
         .signature-label {
@@ -349,6 +352,7 @@
     </style>
 </head>
 <body>
+    @unless($pdfExport ?? false)
     <div class="action-buttons">
         <button onclick="window.print()" class="btn btn-primary">
             <i class="fas fa-print"></i> Print Report
@@ -357,12 +361,13 @@
             <i class="fas fa-arrow-left"></i> Back
         </a>
     </div>
+    @endunless
 
     <div class="report-container">
         <!-- Official Government Header -->
         <div class="official-header">
             <div class="header-logos">
-                <img src="{{ asset('images/civiclear-logo.svg') }}" alt="CIVICLEAR logo" class="dilg-logo">
+                <img src="{{ ($pdfExport ?? false) ? 'data:image/svg+xml;base64,'.base64_encode(file_get_contents(public_path('images/civiclear-logo.svg'))) : asset('images/civiclear-logo.svg') }}" alt="CIVICLEAR logo" class="dilg-logo">
             </div>
             <div class="header-text">
                 <p class="republic-text">Republic of the Philippines</p>
@@ -380,40 +385,41 @@
         </div>
 
         <!-- Summary Cards -->
-        <div class="summary-grid">
-            <div class="summary-card">
+        <table class="summary-grid"><tbody><tr>
+            <td class="summary-card">
                 <div class="summary-label">Total Reports</div>
                 <div class="summary-value">{{ number_format($stats['total_reports']) }}</div>
-            </div>
-            <div class="summary-card">
+            </td>
+            <td class="summary-card">
                 <div class="summary-label">New Reports</div>
                 <div class="summary-value">{{ number_format($stats['new_reports']) }}</div>
-            </div>
-            <div class="summary-card">
+            </td>
+            <td class="summary-card">
                 <div class="summary-label">For Verification</div>
                 <div class="summary-value">{{ number_format($stats['for_verification']) }}</div>
-            </div>
-            <div class="summary-card">
+            </td>
+            <td class="summary-card">
                 <div class="summary-label">Official Verified</div>
                 <div class="summary-value">{{ number_format($stats['verified_reports']) }}</div>
-            </div>
-            <div class="summary-card">
+            </td>
+        </tr><tr>
+            <td class="summary-card">
                 <div class="summary-label">In Progress</div>
                 <div class="summary-value">{{ number_format($stats['in_progress']) }}</div>
-            </div>
-            <div class="summary-card">
+            </td>
+            <td class="summary-card">
                 <div class="summary-label">Action Taken</div>
                 <div class="summary-value">{{ number_format($stats['action_taken']) }}</div>
-            </div>
-            <div class="summary-card">
+            </td>
+            <td class="summary-card">
                 <div class="summary-label">Resolved</div>
                 <div class="summary-value">{{ number_format($stats['resolved']) }}</div>
-            </div>
-            <div class="summary-card">
+            </td>
+            <td class="summary-card">
                 <div class="summary-label">Avg Response Time</div>
                 <div class="summary-value">{{ $stats['avg_response_time'] }}h</div>
-            </div>
-        </div>
+            </td>
+        </tr></tbody></table>
 
         <!-- Violation Type Summary -->
         <div class="section">
@@ -501,44 +507,44 @@
         <!-- Response Transparency Summary -->
         <div class="highlight-card">
             <div class="highlight-title">Response Transparency Summary</div>
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1rem;">
-                <div>
+            <table style="width: 100%; table-layout: fixed; margin-top: 1rem;"><tbody><tr>
+                <td>
                     <div style="font-size: 0.75rem; color: #000000;">Waiting Verification</div>
                     <div style="font-size: 1.125rem; font-weight: 700;">{{ $stats['waiting_verification'] }}</div>
-                </div>
-                <div>
+                </td>
+                <td>
                     <div style="font-size: 0.75rem; color: #000000;">In Progress</div>
                     <div style="font-size: 1.125rem; font-weight: 700;">{{ $stats['in_progress_count'] }}</div>
-                </div>
-                <div>
+                </td>
+                <td>
                     <div style="font-size: 0.75rem; color: #000000;">Resolved</div>
                     <div style="font-size: 1.125rem; font-weight: 700;">{{ $stats['resolved_count'] }}</div>
-                </div>
-                <div>
+                </td>
+                <td>
                     <div style="font-size: 0.75rem; color: #000000;">Resolution Rate</div>
                     <div style="font-size: 1.125rem; font-weight: 700;">{{ $stats['resolution_rate'] }}%</div>
-                </div>
-            </div>
+                </td>
+            </tr></tbody></table>
         </div>
 
         <!-- Footer -->
         <div class="report-footer">
-            <div class="signature-section">
-                <div class="signature-box">
+            <table class="signature-section"><tbody><tr>
+                <td class="signature-box">
                     <p class="signature-label">Prepared by:</p>
                     <div class="signature-line">
-                        <p class="signature-name">_________________________</p>
+                        <p class="signature-name">&nbsp;</p>
                         <p class="signature-position">Barangay Staff / Secretary</p>
                     </div>
-                </div>
-                <div class="signature-box">
+                </td>
+                <td class="signature-box">
                     <p class="signature-label">Noted by:</p>
                     <div class="signature-line">
-                        <p class="signature-name">_________________________</p>
+                        <p class="signature-name">&nbsp;</p>
                         <p class="signature-position">Barangay Captain</p>
                     </div>
-                </div>
-            </div>
+                </td>
+            </tr></tbody></table>
 
             <p style="font-size: 0.8125rem; margin-bottom: 0.5rem;"><strong>Date Printed:</strong> {{ now()->format('F d, Y \a\t g:i A') }}</p>
 

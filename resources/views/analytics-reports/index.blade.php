@@ -56,13 +56,19 @@ $responseTimeByBarangay = $responseTimeByBarangay ?? collect();
     /* Chart Container */
     .chart-container {
         position: relative;
-        height: 420px;
+        height: 220px;
         margin: 0.75rem auto 0;
-        max-width: 540px;
+        max-width: 390px;
         width: 100%;
     }
 
     .chart-description { margin-top: 0.3rem; color: #64748b; font-size: 0.78rem; }
+    .donut-legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.45rem 1rem; margin-top: 1rem; }
+    .donut-legend-item { display: flex; align-items: center; gap: 0.5rem; min-width: 0; color: #475569; font-size: 0.75rem; }
+    .donut-legend-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; }
+    .donut-legend-name { min-width: 0; flex: 1; }
+    .donut-legend-item strong { flex: none; color: #1e293b; font-size: 0.75rem; }
+    .donut-legend-empty { grid-column: 1 / -1; color: #64748b; font-size: 0.8rem; text-align: center; }
 
     /* Two Column Chart Grid */
     .chart-grid-2col {
@@ -222,21 +228,35 @@ $responseTimeByBarangay = $responseTimeByBarangay ?? collect();
     .section-filter {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.4rem;
         font-size: 0.875rem;
-        color: #64748b;
-        padding: 0.5rem 1rem;
+        color: #334155;
+        padding: 0.4rem 0.55rem;
         border: 1px solid #e2e8f0;
         border-radius: 0.5rem;
-        background: #f8fafc;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .section-filter:hover {
-        border-color: #cbd5e1;
         background: white;
     }
+
+    .section-filter select {
+        min-width: 110px;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        cursor: pointer;
+    }
+
+    .section-filter button {
+        padding: 0.25rem 0.45rem;
+        border-radius: 0.35rem;
+        background: #eaf3ff;
+        color: #174ea6;
+        font-size: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .section-filter select:focus-visible, .section-filter button:focus-visible { outline: 2px solid #174ea6; outline-offset: 2px; }
+    .section-period { color: #64748b; font-size: 0.8rem; }
 
     /* Modern Bar Chart */
     .bar-chart {
@@ -412,7 +432,9 @@ $responseTimeByBarangay = $responseTimeByBarangay ?? collect();
             gap: 1rem;
         }
 
-        .chart-container { height: 380px; }
+        .chart-container { height: 200px; }
+        .chart-grid-2col .section-header { align-items: flex-start; flex-wrap: wrap; gap: 0.75rem; }
+        .donut-legend { grid-template-columns: 1fr; }
     }
 </style>
 
@@ -551,28 +573,42 @@ $responseTimeByBarangay = $responseTimeByBarangay ?? collect();
     <div class="section-card">
         <div class="section-header">
             <div><h2 class="section-title">Reports by Barangay</h2><p class="chart-description">Share of mapped reports across the ten busiest barangays</p></div>
-            <div class="section-filter">
-                <span>Last week</span>
-                <i class="fas fa-chevron-down"></i>
-            </div>
+            <form class="section-filter" method="GET" action="{{ route('analytics-reports.index') }}">
+                <input type="hidden" name="violation_period" value="{{ $violationPeriod }}">
+                <label for="barangay-period" class="sr-only">Reports by barangay period</label>
+                <select id="barangay-period" name="barangay_period">
+                    <option value="all" @selected($barangayPeriod === 'all')>All time</option>
+                    <option value="7d" @selected($barangayPeriod === '7d')>Last 7 days</option>
+                    <option value="30d" @selected($barangayPeriod === '30d')>Last 30 days</option>
+                </select>
+                <button type="submit">Apply</button>
+            </form>
         </div>
         <div class="chart-container">
             <canvas id="barangayPieChart" role="img" aria-label="Doughnut chart showing report totals and percentages by barangay"></canvas>
         </div>
+        <div class="donut-legend" id="barangayLegend" aria-label="Reports by barangay legend"></div>
     </div>
 
     <!-- Reports by Violation Type -->
     <div class="section-card">
         <div class="section-header">
             <div><h2 class="section-title">Official Reports by Violation Type</h2><p class="chart-description">Staff-confirmed violations eligible for municipal statistics</p></div>
-            <div class="section-filter">
-                <span>Last week</span>
-                <i class="fas fa-chevron-down"></i>
-            </div>
+            <form class="section-filter" method="GET" action="{{ route('analytics-reports.index') }}">
+                <input type="hidden" name="barangay_period" value="{{ $barangayPeriod }}">
+                <label for="violation-period" class="sr-only">Official violation period</label>
+                <select id="violation-period" name="violation_period">
+                    <option value="all" @selected($violationPeriod === 'all')>All time</option>
+                    <option value="7d" @selected($violationPeriod === '7d')>Last 7 days</option>
+                    <option value="30d" @selected($violationPeriod === '30d')>Last 30 days</option>
+                </select>
+                <button type="submit">Apply</button>
+            </form>
         </div>
         <div class="chart-container">
             <canvas id="violationTypePieChart" role="img" aria-label="Doughnut chart showing report totals and percentages by violation type"></canvas>
         </div>
+        <div class="donut-legend" id="violationLegend" aria-label="Official violation type legend"></div>
     </div>
 </div>
 
@@ -620,10 +656,7 @@ $responseTimeByBarangay = $responseTimeByBarangay ?? collect();
 <div class="section-card">
     <div class="section-header">
         <h2 class="section-title">Monthly Report Trend</h2>
-        <div class="section-filter">
-            <span>Last 6 months</span>
-            <i class="fas fa-chevron-down"></i>
-        </div>
+        <span class="section-period">Last 6 months</span>
     </div>
     <div class="bar-chart">
         @php
@@ -649,10 +682,6 @@ $responseTimeByBarangay = $responseTimeByBarangay ?? collect();
 <div class="section-card">
     <div class="section-header">
         <h2 class="section-title">Response Time by Barangay</h2>
-        <button class="export-btn">
-            <span>Export</span>
-            <i class="fas fa-download"></i>
-        </button>
     </div>
     <div class="table-responsive">
         <table>
@@ -864,13 +893,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Barangay Doughnut Chart
     const barangayCtx = document.getElementById('barangayPieChart');
     if (barangayCtx) {
-        new Chart(barangayCtx, modernBarangayConfig);
+        const chart = new Chart(barangayCtx, modernBarangayConfig);
+        window.DilgAnalyticsDonut.renderLegend(document.getElementById('barangayLegend'), chart);
     }
 
     // Violation Type Doughnut Chart
     const violationCtx = document.getElementById('violationTypePieChart');
     if (violationCtx) {
-        new Chart(violationCtx, modernViolationConfig);
+        const chart = new Chart(violationCtx, modernViolationConfig);
+        window.DilgAnalyticsDonut.renderLegend(document.getElementById('violationLegend'), chart);
     }
 });
 </script>

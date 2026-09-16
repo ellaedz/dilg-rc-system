@@ -53,7 +53,8 @@
             </div>
             
             <!-- Right Panel - Login Form -->
-            <div class="m-4 sm:m-6 lg:m-8 p-7 sm:p-9 lg:p-10 flex flex-col justify-center bg-gradient-to-br from-[#f5f9ff]/95 via-[#eaf3ff]/95 to-[#dbeaff]/95 rounded-3xl shadow-xl border border-white/80">
+            <div class="m-4 sm:m-6 lg:m-8 flex flex-col justify-center gap-4">
+              <div class="p-7 sm:p-9 lg:p-10 flex flex-col justify-center bg-gradient-to-br from-[#f5f9ff]/95 via-[#eaf3ff]/95 to-[#dbeaff]/95 rounded-3xl shadow-xl border border-white/80">
                 <div class="w-full max-w-md mx-auto">
                     <!-- Header -->
                     <div class="mb-8">
@@ -145,7 +146,7 @@
                             Sign In
                         </button>
                     </form>
-                    
+
                     <!-- Security Notice -->
                     <div class="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-xl">
                         <div class="flex items-start gap-3">
@@ -165,6 +166,11 @@
                         <p class="text-xs mt-1">&copy; 2026 Municipality of Santa Cruz, Laguna</p>
                     </div>
                 </div>
+              </div>
+              <a href="{{ route('welcome') }}" class="mx-auto inline-flex items-center gap-2 px-3 py-1 text-sm font-medium text-[#174ea6] transition-colors hover:text-[#0b2c78] hover:underline focus-visible:rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#174ea6]">
+                  <i class="fas fa-arrow-left text-xs" aria-hidden="true"></i>
+                  Back to CIVICLEAR Home
+              </a>
             </div>
             
         </div>

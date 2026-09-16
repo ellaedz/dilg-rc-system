@@ -48,10 +48,12 @@
         .welcome-links > a:not(.welcome-login):hover, .welcome-links > a:not(.welcome-login):focus-visible { color: var(--welcome-deep); opacity: 1; }
         .welcome-links > a:not(.welcome-login):hover::after, .welcome-links > a:not(.welcome-login):focus-visible::after { transform: scaleX(1); }
 
-        .welcome-login, .welcome-button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 46px; padding: 0 19px; border: 1px solid transparent; border-radius: 12px; font-size: 0.9rem; font-weight: 800; cursor: pointer; }
-        .welcome-login svg, .welcome-button svg { width: 17px; height: 17px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-        .welcome-login { margin-left: 14px; color: white; border-color: var(--welcome-deep); border-radius: 6px; background: var(--welcome-deep); box-shadow: none; }
-        .welcome-login:hover { color: white; border-color: var(--welcome-blue); background: var(--welcome-blue); transform: translateY(-1px); }
+        .welcome-button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 46px; padding: 0 19px; border: 1px solid transparent; border-radius: 12px; font-size: 0.9rem; font-weight: 800; cursor: pointer; }
+        .welcome-button svg { width: 17px; height: 17px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+        .welcome-login { position: relative; padding: 10px 8px; color: #18334f; font-size: 0.88rem; font-weight: 600; opacity: 0.78; }
+        .welcome-login::after { content: ""; position: absolute; right: 11px; bottom: 5px; left: 11px; height: 2px; background: #70d8f3; transform: scaleX(0); transform-origin: left; transition: transform 180ms ease; }
+        .welcome-login:hover, .welcome-login:focus-visible { color: var(--welcome-deep); opacity: 1; }
+        .welcome-login:hover::after, .welcome-login:focus-visible::after { transform: scaleX(1); }
         .welcome-menu { display: none; width: 44px; height: 44px; color: var(--welcome-deep); border: 1px solid #d6e2ef; border-radius: 8px; background: white; }
 
         .welcome-hero { position: relative; color: var(--welcome-ink); background: white; }
@@ -63,8 +65,6 @@
         .welcome-hero h1 span { display: block; color: #155f91; font-style: normal; font-weight: 500; }
         .welcome-hero-copy > p { max-width: 620px; margin: 28px 0 0; color: #3e5b73; font-size: clamp(1rem, 1.4vw, 1.14rem); }
         .welcome-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 34px; }
-        .welcome-button--primary { color: white; border-radius: 6px; background: var(--welcome-deep); box-shadow: none; }
-        .welcome-button--primary:hover { background: var(--welcome-blue); transform: translateY(-1px); }
         .welcome-button--ghost { color: var(--welcome-deep); border-color: rgba(11, 44, 120, 0.3); border-radius: 6px; background: rgba(255, 255, 255, 0.54); backdrop-filter: blur(8px); }
         .welcome-button--ghost:hover { border-color: var(--welcome-blue); background: white; transform: translateY(-1px); }
         .welcome-facts { display: flex; flex-wrap: wrap; gap: 26px; margin: 42px 0 0; padding: 0; list-style: none; }
@@ -72,7 +72,7 @@
         .welcome-facts li { display: flex; align-items: center; gap: 10px; color: #31536d; font-size: 0.8rem; font-weight: 650; }
         .welcome-facts i { color: var(--welcome-blue); }
 
-        .welcome-hero-visual { min-height: 650px; display: flex; align-items: flex-end; padding: 32px; background: linear-gradient(rgba(5, 30, 73, 0.15), rgba(5, 30, 73, 0.5)), var(--hero-map) center / cover no-repeat; }
+        .welcome-hero-visual { min-height: 650px; display: flex; align-items: center; padding: 32px; background: linear-gradient(rgba(5, 30, 73, 0.15), rgba(5, 30, 73, 0.5)), var(--hero-map) center / cover no-repeat; }
         .welcome-flow { position: relative; width: 100%; padding: 24px; color: white; border: 1px solid rgba(255, 255, 255, 0.24); border-radius: 8px; background: rgba(6, 31, 75, 0.9); box-shadow: 0 20px 52px rgba(1, 12, 38, 0.28); backdrop-filter: blur(12px); }
         .welcome-flow::before { display: none; }
         .welcome-flow-title { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
@@ -166,11 +166,6 @@
         .welcome-privacy { display: flex; align-items: flex-start; gap: 11px; margin-top: 28px; padding: 16px 18px; color: #c9dff1; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 15px; background: rgba(255, 255, 255, 0.06); font-size: 0.78rem; }
         .welcome-privacy i { margin-top: 3px; color: #69e2b2; }
 
-        .welcome-cta { padding-block: 88px; background: white; }
-        .welcome-cta-card { display: flex; align-items: center; justify-content: space-between; gap: 40px; padding: 46px 50px; color: white; border-radius: 7px; background: linear-gradient(120deg, #0b2c78, #125fa5); box-shadow: 0 22px 54px rgba(11, 44, 120, 0.16); }
-        .welcome-cta-card h2 { margin: 0; font-size: clamp(1.7rem, 3vw, 2.5rem); letter-spacing: -0.035em; }
-        .welcome-cta-card p { margin: 10px 0 0; color: #c7ddf2; }
-        .welcome-cta-card .welcome-button { flex: none; color: var(--welcome-deep); background: white; }
         .welcome-footer { padding-block: 36px; color: #9db4ce; background: #06162f; }
         .welcome-footer-row { display: flex; align-items: center; justify-content: space-between; gap: 28px; }
         .welcome-footer-brand { display: flex; align-items: center; gap: 11px; }
@@ -194,7 +189,6 @@
             .welcome-links { display: none; position: fixed; inset: 74px 15px auto; padding: 15px; border: 1px solid #dce7f2; border-radius: 8px; background: rgba(255, 255, 255, 0.98); box-shadow: 0 24px 50px rgba(12, 43, 81, 0.18); }
             .welcome-links.is-open { display: grid; }
             .welcome-links > a:not(.welcome-login) { display: block; }
-            .welcome-login { margin: 6px 0 0; }
             .welcome-menu { display: grid; place-items: center; }
             .welcome-hero-grid { grid-template-columns: 1fr; padding-block: 20px 56px; }
             .welcome-hero-copy { padding: 68px 38px; }
@@ -203,7 +197,6 @@
             .welcome-purpose-grid, .welcome-mandate-layout, .welcome-mobile-layout { grid-template-columns: 1fr; }
             .welcome-mobile-copy { order: -1; }
             .welcome-phone-wrap { min-height: 530px; }
-            .welcome-cta-card { align-items: flex-start; flex-direction: column; }
         }
 
         @media (max-width: 620px) {
@@ -220,7 +213,6 @@
             .welcome-metric-row { grid-template-columns: 1fr; }
             .welcome-mandate-layout { gap: 18px; }
             .welcome-memo { padding: 26px; }
-            .welcome-cta-card { padding: 32px 25px; }
             .welcome-footer-row { align-items: flex-start; flex-direction: column; }
             .welcome-footer p { text-align: left; }
         }
@@ -251,10 +243,7 @@
                     <a href="#mandate">DILG mandate</a>
                     <a href="#coverage">Report coverage</a>
                     <a href="#mobile-app">Mobile app</a>
-                    <a class="welcome-login" href="{{ route('login') }}">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5.5 5.6v5.2c0 4.2 2.6 7.9 6.5 9.7 3.9-1.8 6.5-5.5 6.5-9.7V5.6L12 3Z"/><path d="M9.5 12.2 11.2 14l3.6-4"/></svg>
-                        Admin / Staff Login
-                    </a>
+                    <a class="welcome-login" href="{{ route('login') }}">Admin / Staff Login</a>
                 </div>
             </nav>
         </header>
@@ -267,10 +256,6 @@
                         <h1>Clear roads. <span>Connected communities.</span></h1>
                         <p>CIVICLEAR connects citizen reports, GPS-based barangay routing, AI-assisted review, staff verification, and response tracking for road-clearing operations across Santa Cruz, Laguna.</p>
                         <div class="welcome-actions">
-                            <a class="welcome-button welcome-button--primary" href="{{ route('login') }}">
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-4"/><path d="m10 8 4 4-4 4M14 12H3"/></svg>
-                                Enter Staff Portal
-                            </a>
                             <a class="welcome-button welcome-button--ghost" href="#mobile-app">
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M10.5 18.2h3"/></svg>
                                 Explore the Mobile App
@@ -410,14 +395,6 @@
                 </div>
             </section>
 
-            <section class="welcome-cta">
-                <div class="welcome-container">
-                    <div class="welcome-cta-card">
-                        <div><h2>Authorized municipal or barangay personnel?</h2><p>Continue to your assigned CIVICLEAR monitoring workspace.</p></div>
-                        <a class="welcome-button" href="{{ route('login') }}">Open Staff Login <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5"/></svg></a>
-                    </div>
-                </div>
-            </section>
         </main>
 
         <footer class="welcome-footer">

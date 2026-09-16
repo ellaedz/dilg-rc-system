@@ -140,9 +140,6 @@
         .welcome-support-card span { color: var(--welcome-sky); font-size: 0.7rem; font-weight: 850; letter-spacing: 0.08em; text-transform: uppercase; }
         .welcome-support-card h3 { margin: 8px 0 9px; font-size: 1rem; }
         .welcome-support-card p { margin: 0; color: var(--welcome-muted); font-size: 0.85rem; }
-        .welcome-legal-note { display: flex; align-items: flex-start; gap: 11px; padding: 20px 26px; color: #66531a; border: 0; background: #fffaf0; font-size: 0.8rem; }
-        .welcome-legal-note i { margin-top: 4px; }
-
         .welcome-class-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
         .welcome-class-card { position: relative; overflow: hidden; min-height: 184px; padding: 22px 20px; border: 1px solid #e1eaf4; border-radius: 7px; background: white; box-shadow: none; transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease; }
         .welcome-class-card::before { content: ""; position: absolute; top: 0; right: 0; left: 0; height: 2px; background: linear-gradient(90deg, var(--welcome-blue), var(--welcome-cyan)); transform: scaleX(0); transform-origin: left; transition: transform 260ms ease; }
@@ -368,7 +365,6 @@
                         <div class="welcome-supporting">
                             <article class="welcome-support-card"><span>Supporting issuance</span><h3>DILG MC No. 2022-085</h3><p>Road-clearing implementation guidance covering the existing road right-of-way, including the travel way, shoulders, and sidewalks.</p></article>
                             <article class="welcome-support-card"><span>Supporting issuance</span><h3>DILG MC No. 2020-027</h3><p>Continued implementation of the directive to clear public roads of illegal or unauthorized obstructions.</p></article>
-                            <div class="welcome-legal-note"><i class="fas fa-circle-info" aria-hidden="true"></i><span>This page is an operational summary, not a substitute for the complete memorandum, applicable local ordinances, due process, or authorized staff assessment.</span></div>
                         </div>
                     </div>
                 </div>

@@ -59,8 +59,7 @@
         .welcome-hero { position: relative; color: var(--welcome-ink); background: white; }
         .welcome-hero-grid { width: min(1320px, calc(100% - 40px)); min-height: 650px; display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(390px, 0.92fr); align-items: stretch; gap: 0; padding-block: 28px 70px; }
         .welcome-hero-copy { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: clamp(54px, 7vw, 92px); text-align: center; background: linear-gradient(145deg, #dceefa, #cde4f4); }
-        .welcome-eyebrow { display: inline-flex; align-items: center; gap: 9px; margin-bottom: 24px; color: var(--welcome-blue); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
-        .welcome-eyebrow::before { content: ""; width: 30px; height: 1px; background: var(--welcome-blue); }
+        .welcome-eyebrow { display: inline-flex; align-items: center; margin-bottom: 24px; color: var(--welcome-blue); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
         .welcome-hero h1 { max-width: 760px; margin: 0; color: #092e58; font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; font-size: clamp(3.15rem, 5.5vw, 5.35rem); font-weight: 600; line-height: 0.98; letter-spacing: -0.045em; text-wrap: balance; }
         .welcome-hero h1 span { display: block; color: #155f91; font-style: normal; font-weight: 500; }
         .welcome-hero-copy > p { max-width: 620px; margin: 28px 0 0; color: #3e5b73; font-size: clamp(1rem, 1.4vw, 1.14rem); }
@@ -72,8 +71,10 @@
         .welcome-facts li { display: flex; align-items: center; gap: 10px; color: #31536d; font-size: 0.8rem; font-weight: 650; }
         .welcome-facts i { color: var(--welcome-blue); }
 
-        .welcome-hero-visual { min-height: 650px; display: flex; align-items: center; padding: 32px; background: linear-gradient(rgba(5, 30, 73, 0.15), rgba(5, 30, 73, 0.5)), var(--hero-map) center / cover no-repeat; }
-        .welcome-flow { position: relative; width: 100%; padding: 24px; color: white; border: 1px solid rgba(255, 255, 255, 0.24); border-radius: 8px; background: rgba(6, 31, 75, 0.9); box-shadow: 0 20px 52px rgba(1, 12, 38, 0.28); backdrop-filter: blur(12px); }
+        .welcome-hero-visual { position: relative; isolation: isolate; overflow: hidden; min-height: 650px; display: flex; align-items: center; padding: 32px; background: #071d48; }
+        .welcome-hero-visual::before { content: ""; position: absolute; z-index: -2; inset: -6%; background: linear-gradient(rgba(5, 30, 73, 0.2), rgba(5, 30, 73, 0.54)), var(--hero-map) center / cover no-repeat; animation: welcome-map-drift 18s ease-in-out infinite alternate; will-change: transform; }
+        .welcome-hero-visual::after { content: ""; position: absolute; z-index: -1; inset: -15% -55%; pointer-events: none; background: linear-gradient(108deg, transparent 38%, rgba(112, 216, 243, 0.14) 49%, transparent 60%); transform: translateX(-42%); animation: welcome-map-sweep 10s ease-in-out infinite; }
+        .welcome-flow { position: relative; z-index: 1; width: 100%; padding: 24px; color: white; border: 1px solid rgba(255, 255, 255, 0.24); border-radius: 8px; background: rgba(6, 31, 75, 0.9); box-shadow: 0 20px 52px rgba(1, 12, 38, 0.28); backdrop-filter: blur(12px); }
         .welcome-flow::before { display: none; }
         .welcome-flow-title { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
         .welcome-flow-title strong { font-size: 1rem; }
@@ -86,6 +87,17 @@
         .welcome-flow-item strong { display: block; font-size: 0.9rem; }
         .welcome-flow-item span { display: block; margin-top: 1px; color: #aac3df; font-size: 0.74rem; }
         .welcome-flow-number { color: rgba(255, 255, 255, 0.35); font-size: 0.7rem; font-weight: 800; }
+
+        @keyframes welcome-map-drift {
+            from { transform: scale(1.04) translate3d(-1.5%, -1%, 0); }
+            to { transform: scale(1.11) translate3d(1.5%, 1%, 0); }
+        }
+
+        @keyframes welcome-map-sweep {
+            0%, 18% { transform: translateX(-42%); opacity: 0; }
+            38% { opacity: 0.75; }
+            68%, 100% { transform: translateX(42%); opacity: 0; }
+        }
 
         .welcome-section { padding-block: 96px; }
         .welcome-section--white { background: white; }
@@ -220,6 +232,7 @@
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
             *, *::before, *::after { transition-duration: 0.01ms !important; }
+            .welcome-hero-visual::before, .welcome-hero-visual::after { animation: none; transform: none; }
         }
     </style>
 </head>

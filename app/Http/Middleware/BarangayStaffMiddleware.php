@@ -2,10 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\RoleService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use App\Services\RoleService;
 
 class BarangayStaffMiddleware
 {
@@ -19,7 +19,7 @@ class BarangayStaffMiddleware
         $user = $request->user();
 
         // Check if user is authenticated
-        if (!$user) {
+        if (! $user) {
             abort(403, 'Access denied. Authentication required.');
         }
 
@@ -33,8 +33,8 @@ class BarangayStaffMiddleware
             $requestedBarangay = $request->route('barangay');
 
             // Check if barangay staff is accessing their assigned barangay
-            if ($requestedBarangay && !RoleService::canAccessBarangay($user, $requestedBarangay)) {
-                abort(403, 'Access denied. You can only access reports for ' . $user->assigned_barangay . '.');
+            if ($requestedBarangay && ! RoleService::canAccessBarangay($user, $requestedBarangay)) {
+                abort(403, 'Access denied. You can only access reports for '.$user->assigned_barangay.'.');
             }
 
             return $next($request);

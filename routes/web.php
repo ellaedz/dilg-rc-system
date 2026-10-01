@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountManagementController;
 use App\Http\Controllers\AnalyticsReportController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BarangayAnalyticsReportController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DilgDashboardController;
 use App\Http\Controllers\GISController;
 use App\Http\Controllers\ManualBarangayRoutingController;
+use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\ReportPhotoController;
 use App\Http\Controllers\ResponseTrackingController;
 use App\Http\Controllers\ViolationReportController;
@@ -32,111 +34,122 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 // AUTHENTICATED ROUTES
 // ========================================
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'security.session'])->group(function () {
 
     // Logout Route
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Role-aware GIS entry point. Barangay staff are redirected to their assigned map.
-    Route::get('/gis-map', [GISController::class, 'entry'])->name('gis.index');
+    Route::get('/change-password', [PasswordController::class, 'edit'])->name('password.edit');
+    Route::put('/change-password', [PasswordController::class, 'update'])->name('password.update');
 
-    // ========================================
-    // DILG ADMIN ROUTES (dilg_admin role only)
-    // ========================================
+    Route::middleware(['password.change.complete'])->group(function () {
 
-    Route::middleware(['dilg.admin'])->group(function () {
+        // Role-aware GIS entry point. Barangay staff are redirected to their assigned map.
+        Route::get('/gis-map', [GISController::class, 'entry'])->name('gis.index');
 
-        // DILG Admin Dashboard
-        Route::get('/dilg-dashboard', [DilgDashboardController::class, 'index'])->name('dilg.dashboard');
+        // ========================================
+        // DILG ADMIN ROUTES (dilg_admin role only)
+        // ========================================
 
-        // All Violation Reports (DILG Admin View Only - READ ONLY MONITORING)
-        Route::get('/violation-reports', [ViolationReportController::class, 'index'])->name('violation-reports.index');
-        Route::post('/violation-reports/{violationReport}/retry-ai', [ViolationReportController::class, 'retryAI'])
-            ->name('violation-reports.retry-ai');
+        Route::middleware(['dilg.admin'])->group(function () {
 
-        // Barangay Performance (DILG Admin View)
-        Route::get('/barangay-performance', [BarangayPerformanceController::class, 'index'])->name('barangay-performance.index');
+            // DILG Admin Dashboard
+            Route::get('/dilg-dashboard', [DilgDashboardController::class, 'index'])->name('dilg.dashboard');
 
-        // DILG Response Tracking
-        Route::get('/response-tracking', [ResponseTrackingController::class, 'index'])->name('response-tracking.index');
+            Route::get('/account-management', [AccountManagementController::class, 'index'])
+                ->name('account-management.index');
+            Route::put('/account-management/{account}/password', [AccountManagementController::class, 'resetPassword'])
+                ->name('account-management.password.reset');
 
-        // DILG Analytics & Reports
-        Route::get('/analytics-reports', [AnalyticsReportController::class, 'index'])->name('analytics-reports.index');
-        Route::get('/analytics-reports/export', [AnalyticsReportController::class, 'export'])->name('analytics-reports.export');
-        Route::get('/analytics-reports/print', [AnalyticsReportController::class, 'print'])->name('analytics-reports.print');
+            // All Violation Reports (DILG Admin View Only - READ ONLY MONITORING)
+            Route::get('/violation-reports', [ViolationReportController::class, 'index'])->name('violation-reports.index');
+            Route::post('/violation-reports/{violationReport}/retry-ai', [ViolationReportController::class, 'retryAI'])
+                ->name('violation-reports.retry-ai');
 
-        // AI Analytics Routes (Placeholder for Phase 4)
-        Route::get('/ai-analytics', function () {
-            return view('ai-analytics.index');
-        })->name('ai.index');
+            // Barangay Performance (DILG Admin View)
+            Route::get('/barangay-performance', [BarangayPerformanceController::class, 'index'])->name('barangay-performance.index');
 
-        Route::get('/needs-barangay-review', [ManualBarangayRoutingController::class, 'index'])
-            ->name('dilg.needs-barangay-review.index');
-        Route::post('/needs-barangay-review/{report}/route', [ManualBarangayRoutingController::class, 'route'])
-            ->name('dilg.needs-barangay-review.route');
+            // DILG Response Tracking
+            Route::get('/response-tracking', [ResponseTrackingController::class, 'index'])->name('response-tracking.index');
 
-        // Profile Route (Placeholder)
-        Route::get('/profile', function () {
-            return view('profile.index');
-        })->name('profile');
+            // DILG Analytics & Reports
+            Route::get('/analytics-reports', [AnalyticsReportController::class, 'index'])->name('analytics-reports.index');
+            Route::get('/analytics-reports/export', [AnalyticsReportController::class, 'export'])->name('analytics-reports.export');
+            Route::get('/analytics-reports/print', [AnalyticsReportController::class, 'print'])->name('analytics-reports.print');
 
-        // Original Dashboard (keep for backward compatibility)
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+            // AI Analytics Routes (Placeholder for Phase 4)
+            Route::get('/ai-analytics', function () {
+                return view('ai-analytics.index');
+            })->name('ai.index');
+
+            Route::get('/needs-barangay-review', [ManualBarangayRoutingController::class, 'index'])
+                ->name('dilg.needs-barangay-review.index');
+            Route::post('/needs-barangay-review/{report}/route', [ManualBarangayRoutingController::class, 'route'])
+                ->name('dilg.needs-barangay-review.route');
+
+            // Profile Route (Placeholder)
+            Route::get('/profile', function () {
+                return view('profile.index');
+            })->name('profile');
+
+            // Original Dashboard (keep for backward compatibility)
+            Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        });
+
+        // ========================================
+        // BARANGAY STAFF ROUTES (barangay_staff role only)
+        // ========================================
+
+        Route::middleware(['barangay.staff'])->group(function () {
+
+            // Barangay Dashboard
+            Route::get('/barangay/{barangay}/dashboard', [BarangayDashboardController::class, 'index'])->name('barangay.dashboard');
+
+            // Barangay Incoming Reports
+            Route::get('/barangay/{barangay}/incoming-reports', [BarangayIncomingReportController::class, 'index'])->name('barangay.incoming-reports');
+            Route::post('/barangay/{barangay}/incoming-reports/{report}/verify', [BarangayIncomingReportController::class, 'verify'])->name('barangay.incoming-reports.verify');
+            Route::post('/barangay/{barangay}/incoming-reports/{report}/reject', [BarangayIncomingReportController::class, 'reject'])->name('barangay.incoming-reports.reject');
+
+            // Barangay Verified Reports
+            Route::get('/barangay/{barangay}/verified-reports', [BarangayVerifiedReportController::class, 'index'])->name('barangay.verified-reports');
+            Route::post('/barangay/{barangay}/verified-reports/{report}/assign', [BarangayVerifiedReportController::class, 'assign'])->name('barangay.verified-reports.assign');
+
+            // Barangay Response Tracking
+            Route::get('/barangay/{barangay}/response-tracking', [BarangayResponseTrackingController::class, 'index'])->name('barangay.response-tracking');
+
+            // Barangay Report Update (from report detail view)
+            Route::put('/barangay/{barangay}/reports/{report}', [BarangayResponseTrackingController::class, 'update'])->name('barangay.report.update');
+
+            // Barangay Analytics
+            Route::get('/barangay/{barangay}/analytics-reports', [BarangayAnalyticsReportController::class, 'index'])->name('barangay.analytics-reports');
+            Route::get('/barangay/{barangay}/analytics-reports/export', [BarangayAnalyticsReportController::class, 'export'])->name('barangay.analytics-reports.export');
+            Route::get('/barangay/{barangay}/analytics-reports/print', [BarangayAnalyticsReportController::class, 'print'])->name('barangay.analytics-reports.print');
+
+            // Barangay GIS workspace (server-scoped to the authenticated assignment)
+            Route::get('/barangay/{barangay}/gis-map', [GISController::class, 'index'])->name('barangay.gis.index');
+
+            // Barangay Profile
+            Route::get('/barangay/{barangay}/profile', function ($barangay) {
+                return view('profile.index', compact('barangay'));
+            })->name('barangay.profile');
+        });
+
+        // ========================================
+        // SHARED ROUTES (Both roles can access with data filtering)
+        // ========================================
+
+        // View Individual Violation Report (role-based layout detection)
+        Route::get('/violation-reports/{violationReport}/photo', [ReportPhotoController::class, 'show'])
+            ->name('violation-reports.photo');
+        Route::get('/violation-reports/{violationReport}/photo/signed', [ReportPhotoController::class, 'signed'])
+            ->name('violation-reports.photo.signed');
+        Route::get('/violation-reports/{violationReport}', [ViolationReportController::class, 'show'])->name('violation-reports.show');
     });
-
-    // ========================================
-    // BARANGAY STAFF ROUTES (barangay_staff role only)
-    // ========================================
-
-    Route::middleware(['barangay.staff'])->group(function () {
-
-        // Barangay Dashboard
-        Route::get('/barangay/{barangay}/dashboard', [BarangayDashboardController::class, 'index'])->name('barangay.dashboard');
-
-        // Barangay Incoming Reports
-        Route::get('/barangay/{barangay}/incoming-reports', [BarangayIncomingReportController::class, 'index'])->name('barangay.incoming-reports');
-        Route::post('/barangay/{barangay}/incoming-reports/{report}/verify', [BarangayIncomingReportController::class, 'verify'])->name('barangay.incoming-reports.verify');
-        Route::post('/barangay/{barangay}/incoming-reports/{report}/reject', [BarangayIncomingReportController::class, 'reject'])->name('barangay.incoming-reports.reject');
-
-        // Barangay Verified Reports
-        Route::get('/barangay/{barangay}/verified-reports', [BarangayVerifiedReportController::class, 'index'])->name('barangay.verified-reports');
-        Route::post('/barangay/{barangay}/verified-reports/{report}/assign', [BarangayVerifiedReportController::class, 'assign'])->name('barangay.verified-reports.assign');
-
-        // Barangay Response Tracking
-        Route::get('/barangay/{barangay}/response-tracking', [BarangayResponseTrackingController::class, 'index'])->name('barangay.response-tracking');
-
-        // Barangay Report Update (from report detail view)
-        Route::put('/barangay/{barangay}/reports/{report}', [BarangayResponseTrackingController::class, 'update'])->name('barangay.report.update');
-
-        // Barangay Analytics
-        Route::get('/barangay/{barangay}/analytics-reports', [BarangayAnalyticsReportController::class, 'index'])->name('barangay.analytics-reports');
-        Route::get('/barangay/{barangay}/analytics-reports/export', [BarangayAnalyticsReportController::class, 'export'])->name('barangay.analytics-reports.export');
-        Route::get('/barangay/{barangay}/analytics-reports/print', [BarangayAnalyticsReportController::class, 'print'])->name('barangay.analytics-reports.print');
-
-        // Barangay GIS workspace (server-scoped to the authenticated assignment)
-        Route::get('/barangay/{barangay}/gis-map', [GISController::class, 'index'])->name('barangay.gis.index');
-
-        // Barangay Profile
-        Route::get('/barangay/{barangay}/profile', function ($barangay) {
-            return view('profile.index', compact('barangay'));
-        })->name('barangay.profile');
-    });
-
-    // ========================================
-    // SHARED ROUTES (Both roles can access with data filtering)
-    // ========================================
-
-    // View Individual Violation Report (role-based layout detection)
-    Route::get('/violation-reports/{violationReport}/photo', [ReportPhotoController::class, 'show'])
-        ->name('violation-reports.photo');
-    Route::get('/violation-reports/{violationReport}/photo/signed', [ReportPhotoController::class, 'signed'])
-        ->name('violation-reports.photo.signed');
-    Route::get('/violation-reports/{violationReport}', [ViolationReportController::class, 'show'])->name('violation-reports.show');
 });
 
 // Local admin diagnostics only. Never expose framework/runtime details publicly.
 if (app()->environment('local')) {
-    Route::middleware(['auth', 'dilg.admin'])->get('/test', function () {
+    Route::middleware(['auth', 'security.session', 'password.change.complete', 'dilg.admin'])->get('/test', function () {
         return response()->json([
             'message' => 'DILG-RC System - Phase 3C: Authentication & Role-Based Access',
             'architecture' => 'Role-Based Authentication',
@@ -157,7 +170,7 @@ if (app()->environment('local')) {
 // AJAX API ROUTES (Real-time Updates)
 // ========================================
 
-Route::middleware(['auth'])->prefix('api')->group(function () {
+Route::middleware(['auth', 'security.session', 'password.change.complete'])->prefix('api')->group(function () {
     // DILG Dashboard Stats
     Route::get('/dilg-dashboard-stats', [DilgDashboardController::class, 'getStats'])->middleware('dilg.admin');
 

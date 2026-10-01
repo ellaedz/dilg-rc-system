@@ -2,6 +2,8 @@
 
 use App\Http\Middleware\BarangayStaffMiddleware;
 use App\Http\Middleware\DilgAdminMiddleware;
+use App\Http\Middleware\EnsureSecuritySession;
+use App\Http\Middleware\RequireCompletedPasswordChange;
 use App\Http\Middleware\VerifyCloudTaskOidc;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -23,6 +25,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'dilg.admin' => DilgAdminMiddleware::class,
             'barangay.staff' => BarangayStaffMiddleware::class,
+            'security.session' => EnsureSecuritySession::class,
+            'password.change.complete' => RequireCompletedPasswordChange::class,
             'cloud.tasks.oidc' => VerifyCloudTaskOidc::class,
         ]);
     })

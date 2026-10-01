@@ -15,6 +15,19 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * Security defaults mirror the additive database migration so newly created
+     * model instances behave safely before they are reloaded from the database.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'is_active' => true,
+        'must_change_password' => false,
+        'failed_login_attempts' => 0,
+        'session_version' => 1,
+    ];
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>

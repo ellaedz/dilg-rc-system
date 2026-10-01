@@ -195,22 +195,22 @@ passwords and require a private replacement at the next login.
 
 ### Tasks
 
-- [ ] Add a DILG Administrator-only Account Management page.
-- [ ] List the 26 barangay accounts with assigned barangay, account state, password
+- [x] Add a DILG Administrator-only Account Management page.
+- [x] List the 26 barangay accounts with assigned barangay, account state, password
       state, and last password-change date.
-- [ ] Never display an existing password or password hash.
-- [ ] Add reset-password and confirmation fields with server-side validation.
-- [ ] Hash the temporary password before persistence.
-- [ ] Set `must_change_password = true` after an administrator reset.
-- [ ] Invalidate all existing sessions for the affected account.
-- [ ] Add a Change Password page for every authenticated user.
-- [ ] Require the current password for a normal self-service change.
-- [ ] Require a new private password immediately after temporary-password login.
-- [ ] Allow only logout and the required password-change flow while change is required.
-- [ ] Regenerate the current session after a successful password change.
-- [ ] Invalidate all other sessions after the change.
-- [ ] Record reset and change audit events without sensitive form values.
-- [ ] Preserve DILG and barangay role restrictions.
+- [x] Never display an existing password or password hash.
+- [x] Add reset-password and confirmation fields with server-side validation.
+- [x] Hash the temporary password before persistence.
+- [x] Set `must_change_password = true` after an administrator reset.
+- [x] Invalidate all existing sessions for the affected account.
+- [x] Add a Change Password page for every authenticated user.
+- [x] Require the current password for a normal self-service change.
+- [x] Require a new private password immediately after temporary-password login.
+- [x] Allow only logout and the required password-change flow while change is required.
+- [x] Regenerate the current session after a successful password change.
+- [x] Invalidate all other sessions after the change.
+- [x] Record reset and change audit events without sensitive form values.
+- [x] Preserve DILG and barangay role restrictions.
 
 ### Required tests
 
@@ -227,9 +227,9 @@ passwords and require a private replacement at the next login.
 
 ### Exit gate
 
-- [ ] All account-management authorization tests pass.
-- [ ] Every password remains one-way hashed.
-- [ ] No production account has been reset.
+- [x] All account-management authorization tests pass.
+- [x] Every password remains one-way hashed.
+- [x] No production account has been reset.
 
 ---
 
@@ -637,8 +637,8 @@ without exposing them to developers or repositories.
 
 ## Immediate next action
 
-Phase 15B is complete locally and documented in
-`docs/phase-records/PHASE_15B_PASSWORD_DATA_FOUNDATION.md`. Begin Phase 15C only from
-the reviewed Phase 15B commit. Phase 15C may implement the protected DILG account
-management and authenticated password-change flows, but it must not reset a production
-password, rotate a live credential, or deploy a migration to production.
+Phase 15C is complete locally and documented in
+`docs/phase-records/PHASE_15C_ACCOUNT_MANAGEMENT.md`. Begin Phase 15D only from the
+reviewed Phase 15C commit. Phase 15D may add normalized email/IP throttling, bounded
+temporary lockouts, generic login failures, and authorized unlocking. It must not reset
+a production password, rotate a live credential, or deploy a migration to production.

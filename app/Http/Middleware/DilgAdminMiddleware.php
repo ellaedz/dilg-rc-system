@@ -2,10 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\RoleService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use App\Services\RoleService;
 
 class DilgAdminMiddleware
 {
@@ -19,7 +19,7 @@ class DilgAdminMiddleware
         $user = $request->user();
 
         // Check if user is authenticated and is DILG Admin
-        if (!$user || !RoleService::isDilgAdmin($user)) {
+        if (! $user || ! RoleService::isDilgAdmin($user)) {
             abort(403, 'Access denied. DILG Admin role required.');
         }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\SecuritySessionManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -18,7 +19,7 @@ class AuthController extends Controller
     /**
      * Handle login request with real authentication
      */
-    public function login(Request $request)
+    public function login(Request $request, SecuritySessionManager $sessionManager)
     {
         // Validate credentials
         $credentials = $request->validate([
@@ -31,6 +32,14 @@ class AuthController extends Controller
             $request->session()->regenerate();
 
             $user = Auth::user();
+            $sessionManager->establish($request, $user);
+
+            if ($user->must_change_password) {
+                return redirect()->route('password.edit')->with(
+                    'info',
+                    'Create a private new password before accessing CIVICLEAR.'
+                );
+            }
 
             // Redirect based on role
             if ($user->role === 'dilg_admin') {
@@ -40,7 +49,7 @@ class AuthController extends Controller
 
             if ($user->role === 'barangay_staff') {
                 return redirect()->route('barangay.dashboard', ['barangay' => $user->assigned_barangay])
-                    ->with('success', 'Welcome back, ' . $user->assigned_barangay . ' Staff!');
+                    ->with('success', 'Welcome back, '.$user->assigned_barangay.' Staff!');
             }
 
             // Fallback (should not happen)

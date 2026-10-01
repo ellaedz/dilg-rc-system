@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -34,6 +35,10 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'failed_login_attempts',
+        'last_failed_login_at',
+        'locked_until',
+        'session_version',
     ];
 
     /**
@@ -46,6 +51,28 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
+            'must_change_password' => 'boolean',
+            'password_changed_at' => 'immutable_datetime',
+            'failed_login_attempts' => 'integer',
+            'last_failed_login_at' => 'immutable_datetime',
+            'locked_until' => 'immutable_datetime',
+            'session_version' => 'integer',
         ];
+    }
+
+    public function passwordHistories(): HasMany
+    {
+        return $this->hasMany(PasswordHistory::class);
+    }
+
+    public function securityAuditEventsAsActor(): HasMany
+    {
+        return $this->hasMany(SecurityAuditEvent::class, 'actor_user_id');
+    }
+
+    public function securityAuditEventsAsTarget(): HasMany
+    {
+        return $this->hasMany(SecurityAuditEvent::class, 'target_user_id');
     }
 }

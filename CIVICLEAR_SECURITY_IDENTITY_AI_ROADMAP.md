@@ -157,17 +157,17 @@ security_audit_events
 
 ### Tasks
 
-- [ ] Add reversible migrations with safe nullable fields or defaults.
-- [ ] Set existing users to `must_change_password = false` during migration.
-- [ ] Do not alter any existing password hash during migration.
-- [ ] Add password history using hashes only.
-- [ ] Add security audit events for reset, change, lock, unlock, and rejected attempts.
-- [ ] Record actor, affected account, action, timestamp, and IP address.
-- [ ] Prohibit password values and password-like request fields from audit payloads.
-- [ ] Add centralized password policy validation with a minimum of 16 characters.
-- [ ] Support compromised/common-password blocking using a local or privacy-preserving
+- [x] Add reversible migrations with safe nullable fields or defaults.
+- [x] Set existing users to `must_change_password = false` during migration.
+- [x] Do not alter any existing password hash during migration.
+- [x] Add password history using hashes only.
+- [x] Add security audit events for reset, change, lock, unlock, and rejected attempts.
+- [x] Record actor, affected account, action, timestamp, and IP address.
+- [x] Prohibit password values and password-like request fields from audit payloads.
+- [x] Add centralized password policy validation with a minimum of 16 characters.
+- [x] Support compromised/common-password blocking using a local or privacy-preserving
       mechanism.
-- [ ] Reject the current password and recently used passwords when technically
+- [x] Reject the current password and recently used passwords when technically
       possible.
 
 ### Required tests
@@ -180,9 +180,9 @@ security_audit_events
 
 ### Exit gate
 
-- [ ] Schema is backward compatible.
-- [ ] No live password was rotated.
-- [ ] Existing users are not automatically locked out.
+- [x] Schema is backward compatible.
+- [x] No live password was rotated.
+- [x] Existing users are not automatically locked out.
 
 ---
 
@@ -637,7 +637,8 @@ without exposing them to developers or repositories.
 
 ## Immediate next action
 
-Phase 15A is complete. Begin Phase 15B from the verified Phase 15A documentation
-commit. Phase 15B may add only the backward-compatible password and audit data
-foundation. It must not reset a password, force an existing user to change a password,
-or deploy a migration to production.
+Phase 15B is complete locally and documented in
+`docs/phase-records/PHASE_15B_PASSWORD_DATA_FOUNDATION.md`. Begin Phase 15C only from
+the reviewed Phase 15B commit. Phase 15C may implement the protected DILG account
+management and authenticated password-change flows, but it must not reset a production
+password, rotate a live credential, or deploy a migration to production.

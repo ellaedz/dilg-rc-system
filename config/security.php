@@ -16,4 +16,12 @@ return [
             'c072e19b20265eb9e29ba4e89be28800f2758bfa9c3e162ed6c772b75bd469c6',
         ],
     ],
+
+    'login' => [
+        'email_max_attempts' => (int) env('LOGIN_EMAIL_MAX_ATTEMPTS', 5),
+        'ip_max_attempts' => (int) env('LOGIN_IP_MAX_ATTEMPTS', 20),
+        'decay_seconds' => (int) env('LOGIN_RATE_LIMIT_DECAY_SECONDS', 300),
+        'lockout_threshold' => (int) env('LOGIN_LOCKOUT_THRESHOLD', 5),
+        'lockout_minutes' => [5, 15, 30],
+    ],
 ];

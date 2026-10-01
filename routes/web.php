@@ -60,6 +60,8 @@ Route::middleware(['auth', 'security.session'])->group(function () {
                 ->name('account-management.index');
             Route::put('/account-management/{account}/password', [AccountManagementController::class, 'resetPassword'])
                 ->name('account-management.password.reset');
+            Route::put('/account-management/{account}/unlock', [AccountManagementController::class, 'unlock'])
+                ->name('account-management.unlock');
 
             // All Violation Reports (DILG Admin View Only - READ ONLY MONITORING)
             Route::get('/violation-reports', [ViolationReportController::class, 'index'])->name('violation-reports.index');

@@ -242,17 +242,17 @@ permanent denial-of-service risk.
 
 ### Tasks
 
-- [ ] Normalize email addresses consistently before authentication and throttling.
-- [ ] Rate-limit login using both normalized email and client IP.
-- [ ] Add escalating temporary lockouts with a documented maximum duration.
-- [ ] Avoid permanent lockout based solely on unauthenticated failures.
-- [ ] Return a generic error for nonexistent users, wrong passwords, and locked
+- [x] Normalize email addresses consistently before authentication and throttling.
+- [x] Rate-limit login using both normalized email and client IP.
+- [x] Add escalating temporary lockouts with a documented maximum duration.
+- [x] Avoid permanent lockout based solely on unauthenticated failures.
+- [x] Return a generic error for nonexistent users, wrong passwords, and locked
       accounts.
-- [ ] Audit locking and unlocking without logging credentials.
-- [ ] Add an authorized DILG unlock action.
-- [ ] Replace the fake Forgot Password action with instructions to contact the
+- [x] Audit locking and unlocking without logging credentials.
+- [x] Add an authorized DILG unlock action.
+- [x] Replace the fake Forgot Password action with instructions to contact the
       authorized DILG administrator.
-- [ ] Preserve CSRF, secure session cookies, authorization, and server-side validation.
+- [x] Preserve CSRF, secure session cookies, authorization, and server-side validation.
 
 ### Required tests
 
@@ -265,9 +265,9 @@ permanent denial-of-service risk.
 
 ### Exit gate
 
-- [ ] Authentication regression suite passes.
-- [ ] Lockout cannot become permanent through normal failed-login traffic.
-- [ ] Production password rotation remains unstarted.
+- [x] Authentication regression suite passes.
+- [x] Lockout cannot become permanent through normal failed-login traffic.
+- [x] Production password rotation remains unstarted.
 
 ---
 
@@ -637,8 +637,9 @@ without exposing them to developers or repositories.
 
 ## Immediate next action
 
-Phase 15C is complete locally and documented in
-`docs/phase-records/PHASE_15C_ACCOUNT_MANAGEMENT.md`. Begin Phase 15D only from the
-reviewed Phase 15C commit. Phase 15D may add normalized email/IP throttling, bounded
-temporary lockouts, generic login failures, and authorized unlocking. It must not reset
-a production password, rotate a live credential, or deploy a migration to production.
+Phase 15D is complete locally and documented in
+`docs/phase-records/PHASE_15D_LOGIN_PROTECTION.md`. Begin Phase 16A only from the
+reviewed Phase 15D commit. Phase 16A may add a private optional reporter name and
+privacy notice across the mobile and Laravel contracts. It must preserve anonymous
+reporting and must not expose names through tracking, GIS, analytics, exports, logs, or
+browser URLs.

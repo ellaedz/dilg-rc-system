@@ -53,7 +53,7 @@ Route::prefix('mobile')->group(function () {
     // Numeric report details are staff-only; the public uses the minimal status endpoint.
     Route::get('/reports/{id}', [MobileReportApiController::class, 'show'])
         ->whereNumber('id')
-        ->middleware(['web', 'auth', 'throttle:60,1']);
+        ->middleware(['web', 'auth', 'security.session', 'password.change.complete', 'throttle:60,1']);
 
     // Get list of violation types
     Route::get('/violation-types', [MobileReportApiController::class, 'violationTypes']);
@@ -101,7 +101,7 @@ Route::prefix('gis')->group(function () {
     */
 
     // Get all reports with GPS coordinates for map markers
-    Route::middleware(['web', 'auth', 'throttle:60,1'])->group(function () {
+    Route::middleware(['web', 'auth', 'security.session', 'password.change.complete', 'throttle:60,1'])->group(function () {
         Route::get('/reports', [GISApiController::class, 'reports']);
 
         // Get barangay office locations for map markers

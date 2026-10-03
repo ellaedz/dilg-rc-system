@@ -34,6 +34,7 @@
             <a href="{{ route('gis.index') }}" class="app-nav-link {{ request()->routeIs('gis.*') ? 'active' : '' }}"><i class="fas fa-map-location-dot"></i><span>GIS Map</span></a>
 
             <div class="app-nav-label">Account</div>
+            <a href="{{ route('account-management.index') }}" class="app-nav-link {{ request()->routeIs('account-management.*') ? 'active' : '' }}"><i class="fas fa-users-gear"></i><span>Account Management</span></a>
             <a href="{{ route('profile') }}" class="app-nav-link {{ request()->routeIs('profile') ? 'active' : '' }}"><i class="fas fa-user-gear"></i><span>Profile</span></a>
         </nav>
 
@@ -53,6 +54,7 @@
                 <ul tabindex="0" class="dropdown-content menu z-[100] mt-3 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
                     <li class="px-3 py-2"><span class="block truncate text-xs text-slate-500">{{ auth()->user()->email }}</span></li>
                     <li><a href="{{ route('profile') }}"><i class="fas fa-user"></i>Profile</a></li>
+                    <li><a href="{{ route('password.edit') }}"><i class="fas fa-key"></i>Change password</a></li>
                     <li><form action="{{ route('logout') }}" method="POST">@csrf<button type="submit" class="w-full text-left text-error"><i class="fas fa-right-from-bracket"></i>Log out</button></form></li>
                 </ul>
             </div>

@@ -184,9 +184,9 @@
                 Password Information
             </h3>
             <div class="py-4 space-y-3">
-                <p><strong>Contact your CIVICLEAR system administrator for access.</strong></p>
+                <p><strong>Contact the authorized DILG administrator for password assistance.</strong></p>
                 <p class="text-sm text-gray-600">
-                    Passwords are assigned individually and must never be shared or published.
+                    CIVICLEAR does not display existing passwords. Temporary passwords must be replaced immediately after login and must never be shared or published.
                 </p>
             </div>
             <div class="modal-action">
